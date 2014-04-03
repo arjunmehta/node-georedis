@@ -23,6 +23,8 @@
  *
  */
 
+var geohash = require('ngeohash');
+
 var getDistanceRanges = function(){
 };
 
