@@ -25,7 +25,7 @@
 
 var geohash = require('ngeohash');
 
-var clientZSetName = "geohashzset";
+var redis_clientZSetName = "geohashzset";
 
 /**
  * Range-Radius Index
@@ -106,8 +106,6 @@ var hashIntegerRangesforBitDepth = function(lat, lon, rBitDepth, bitDepth){
   var ranges = [];
   var neighbors = geohash.neighbors_int(hash, rBitDepth);
 
-  // console.log("NEIGHBOURS:", hash, neighbors);
-
   for(var i=0; i< neighbors.length; i++){
     ranges.push(buildRange(neighbors[i], bitDiff));
   }
@@ -116,8 +114,6 @@ var hashIntegerRangesforBitDepth = function(lat, lon, rBitDepth, bitDepth){
 };
 
 function buildRange(hash_integer, diff){
-
-  // console.log(hash_integer);
 
   var lowerRange = leftShift(hash_integer, diff);
   var upperRange = leftShift(hash_integer + 1, diff);
@@ -145,21 +141,23 @@ var hashIntegerRangesforRadius = function(lat, lon, radius, bitDepth){
   return hashIntegerRangesforBitDepth(lat, lon, rBitDepth, bitDepth);
 };
 
-
-
-var setClientZSetName = function(zset_name){
-  clientZSetName = zset_name;
+/**
+ * Set Client Name
+ *
+ * Sets the default zset name for various redis operations.
+ *
+ * @param {String} zset_name
+ */
+var redis_setClientZSetName = function(zset_name){
+  redis_clientZSetName = zset_name;
 };
 
 /**
  * Nearby Search (Asynchronous)
  *
- * Returns 9 ranges including ranges for the coordinate itself, plus its hash neighbors.
- * Slower than the direct forBitDepth method as it needs to look up bitDepth based on radius.
- *
  * @param {RedisClient} client
  * @param {Hash Integer Ranges} ranges
- * @returns {Connected Neighbors in Ranges} Array
+ * @param {Function} callBack
  */
 var redis_nearbySearch = function(client, ranges, callBack){
 
@@ -167,20 +165,12 @@ var redis_nearbySearch = function(client, ranges, callBack){
   var rangeLength = ranges.length;
   var args = [];
 
-
   var multi = client.multi();
   for(var i=0; i<rangeLength; i++){
-    // console.log("ranges", ranges[i][0], ranges[i][1]);
     multi.ZRANGEBYSCORE("myzset", ranges[i][0], ranges[i][1]);
-    // args.push(["zrangebyscore", "myzset", ranges[i][0], ranges[i][1]]);
   }
 
-  // client.multi(args).exec(function (err, replies) {
-  //   if(callBack && typeof callBack == "function") callBack(err, replies);
-  // });
-
   multi.exec(function (err, replies) {
-    // console.log(replies);
     if(callBack && typeof callBack == "function") callBack(err, replies);
   });
 };
@@ -188,12 +178,12 @@ var redis_nearbySearch = function(client, ranges, callBack){
 /**
  * Add New Redis Coordinate (Asynchronous)
  *
- * Returns 9 ranges including ranges for the coordinate itself, plus its hash neighbors.
- * Slower than the direct forBitDepth method as it needs to look up bitDepth based on radius.
- *
  * @param {RedisClient} client
- * @param {Hash Integer Ranges} ranges
- * @returns {Connected Neighbors in Ranges} Array
+ * @param {Number} lat
+ * @param {Number} lon
+ * @param {String|Number} key_name
+ * @param {Number} bit_Depth (defaults to 52)
+ * @param {Function} callBack
  */
 function redis_addNewCoordinate(client, lat, lon, key_name, bitDepth, callBack){
 
@@ -205,9 +195,8 @@ function redis_addNewCoordinate(client, lat, lon, key_name, bitDepth, callBack){
     bitDepth = bitDepth || 52;
   }
 
-  client.zadd(clientZSetName, geohash.encode_int(lat, lon, bitDepth), key_name, function (err, res){
+  client.zadd(redis_clientZSetName, geohash.encode_int(lat, lon, bitDepth), key_name, function (err, res){
     if(err){
-      // console.log("ERROR", err);
       if(callBack && typeof callBack === "function") callBack(err, res);
     }
   });
@@ -218,7 +207,7 @@ var geohashDistance = {
   'rangeDepth': rangeDepth,
   'hashIntegerRangesforBitDepth':hashIntegerRangesforBitDepth,
   'hashIntegerRangesforRadius':hashIntegerRangesforRadius,
-  'redis_setClientZSetName': setClientZSetName,
+  'redis_setClientZSetName': redis_setClientZSetName,
   'redis_nearbySearch': redis_nearbySearch,
   'redis_addNewCoordinate': redis_addNewCoordinate
 };
