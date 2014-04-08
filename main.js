@@ -32,25 +32,14 @@ var initialize = function(client, zSetName){
   redis_client = client;
 };
 
-var setGeo = function(options){
-
-  if(options.client !== undefined){
-    redis_client = options.client;
-  }
-  if(options.zset !== undefined){
-    redis_clientZSetName = options.zset;
-  }
-
-};
-
 
 /**
  * Range-Radius Index
  *
- * The index is a list of ranges that correspond to the accuracy associated with
+ * This index is a list of ranges that correspond to the accuracy associated with
  * a particular bitDepth in reverse order from 52 bits. ie. rangeIndex[0] represents
  * 52 bits and an accuracy of a 0.5971m radius, while rangeIndex[7] represents 38 bits (52-(7*2))
- * and 76.4378m radius accuracy.
+ * and 76.4378m radius accuracy etc.
  * 
  */
 var rangeIndex = [  0.5971,
@@ -208,7 +197,10 @@ var redis_hashRangeSearch = function(client, ranges, callBack){
 };
 
 
-var redis_findNearby = function(lat, lon, options, callBack){
+var redis_findNearby = function(lat, lon, bitDepth, options, callBack){
+
+  bitDepth = bitDepth || 52;
+  var rBitDepth = 24;
 
   if(typeof options === "function" && callBack === undefined){
     callBack = options;
@@ -216,18 +208,15 @@ var redis_findNearby = function(lat, lon, options, callBack){
   }
 
   var ranges;
-  var client = options.client || redis_client;
+  var client = redis_client || options.client;
 
-  if(options.ranges === undefined){
-    var bitDepth = options.bitDepth || 52;
-    var rBitDepth = (options.radius !== undefined) ? options.radius : (options.rBitDepth || 48);  
+  if(options.ranges === undefined){    
+    rBitDepth = (options.radius !== undefined) ? rangeDepth(options.radius) : (options.rBitDepth || 48);
     ranges = hashIntegerRangesforBitDepth(lat, lon, rBitDepth, bitDepth);
   }
   else{
     ranges = options.ranges;
   }  
-
-  // console.log(options.ranges);
   
   redis_hashRangeSearch(client, ranges, callBack);
 };
