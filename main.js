@@ -98,7 +98,7 @@ var rangeDepth = function(radius){
  * @param {Number} bitDepth (bit depth of final hash values)
  * @returns {Hash Integer Ranges} Array
  */
-var getGeoHashBitDepthRanges = function(lat, lon, rBitDepth, bitDepth){
+var getBitDepthGeohashRanges = function(lat, lon, rBitDepth, bitDepth){
 
   bitDepth = bitDepth || 52;
   rBitDepth = rBitDepth || 48;
@@ -157,11 +157,11 @@ function leftShift(integer, shft){
  * @param {Number} bitDepth (bit depth of final hash values)
  * @returns {Hash Integer Ranges} Array
  */
-var getGeoHashRadiusRanges = function(lat, lon, radius, bitDepth){
+var getRadiusGeohashRanges = function(lat, lon, radius, bitDepth){
   var rBitDepth = rangeDepth(radius);
-  // console.log("RADIUS BIT DEPTH:", rBitDepth);
+  console.log("RADIUS BIT DEPTH:", rBitDepth);
 
-  return getGeoHashBitDepthRanges(lat, lon, rBitDepth, bitDepth);
+  return getBitDepthGeohashRanges(lat, lon, rBitDepth, bitDepth);
 };
 
 /**
@@ -190,7 +190,6 @@ var redis_findInRange = function(client, ranges, callBack){
     }
     if(callBack && typeof callBack === "function") callBack(err, concatedReplies);
   });
-
 };
 
 /**
@@ -216,8 +215,9 @@ var redis_proximity = function(lat, lon, bitDepth, options, callBack){
   var client = redis_client || options.client;
 
   if(options.ranges === undefined){    
+
     rBitDepth = (options.radius !== undefined) ? rangeDepth(options.radius) : (options.rBitDepth || 48);
-    ranges = hashIntegerRangesforBitDepth(lat, lon, rBitDepth, bitDepth);
+    ranges = getBitDepthGeohashRanges(lat, lon, rBitDepth, bitDepth);
   }
   else{
     ranges = options.ranges;
@@ -244,16 +244,9 @@ var redis_addNewCoordinate = function(lat, lon, key_name, bitDepth, options, cal
     options = {};
   }
 
+  bitDepth = bitDepth || 52;
   var client = redis_client || options.client;
   var zSetName = redis_clientZSetName || options.zset;
-
-  if(typeof bitDepth === "function"){
-    callBack = bitDepth;
-    bitDepth = 52;
-  }
-  else{
-    bitDepth = bitDepth || 52;
-  }
 
   client.zadd(zSetName, geohash.encode_int(lat, lon, bitDepth), key_name, callBack);
 };
@@ -348,9 +341,10 @@ function intersect(a, b){
 
 
 var geohashDistance = {
-  'hashIntegerRangesforBitDepth':hashIntegerRangesforBitDepth,
-  'hashIntegerRangesforRadius':hashIntegerRangesforRadius,
-  'redis_hashRangeSearch': redis_hashRangeSearch,
+  'initialize': initialize,
+  'getBitDepthGeohashRanges':getBitDepthGeohashRanges,
+  'getRadiusGeohashRanges':getRadiusGeohashRanges,
+  'redis_findInRange': redis_findInRange,
   'redis_proximity': redis_proximity,
   'redis_addNewCoordinate': redis_addNewCoordinate,
   'redis_findCoordinatesInRangeNaive': redis_findCoordinatesInRangeNaive,
