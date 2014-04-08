@@ -98,9 +98,7 @@ var rangeDepth = function(radius){
  * @param {Number} bitDepth (bit depth of final hash values)
  * @returns {Hash Integer Ranges} Array
  */
-var hashIntegerRangesforBitDepth = function(lat, lon, rBitDepth, bitDepth, callBack){
-
-  // var startTime = new Date().getTime();
+var getGeoHashBitDepthRanges = function(lat, lon, rBitDepth, bitDepth){
 
   bitDepth = bitDepth || 52;
   rBitDepth = rBitDepth || 48;
@@ -159,12 +157,11 @@ function leftShift(integer, shft){
  * @param {Number} bitDepth (bit depth of final hash values)
  * @returns {Hash Integer Ranges} Array
  */
-var hashIntegerRangesforRadius = function(lat, lon, radius, bitDepth, callBack){
+var getGeoHashRadiusRanges = function(lat, lon, radius, bitDepth){
   var rBitDepth = rangeDepth(radius);
-  console.log("RADIUS BIT DEPTH:", rBitDepth);
+  // console.log("RADIUS BIT DEPTH:", rBitDepth);
 
-  // hashIntegerRangesforBitDepth(lat, lon, rBitDepth, bitDepth, callBack);
-  return hashIntegerRangesforBitDepth(lat, lon, rBitDepth, bitDepth);
+  return getGeoHashBitDepthRanges(lat, lon, rBitDepth, bitDepth);
 };
 
 /**
@@ -174,7 +171,7 @@ var hashIntegerRangesforRadius = function(lat, lon, radius, bitDepth, callBack){
  * @param {Hash Integer Ranges} ranges
  * @param {Function} callBack
  */
-var redis_hashRangeSearch = function(client, ranges, callBack){
+var redis_findInRange = function(client, ranges, callBack){
 
   var rangeLength = ranges.length;
   var range = [];
@@ -196,8 +193,16 @@ var redis_hashRangeSearch = function(client, ranges, callBack){
 
 };
 
-
-var redis_findNearby = function(lat, lon, bitDepth, options, callBack){
+/**
+ * Redise Proximity Search (Asynchronous)
+ *
+ * @param {Number} lat
+ * @param {Number} lon
+ * @param {Number} bitDepth (defaults to 52)
+ * @param {Object} options (ranges: {Array}, radius: {Number}, rBitDepth: {Number}, client: {RedisClient})
+ * @param {Function} callBack
+ */
+var redis_proximity = function(lat, lon, bitDepth, options, callBack){
 
   bitDepth = bitDepth || 52;
   var rBitDepth = 24;
@@ -216,9 +221,9 @@ var redis_findNearby = function(lat, lon, bitDepth, options, callBack){
   }
   else{
     ranges = options.ranges;
-  }  
+  }
   
-  redis_hashRangeSearch(client, ranges, callBack);
+  redis_findInRange(client, ranges, callBack);
 };
 
 
@@ -232,7 +237,15 @@ var redis_findNearby = function(lat, lon, bitDepth, options, callBack){
  * @param {Number} bit_Depth (defaults to 52)
  * @param {Function} callBack
  */
-var redis_addNewCoordinate = function(client, lat, lon, key_name, bitDepth, callBack){
+var redis_addNewCoordinate = function(lat, lon, key_name, bitDepth, options, callBack){
+
+  if(typeof options === "function" && callBack === undefined){
+    callBack = options;
+    options = {};
+  }
+
+  var client = redis_client || options.client;
+  var zSetName = redis_clientZSetName || options.zset;
 
   if(typeof bitDepth === "function"){
     callBack = bitDepth;
@@ -242,8 +255,10 @@ var redis_addNewCoordinate = function(client, lat, lon, key_name, bitDepth, call
     bitDepth = bitDepth || 52;
   }
 
-  client.zadd(redis_clientZSetName, geohash.encode_int(lat, lon, bitDepth), key_name, callBack);
+  client.zadd(zSetName, geohash.encode_int(lat, lon, bitDepth), key_name, callBack);
 };
+
+
 
 
 var redis_findCoordinatesInRangeNaive = function(client, lat, lon, radius, callBack){
@@ -336,7 +351,7 @@ var geohashDistance = {
   'hashIntegerRangesforBitDepth':hashIntegerRangesforBitDepth,
   'hashIntegerRangesforRadius':hashIntegerRangesforRadius,
   'redis_hashRangeSearch': redis_hashRangeSearch,
-  'redis_findNearby': redis_findNearby,
+  'redis_proximity': redis_proximity,
   'redis_addNewCoordinate': redis_addNewCoordinate,
   'redis_findCoordinatesInRangeNaive': redis_findCoordinatesInRangeNaive,
   'redis_findCoordinatesInRangeMin': redis_findCoordinatesInRangeMin
