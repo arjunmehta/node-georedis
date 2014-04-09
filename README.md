@@ -1,7 +1,7 @@
-node-geohash-distance
+node-redis-proximity
 =====================
 
-A node module that extends the functionality of node-geohash (ngeohash) to provide extremely fast proximity searches of for geocoordinates.
+A node module that leverages the functionality of [node-geohash (ngeohash)](https://github.com/sunng87/node-geohash) to provide super fast proximity searches for geo coordinates.
 
 ## Installation
 
@@ -49,12 +49,12 @@ proximity.query(22.911, 11.186, {radius: 5000}, function(err, replies){
 
 # API
 
-## Initialization Method
+## Initialization
 
 ### proximity.initialize(redisClient, redisZSetName);
 Initialize the module with a redis client, and a ZSET name. This is not required, but will slightly improve efficiency and make your life easier. If you don't initialize, you will need to pass in a client and zset name as options for method calls.
 
-## Adding Coordinates Method
+## Adding Coordinates
 
 ### proximity.addNewCoordinate(lat, lon, {options}, callBack);
 Add a new coordinate to the your set. You can get quite technical here by specifying the geohash integer resolution at which to store (MUST BE CONSISTENT), as well as the specific geohash ranges to query (see proximity.queryByRanges).
@@ -65,7 +65,7 @@ Add a new coordinate to the your set. You can get quite technical here by specif
 - `zset: {String}`
 
 
-## Basic Querying Method
+## Basic Querying
 
 ### proximity.query(lat, lon, radius, {options}, callBack);
 Use this function for a basic search by proximity within the given latitude and longitude and radius (in meters). It is not ideal to use this method if you intend on making the same query multiple times. **If performance is important and you'll be making the same query over and over again, it is recommended you instead have a look at proximity.queryByRanges and promixity.getQueryRangesFromRadius.** Otherwise this is an easy method to use.
@@ -78,7 +78,7 @@ Use this function for a basic search by proximity within the given latitude and 
 
 
 
-## Performant Querying Methods
+## Performant Querying
 
 If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you should cache the **geohash ranges** that are used to search for nearby locations. The geohash ranges are what the methods ultimately search within to find nearby points. So keeping these stored in a variable some place and passing them into a more basic search function will save some cycles (at least 5ms on a basic machine). This will save you quite a bit of processing time if you expect to refresh your searches often, and especially if you expect to have empty results often. Your processor is probably best used for other things.
 
@@ -93,7 +93,7 @@ Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find 
 - `zset: {String}`
 
 
-## Examples of Performant Method Usage
+## Example of Performant Method Usage
 As mentioned, you may want to cache the ranges to search for in your data model. Perhaps if you have a connection or user that is logged in, you can associate these ranges with their object.
 
 
