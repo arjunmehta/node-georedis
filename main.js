@@ -156,6 +156,8 @@ function leftShift(integer, shft){
  * @returns {Hash Integer Ranges} Array
  */
 var getQueryRangesFromRadius = function(lat, lon, radius, bitDepth){
+
+  bitDepth = bitDepth || 52;
   var radiusBitDepth = rangeDepth(radius);
   console.log("RADIUS BIT DEPTH:", radiusBitDepth);
 
@@ -205,20 +207,20 @@ var queryByRanges = function(ranges, options, callBack){
  * @param {Number} lat
  * @param {Number} lon
  * @param {Number} bitDepth (defaults to 52)
- * @param {Object} options (ranges: {Array}, radius: {Number}, radiusBitDepth: {Number}, client: {RedisClient}, zset: {Redis zSet name})
+ * @param {Object} options (ranges: {Array}, radius: {Number}, radiusBitDepth: {Number}, bitDepth: {Number}, client: {RedisClient}, zset: {Redis zSet name})
  * @param {Function} callBack
  */
-var queryByProximity = function(lat, lon, bitDepth, options, callBack){
-
-  bitDepth = bitDepth || 52;
-  var radiusBitDepth = 24;
+var queryByProximity = function(lat, lon, options, callBack){
 
   if(typeof options === "function" && callBack === undefined){
     callBack = options;
     options = {};
   }
 
+  var radiusBitDepth = 24;
+  var bitDepth = options.bitDepth || 52;
   var ranges;
+
   if(options.ranges === undefined){
     radiusBitDepth = (options.radius !== undefined) ? rangeDepth(options.radius) : (options.radiusBitDepth || 48);
     ranges = getBitDepthGeohashRanges(lat, lon, radiusBitDepth, bitDepth);
@@ -241,14 +243,14 @@ var queryByProximity = function(lat, lon, bitDepth, options, callBack){
  * @param {Number} bit_Depth (defaults to 52)
  * @param {Function} callBack
  */
-var addNewCoordinate = function(lat, lon, key_name, bitDepth, options, callBack){
+var addNewCoordinate = function(lat, lon, key_name, options, callBack){
 
   if(typeof options === "function" && callBack === undefined){
     callBack = options;
     options = {};
   }
 
-  bitDepth = bitDepth || 52;
+  var bitDepth = options.bitDepth || 52;
   var client = redis_client || options.client;
   var zset = redis_clientZSetName || options.zset;
 
