@@ -84,40 +84,39 @@ var rangeDepth = function(radius){
       return 52-(i*2);
     }
   }
-  return null;
+  return 2;
 };
 
 /**
  * Nearby Hash Ranges by Resolution
  *
- * Returns 9 ranges including ranges for the coordinate itself, plus its hash neighbors.
+ * Returns a set of optimum ranges at bitDepth that contain all geohashes within range of the passed in coordinate values at the radiusBitDepth.
  *
  * @param {Number} lat
  * @param {Number} lon
- * @param {Number} rBitDepth (determines the range)
+ * @param {Number} radiusBitDepth (determines the range)
  * @param {Number} bitDepth (bit depth of final hash values)
  * @returns {Hash Integer Ranges} Array
  */
-var getBitDepthGeohashRanges = function(lat, lon, rBitDepth, bitDepth){
+var getQueryRangesFromBitDepth = function(lat, lon, radiusBitDepth, bitDepth){
 
   bitDepth = bitDepth || 52;
-  rBitDepth = rBitDepth || 48;
+  radiusBitDepth = radiusBitDepth || 48;
 
-  var bitDiff = bitDepth - rBitDepth;
+  var bitDiff = bitDepth - radiusBitDepth;
   if(bitDiff < 0){
     throw "bitDepth must be high enough to calculate range within radius";
   }
 
-  var i, j;
-
-  var ranges = [];
-  var range;
+  var i;
+  var ranges = [],
+      range;
 
   var lowerRange = 0,
       upperRange = 0;
 
-  var hash = geohash.encode_int(lat, lon, rBitDepth);
-  var neighbors = geohash.neighbors_int(hash, rBitDepth);
+  var hash = geohash.encode_int(lat, lon, radiusBitDepth);
+  var neighbors = geohash.neighbors_int(hash, radiusBitDepth);
   
   neighbors.push(hash);
   neighbors.sort();
@@ -148,8 +147,7 @@ function leftShift(integer, shft){
 /**
  * Nearby Hash Ranges by Radius
  *
- * Returns 9 ranges including ranges for the coordinate itself, plus its hash neighbors.
- * Slower than the direct forBitDepth method as it needs to look up bitDepth based on radius.
+ * Returns a set of optimum ranges at bitDepth that contain all geohashes within the radius of the passed in coordinate values.
  *
  * @param {Number} lat
  * @param {Number} lon
@@ -157,30 +155,39 @@ function leftShift(integer, shft){
  * @param {Number} bitDepth (bit depth of final hash values)
  * @returns {Hash Integer Ranges} Array
  */
-var getRadiusGeohashRanges = function(lat, lon, radius, bitDepth){
-  var rBitDepth = rangeDepth(radius);
-  console.log("RADIUS BIT DEPTH:", rBitDepth);
+var getQueryRangesFromRadius = function(lat, lon, radius, bitDepth){
+  var radiusBitDepth = rangeDepth(radius);
+  console.log("RADIUS BIT DEPTH:", radiusBitDepth);
 
-  return getBitDepthGeohashRanges(lat, lon, rBitDepth, bitDepth);
+  return getQueryRangesFromBitDepth(lat, lon, radiusBitDepth, bitDepth);
 };
 
 /**
  * Nearby Search (Asynchronous)
  *
- * @param {RedisClient} client
  * @param {Hash Integer Ranges} ranges
+ * @param {Object} options (client: {RedisClient}, zset: {Redis zSet name})
  * @param {Function} callBack
  */
-var redis_findInRange = function(client, ranges, callBack){
+var queryByRanges = function(ranges, options, callBack){
 
-  var rangeLength = ranges.length;
-  var range = [];
-  var i;
+  if(typeof options === "function" && callBack === undefined){
+    callBack = options;
+    options = {};
+  }
+
+  var client = redis_client || options.client;
+  var zset = redis_clientZSetName || options.zset;
+
+  var i,
+      range = [],
+      rangeLength = ranges.length;
 
   var multi = client.multi();
+
   for(i=0; i<rangeLength; i++){
     range = ranges[i];
-    multi.ZRANGEBYSCORE("myzset", range[0], range[1]);
+    multi.ZRANGEBYSCORE(zset, range[0], range[1]);
   }
 
   multi.exec(function(err, replies){
@@ -198,13 +205,13 @@ var redis_findInRange = function(client, ranges, callBack){
  * @param {Number} lat
  * @param {Number} lon
  * @param {Number} bitDepth (defaults to 52)
- * @param {Object} options (ranges: {Array}, radius: {Number}, rBitDepth: {Number}, client: {RedisClient})
+ * @param {Object} options (ranges: {Array}, radius: {Number}, radiusBitDepth: {Number}, client: {RedisClient}, zset: {Redis zSet name})
  * @param {Function} callBack
  */
-var redis_proximity = function(lat, lon, bitDepth, options, callBack){
+var queryByProximity = function(lat, lon, bitDepth, options, callBack){
 
   bitDepth = bitDepth || 52;
-  var rBitDepth = 24;
+  var radiusBitDepth = 24;
 
   if(typeof options === "function" && callBack === undefined){
     callBack = options;
@@ -212,18 +219,15 @@ var redis_proximity = function(lat, lon, bitDepth, options, callBack){
   }
 
   var ranges;
-  var client = redis_client || options.client;
-
-  if(options.ranges === undefined){    
-
-    rBitDepth = (options.radius !== undefined) ? rangeDepth(options.radius) : (options.rBitDepth || 48);
-    ranges = getBitDepthGeohashRanges(lat, lon, rBitDepth, bitDepth);
+  if(options.ranges === undefined){
+    radiusBitDepth = (options.radius !== undefined) ? rangeDepth(options.radius) : (options.radiusBitDepth || 48);
+    ranges = getBitDepthGeohashRanges(lat, lon, radiusBitDepth, bitDepth);
   }
   else{
     ranges = options.ranges;
   }
   
-  redis_findInRange(client, ranges, callBack);
+  queryByRanges(ranges, options, callBack);
 };
 
 
@@ -237,7 +241,7 @@ var redis_proximity = function(lat, lon, bitDepth, options, callBack){
  * @param {Number} bit_Depth (defaults to 52)
  * @param {Function} callBack
  */
-var redis_addNewCoordinate = function(lat, lon, key_name, bitDepth, options, callBack){
+var addNewCoordinate = function(lat, lon, key_name, bitDepth, options, callBack){
 
   if(typeof options === "function" && callBack === undefined){
     callBack = options;
@@ -246,51 +250,37 @@ var redis_addNewCoordinate = function(lat, lon, key_name, bitDepth, options, cal
 
   bitDepth = bitDepth || 52;
   var client = redis_client || options.client;
-  var zSetName = redis_clientZSetName || options.zset;
+  var zset = redis_clientZSetName || options.zset;
 
-  client.zadd(zSetName, geohash.encode_int(lat, lon, bitDepth), key_name, callBack);
+  client.zadd(zset, geohash.encode_int(lat, lon, bitDepth), key_name, callBack);
 };
 
 
-
-
-var redis_findCoordinatesInRangeNaive = function(client, lat, lon, radius, callBack){
-
-  var ranges = getMinMaxs(lat, lon, radius);
-
-  var multi = client.multi();
-      multi.ZUNIONSTORE("temp:lat", 1, "index:lat", "WEIGHTS", 1);
-      multi.ZREMRANGEBYSCORE("temp:lat", 0, ranges.latmin);
-      multi.ZREMRANGEBYSCORE("temp:lat", ranges.latmax, "INF");
-      multi.ZUNIONSTORE("temp:lon", 1, "index:lon", "WEIGHTS", 1);
-      multi.ZREMRANGEBYSCORE("temp:lon", 0, ranges.lonmin);
-      multi.ZREMRANGEBYSCORE("temp:lon", ranges.lonmax, "INF");
-      multi.ZINTERSTORE("temp:result", 2, "temp:lon", "temp:lat");
-      multi.ZRANGE("temp:result", 0, -1, callBack);
-
-      multi.exec(callBack);
-};
-
-
-var redis_findCoordinatesInRangeMin = function(client, lat, lon, radius, callBack){
-
-  var startTime = new Date().getTime();
+/**
+ * UNDOCUMENTED A control for basic latitude/longitude box intersect query. Inefficient using redis (Asynchronous)
+ *
+ * @param {RedisClient} client
+ * @param {Number} lat
+ * @param {Number} lon
+ * @param {String|Number} key_name
+ * @param {Number} bit_Depth (defaults to 52)
+ * @param {Function} callBack
+ */
+var queryCoordinatesInRange = function(client, lat, lon, radius, callBack){
 
   var ranges = getMinMaxs(lat, lon, radius);
 
   var multi = client.multi();
       multi.ZRANGEBYSCORE("index:lat", ranges.latmin, ranges.latmax);
       multi.ZRANGEBYSCORE("index:lon", ranges.lonmin, ranges.lonmax);
+
       multi.exec(function(err, replies){
 
-        // console.log("TIMESTAMP REDIS RESULT for Coordinate Range", new Date().getTime()-startTime);
         var replyLength = 0;
         for(var i=0; i<replies.length; i++){
           replyLength += replies[i].length;
         }
         // console.log("FOR REPLY LENGTH:",replyLength);
-
-        startTime = new Date().getTime();
 
         var lats = arrayToObject(replies[0]);
         var lons = arrayToObject(replies[1]);
@@ -298,11 +288,8 @@ var redis_findCoordinatesInRangeMin = function(client, lat, lon, radius, callBac
         var intersection = (replies[0].length < replies[1].length) ? intersect(lats, lons) : intersect(lons, lats);
 
         if(callBack && typeof callBack == "function") callBack(err, intersection);
-        // console.log(replies);
       });
 };
-
-
 
 // HELPER FUNCTIONS
 
@@ -342,13 +329,12 @@ function intersect(a, b){
 
 var geohashDistance = {
   'initialize': initialize,
-  'getBitDepthGeohashRanges':getBitDepthGeohashRanges,
-  'getRadiusGeohashRanges':getRadiusGeohashRanges,
-  'redis_findInRange': redis_findInRange,
-  'redis_proximity': redis_proximity,
-  'redis_addNewCoordinate': redis_addNewCoordinate,
-  'redis_findCoordinatesInRangeNaive': redis_findCoordinatesInRangeNaive,
-  'redis_findCoordinatesInRangeMin': redis_findCoordinatesInRangeMin
+  'getQueryRangesFromBitDepth':getQueryRangesFromBitDepth,
+  'getQueryRangesFromRadius':getQueryRangesFromRadius,
+  'queryByRanges': queryByRanges,
+  'queryByProximity': queryByProximity,
+  'addNewCoordinate': addNewCoordinate,
+  'queryCoordinatesInRange': queryCoordinatesInRange
 };
 
 
