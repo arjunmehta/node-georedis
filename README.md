@@ -41,7 +41,7 @@ Now you can look for points that exist within a certain range of any other coord
 
 ```javascript
 //look for all points within 5000m.
-proximity.query(22.911, 11.186, 5000, function(err, replies){
+proximity.query(43.646838, -79.403723, 5000, function(err, replies){
   if(err) throw err;
   console.log(replies);
 });
