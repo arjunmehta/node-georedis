@@ -47,6 +47,8 @@ proximity.query(22.911, 11.186, {radius: 5000}, function(err, replies){
 });
 ```
 
+# API
+
 ## Initialization Method
 
 ### proximity.initialize(redisClient, redisZSetName);
