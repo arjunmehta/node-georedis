@@ -24,11 +24,12 @@
  */
 
 var geohash = require('ngeohash');
-var redis_clientZSetName = "geohashzset";
+
+var redis_clientZSetName;
 var redis_client;
 
 var initialize = function(client, zSetName){
-  redis_clientZSetName = zSetName || "geohashzset";
+  redis_clientZSetName = zSetName;
   redis_client = client;
 };
 
