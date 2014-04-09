@@ -245,7 +245,7 @@ var queryByProximity = function(lat, lon, radius, options, callBack){
  */
 var addNewCoordinate = function(lat, lon, key_name, options, callBack){
 
-  if(typeof options === "function" && callBack === undefined){
+  if(options === undefined || (typeof options === "function" && callBack === undefined)){
     callBack = options;
     options = {};
   }
