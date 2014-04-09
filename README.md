@@ -56,7 +56,7 @@ Initialize the module with a redis client, and a ZSET name. This is not required
 
 ## Adding Coordinates
 
-### proximity.addNewCoordinate(lat, lon, name, {options}, callBack);
+### proximity.addNewCoordinate(lat, lon, {options}, callBack);
 Add a new coordinate to the your set. You can get quite technical here by specifying the geohash integer resolution at which to store (MUST BE CONSISTENT), as well as the specific geohash ranges to query (see proximity.queryByRanges).
 
 #### Options
