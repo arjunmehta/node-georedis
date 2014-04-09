@@ -12,7 +12,6 @@ npm install redis-proximity
 ## Example Usage
 This module requires a functioning redis server running in order to work. Ideally, you should initialize it with your client and a zset name with which it will use for coordinate queries. But these can be specified in your function calls through method options.
 
-### Setup
 Of course you need to have redis installed on your machine and accessible to node. Visit [node-redis](https://github.com/mranney/node_redis) for more information on using redis into your node environment.
 
 ```javascript
