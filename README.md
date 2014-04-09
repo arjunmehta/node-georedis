@@ -60,11 +60,11 @@ Initialize the module with a redis client, and a ZSET name. This is not required
 Add a new coordinate to the your set. You can get quite technical here by specifying the geohash integer resolution at which to store (MUST BE CONSISTENT), as well as the specific geohash ranges to query (see proximity.queryByRanges).
 
 #### Options
-`client: {redisClient}`
-`zset: {String}`
-`radius: {Number, in meters}`
+- `client: {redisClient}`
+- `zset: {String}`
+- `radius: {Number, in meters}`
 advanced:
-`bitDepth: {Number, default is 52}`: the bit depth you want to store your geohashes in, usually the highest possible (52 bits for javascript).
+- `bitDepth: {Number, default is 52}`: the bit depth you want to store your geohashes in, usually the highest possible (52 bits for javascript).
 
 ## Basic Querying Method (not as performant)
 
@@ -72,10 +72,10 @@ advanced:
 Use this function for a basic search by proximity within the given latitude and longitude and radius (in meters). It is not ideal to use this method if you intend on making the same query multiple times. **If performance is important and you'll be making the same query over and over again, it is recommended you instead have a look at proximity.queryByRanges and promixity.getQueryRangesFromRadius.** Otherwise this is an easy method to use.
 
 **Options:**
-`radiusBitDepth: {Number, default is 48}`: This is the bit depth that is associated with a search radius. It will override your radius setting, so if you use this option, for good form pass in `null` as your radius.
-`bitDepth: {Number, default is 52}`: the bit depth your geohashes are stored in if they are not in the default 52 bits.
-`client: {redisClient}`
-`zset: {String}`
+- `radiusBitDepth: {Number, default is 48}`: This is the bit depth that is associated with a search radius. It will override your radius setting, so if you use this option, for good form pass in `null` as your radius.
+- `bitDepth: {Number, default is 52}`: the bit depth your geohashes are stored in if they are not in the default 52 bits.
+- `client: {redisClient}`
+- `zset: {String}`
 
 
 
@@ -90,8 +90,8 @@ Get the query ranges to use with **proximity.queryByRanges**. This returns an ar
 Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find points that fall within your range value.
 
 **Options:**
-`client: {redisClient}`
-`zset: {String}`
+- `client: {redisClient}`
+- `zset: {String}`
 
 
 ## License
