@@ -60,13 +60,12 @@ Initialize the module with a redis client, and a ZSET name. This is not required
 Add a new coordinate to the your set. You can get quite technical here by specifying the geohash integer resolution at which to store (MUST BE CONSISTENT), as well as the specific geohash ranges to query (see proximity.queryByRanges).
 
 #### Options
+- `bitDepth: {Number, default is 52}`: the bit depth you want to store your geohashes in, usually the highest possible (52 bits for javascript). MUST BE CONSISTENT. If you set this to another value other than 52, you will have to ensure you set bitDepth in options for querying methods.
 - `client: {redisClient}`
 - `zset: {String}`
-- `radius: {Number, in meters}`
-advanced:
-- `bitDepth: {Number, default is 52}`: the bit depth you want to store your geohashes in, usually the highest possible (52 bits for javascript).
 
-## Basic Querying Method (not as performant)
+
+## Basic Querying Method
 
 ### proximity.query(lat, lon, radius, {options}, callBack);
 Use this function for a basic search by proximity within the given latitude and longitude and radius (in meters). It is not ideal to use this method if you intend on making the same query multiple times. **If performance is important and you'll be making the same query over and over again, it is recommended you instead have a look at proximity.queryByRanges and promixity.getQueryRangesFromRadius.** Otherwise this is an easy method to use.
@@ -92,6 +91,28 @@ Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find 
 **Options:**
 - `client: {redisClient}`
 - `zset: {String}`
+
+
+## Examples of Performant Method Usage
+As mentioned, you may want to cache the ranges to search for in your data model. Perhaps if you have a connection or user that is logged in, you can associate these ranges with their object.
+
+
+```javascript
+//Imagine you have a set of users
+//each user has a certain latitude and longitude
+var user = users[userID];
+var queryRadius = 5000;
+
+user.proximityQueryRanges = proximity.getQueryRangesFromRadius(user.latitude, user.longitide, queryRadius);
+
+function search(user){
+  proximity.queryByRanges(user.proximityQueryRanges, function(err, replies){
+    console.log("Nearby Users to", user, "are", replies);
+  });
+}
+```
+
+Get it? Got it?
 
 
 ## License
