@@ -19,7 +19,6 @@ var redis = require('redis');
 var client = redis.createClient();
 
 var proximity = require('redis-proximity');
-
 proximity.initialize(client, "mygeohashzset");
 ```
 
