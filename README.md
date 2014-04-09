@@ -40,7 +40,7 @@ proximity.addNewCoordinate(-12.29, 22.298, "CoordinateName");
 Now you can look for points that exist within a certain range of any other coordinate in the system.
 
 ```javascript
-//look for all points within 5000m.
+//look for all points within 5000m of Toronto.
 proximity.query(43.646838, -79.403723, 5000, function(err, replies){
   if(err) throw err;
   console.log(replies);
