@@ -15,7 +15,7 @@ var j,
 distance.initialize(client, "myzset");
 
 
-var ranges = distance.getRadiusGeohashRanges(lat, lon, 50000, 52);
+var ranges = distance.getQueryRangesFromRadius(lat, lon, 50000);
 // ranges = distance.getBitDepthGeohashRanges(lat, lon, 24, 52);
 
 // console.log("RANGES MAIN", ranges);
@@ -29,9 +29,9 @@ setTimeout(function(){
 
 function getNearby(){
   var startTime = new Date().getTime();
-  distance.redis_proximity(lat, lon, 52, {client: client, ranges: ranges}, function(err, replies){
+  distance.query(lat, lon, 50000, function(err, replies){
     console.log("TIMESTAMP Concated Replies", new Date().getTime()-startTime);
-    console.log(JSON.stringify(replies));
+    // console.log(JSON.stringify(replies));
     console.log("NUMBER OF GEOHASH MATCHES", replies.length);
   });
 }

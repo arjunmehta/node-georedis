@@ -210,7 +210,7 @@ var queryByRanges = function(ranges, options, callBack){
  * @param {Object} options (ranges: {Array}, radius: {Number}, radiusBitDepth: {Number}, bitDepth: {Number}, client: {RedisClient}, zset: {Redis zSet name})
  * @param {Function} callBack
  */
-var queryByProximity = function(lat, lon, options, callBack){
+var queryByProximity = function(lat, lon, radius, options, callBack){
 
   if(typeof options === "function" && callBack === undefined){
     callBack = options;
@@ -222,8 +222,8 @@ var queryByProximity = function(lat, lon, options, callBack){
   var ranges;
 
   if(options.ranges === undefined){
-    radiusBitDepth = (options.radius !== undefined) ? rangeDepth(options.radius) : (options.radiusBitDepth || 48);
-    ranges = getBitDepthGeohashRanges(lat, lon, radiusBitDepth, bitDepth);
+    radiusBitDepth = (options.radiusBitDepth !== undefined) ? (options.radiusBitDepth || 48) : rangeDepth(radius);
+    ranges = getQueryRangesFromBitDepth(lat, lon, radiusBitDepth, bitDepth);
   }
   else{
     ranges = options.ranges;
@@ -334,7 +334,7 @@ var geohashDistance = {
   'getQueryRangesFromBitDepth':getQueryRangesFromBitDepth,
   'getQueryRangesFromRadius':getQueryRangesFromRadius,
   'queryByRanges': queryByRanges,
-  'queryByProximity': queryByProximity,
+  'query': queryByProximity,
   'addNewCoordinate': addNewCoordinate,
   'queryCoordinatesInRange': queryCoordinatesInRange
 };
