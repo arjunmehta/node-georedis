@@ -85,7 +85,7 @@ Use this function for a basic search by proximity within the given latitude and 
 
 If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you should cache the **geohash ranges** that are used to search for nearby locations. The geohash ranges are what the methods ultimately search within to find nearby points. So keeping these stored in a variable some place and passing them into a more basic search function will save some cycles (at least 5ms on a basic machine). This will save you quite a bit of processing time if you expect to refresh your searches often, and especially if you expect to have empty results often. Your processor is probably best used for other things.
 
-### proximity.getQueryRangesFromRadius(latitude, longitide, radius, {bitDepth=52});
+### proximity.getQueryRangesFromRadius(lat, lon, radius, {bitDepth=52});
 Get the query ranges to use with **proximity.queryByRanges**. This returns an array of geohash ranges to search your set for. `bitDepth` is optional and defaults to 52, set it if you have chosen to store your coordinates at a different bit depth. Store the return value of this function for making the same query often.
 
 ### proximity.queryByRanges(ranges, {options}, callBack);
