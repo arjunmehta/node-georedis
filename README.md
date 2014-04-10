@@ -35,8 +35,7 @@ proximity.addNewCoordinate(-12.29, 22.298, "CoordinateName", function(err, reply
   console.log("ADD successful:", reply)
 });
 
-//Or Plainly if you don't care about tracking errors (you should).
-
+//Or Plainly if you don't care about handling errors (you should ideally handle errors though!).
 proximity.addNewCoordinate(-12.29, 22.298, "CoordinateName");
 ```
 
