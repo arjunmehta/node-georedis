@@ -39,9 +39,9 @@ proximity.addCoordinate(43.6667,-79.4167, "Toronto", function(err, reply){
 //OR (much quicker for large sets)
 var coordinates = [[43.6667,-79.4167, "Toronto"],
                    [39.9523,-75.1638, "Philadelphia"],
-                   [37.7691,-122.4449, "San Francisco"],
-                   [47.5500,-52.6667, "St. John's"],
-                   [40.7143,-74.0060, "New York"],
+                   [37.4688,-122.1411, "Palo Alto"],
+                   [49.6500,-54.7500, "Twillingate"],
+                   [45.4167,-75.7000, "Ottawa"],
                    [51.0833,-114.0833, "Calgary"],
                    [18.9750,72.8258, "Mumbai"]];
 
