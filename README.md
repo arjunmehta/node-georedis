@@ -30,7 +30,6 @@ proximity.initialize(client, "mygeohashzset");
 Generally you'll have some trigger to add new coordinates to your set (a user logs in, or a new point gets added in your application), or perhaps you'll want to load all the coordinates from a file of existing places. Whatever the case you should add them to redis as folows:
 
 ```javascript
-
 proximity.addCoordinate(43.6667,-79.4167, "Toronto", function(err, reply){
   if(err) throw err;
   console.log("ADD successful:", reply)
@@ -40,6 +39,9 @@ proximity.addCoordinate(43.6667,-79.4167, "Toronto", function(err, reply){
 var coordinates = [[43.6667,-79.4167, "Toronto"],
                    [39.9523,-75.1638, "Philadelphia"],
                    [37.4688,-122.1411, "Palo Alto"],
+                   [37.7691,-122.4449, "San Francisco"],
+                   [47.5500,-52.6667, "St. John's"],
+                   [40.7143,-74.0060, "New York"],
                    [49.6500,-54.7500, "Twillingate"],
                    [45.4167,-75.7000, "Ottawa"],
                    [51.0833,-114.0833, "Calgary"],
@@ -59,6 +61,23 @@ Now you can look for points that exist within a certain range of any other coord
 proximity.query(43.646838, -79.403723, 5000, function(err, replies){
   if(err) throw err;
   console.log(replies);
+});
+```
+
+
+### Remove points
+Of course you may need to remove some points from your set as users/temporary events/whatever no longer are part of the set.
+
+```javascript
+proximity.removeCoordinate("New York", function(err, reply){
+  if(err) throw err;
+  console.log("Removed Coordinate", reply);
+});
+
+//OR Quicker for Bulk Removals
+proximity.removeCoordinates(["New York", "St. John's", "San Francisco"], function(err, reply){
+  if(err) throw err;
+  console.log("Removed Coordinates", reply);
 });
 ```
 
@@ -132,7 +151,6 @@ Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find 
 
 ## Example of Performant Method Usage
 As mentioned, you may want to cache the ranges to search for in your data model. Perhaps if you have a connection or user that is logged in, you can associate these ranges with their object.
-
 
 ```javascript
 //Imagine you have a set of users
