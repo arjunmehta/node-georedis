@@ -207,8 +207,8 @@ var queryByRanges = function(ranges, options, callBack){
  *
  * @param {Number} lat
  * @param {Number} lon
- * @param {Number} bitDepth (defaults to 52)
- * @param {Object} options (ranges: {Array}, radius: {Number}, radiusBitDepth: {Number}, bitDepth: {Number}, client: {RedisClient}, zset: {Redis zSet name})
+ * @param {Number} radius (defaults to 5000)
+ * @param {Object} options (ranges: {Array}, radiusBitDepth: {Number}, bitDepth: {Number}, client: {RedisClient}, zset: {Redis zSet name})
  * @param {Function} callBack
  */
 var queryByProximity = function(lat, lon, radius, options, callBack){
@@ -237,16 +237,15 @@ var queryByProximity = function(lat, lon, radius, options, callBack){
 /**
  * Add New Redis Coordinate (Asynchronous)
  *
- * @param {RedisClient} client
  * @param {Number} lat
  * @param {Number} lon
  * @param {String|Number} key_name
- * @param {Number} bit_Depth (defaults to 52)
+ * @param {Object} options (bitDepth: {Number}, client: {RedisClient}, zset: {Redis zSet name})
  * @param {Function} callBack
  */
-var addNewCoordinate = function(lat, lon, key_name, options, callBack){
+var addCoordinate = function(lat, lon, key_name, options, callBack){
 
-  if(options === undefined || (typeof options === "function" && callBack === undefined)){
+  if(typeof options === "function" && callBack === undefined){
     callBack = options;
     options = {};
   }
@@ -256,6 +255,86 @@ var addNewCoordinate = function(lat, lon, key_name, options, callBack){
   var zset = redis_clientZSetName || options.zset;
 
   client.zadd(zset, geohash.encode_int(lat, lon, bitDepth), key_name, callBack);
+};
+
+/**
+ * Add New Redis Coordinates (Asynchronous)
+ * 
+ * Takes an array of coordinate Arrays in the form [lat, lon, key_name] and adds them to the zset
+ *
+ * @param {Array} coordinateArray Set
+ * @param {Object} options (bitDepth: {Number}, client: {RedisClient}, zset: {Redis zSet name})
+ * @param {Function} callBack
+ */
+var addCoordinates = function(coordinatesArray, options, callBack){
+
+  if(typeof options === "function" && callBack === undefined){
+    callBack = options;
+    options = {};
+  }
+
+  var bitDepth = options.bitDepth || 52;
+  var client = redis_client || options.client;
+  var zset = redis_clientZSetName || options.zset;
+
+  var args = [];
+  var i, hash;
+
+  for (i=0; i<coordinatesArray.length; i++){
+    hash = geohash.encode_int(coordinatesArray[i][0], coordinatesArray[i][1], bitDepth);
+    args.push(hash);
+    args.push(coordinatesArray[i][2]);
+  }
+
+  args.unshift(zset);
+
+  client.zadd(args, callBack);
+};
+
+
+/**
+ * Remove Redis Coordinate (Asynchronous)
+ *
+ * @param {String|Number} key_name
+ * @param {Object} options (client: {RedisClient}, zset: {Redis zSet name})
+ * @param {Function} callBack
+ */
+var removeCoordinate = function(key_name, options, callBack){
+
+  if(typeof options === "function" && callBack === undefined){
+    callBack = options;
+    options = {};
+  }
+
+  var client = redis_client || options.client;
+  var zset = redis_clientZSetName || options.zset;
+
+  client.zrem(zset, key_name, callBack);
+};
+
+
+/**
+ * Remove Redis Coordinates (Asynchronous)
+ * 
+ * Takes an array of coordinate Arrays in the form [lat, lon, key_name] and adds them to the zset
+ *
+ * @param {String|Number} key_name
+ * @param {Object} options (client: {RedisClient}, zset: {Redis zSet name})
+ * @param {Function} callBack
+ */
+var removeCoordinates = function(coordinateKeys, options, callBack){
+
+  if(typeof options === "function" && callBack === undefined){
+    callBack = options;
+    options = {};
+  }
+
+  var client = redis_client || options.client;
+  var zset = redis_clientZSetName || options.zset;
+
+  coordinateKeys.unshift(zset);
+
+  client.zrem(coordinateKeys, callBack);
 };
 
 
@@ -336,7 +415,11 @@ var geohashDistance = {
   'getQueryRangesFromRadius':getQueryRangesFromRadius,
   'queryByRanges': queryByRanges,
   'query': queryByProximity,
-  'addNewCoordinate': addNewCoordinate,
+  'addNewCoordinate': addCoordinate,
+  'addCoordinate': addCoordinate,
+  'addCoordinates': addCoordinates,
+  'removeCoordinate': removeCoordinate,
+  'removeCoordinates': removeCoordinates,
   'queryCoordinatesInRange': queryCoordinatesInRange
 };
 

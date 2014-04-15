@@ -30,14 +30,25 @@ proximity.initialize(client, "mygeohashzset");
 Generally you'll have some trigger to add new coordinates to your set (a user logs in, or a new point gets added in your application), or perhaps you'll want to load all the coordinates from a file of existing places. Whatever the case you should add them to redis as folows:
 
 ```javascript
-proximity.addNewCoordinate(-12.29, 22.298, "CoordinateName", function(err, reply){
+
+proximity.addCoordinate(43.6667,-79.4167, "Toronto", function(err, reply){
   if(err) throw err;
   console.log("ADD successful:", reply)
 });
 
-//Or Plainly if you don't care about tracking errors (you should).
+//OR (much quicker for large sets)
+var coordinates = [[43.6667,-79.4167, "Toronto"],
+                   [39.9523,-75.1638, "Philadelphia"],
+                   [37.7691,-122.4449, "San Francisco"],
+                   [47.5500,-52.6667, "St. John's"],
+                   [40.7143,-74.0060, "New York"],
+                   [51.0833,-114.0833, "Calgary"],
+                   [18.9750,72.8258, "Mumbai"]];
 
-proximity.addNewCoordinate(-12.29, 22.298, "CoordinateName");
+proximity.addCoordinates(coordinates, function(err, reply){
+  if(err) throw err;
+  console.log("ADD successful:", reply)
+});
 ```
 
 ### Query for proximal points
@@ -58,13 +69,35 @@ proximity.query(43.646838, -79.403723, 5000, function(err, replies){
 ### proximity.initialize(redisClient, redisZSetName);
 Initialize the module with a redis client, and a ZSET name. This is not required, but will slightly improve efficiency and make your life easier. If you don't initialize, you will need to pass in a client and zset name as options for method calls.
 
-## Adding Coordinates
+## Adding/Removing Coordinates
 
-### proximity.addNewCoordinate(lat, lon, {options}, callBack);
-Add a new coordinate to the your set. You can get quite technical here by specifying the geohash integer resolution at which to store (MUST BE CONSISTENT), as well as the specific geohash ranges to query (see proximity.queryByRanges).
+### proximity.addCoordinate(lat, lon, {options}, callBack);
+Add a new coordinate to your set. You can get quite technical here by specifying the geohash integer resolution at which to store (MUST BE CONSISTENT).
 
 #### Options
 - `bitDepth: {Number, default is 52}`: the bit depth you want to store your geohashes in, usually the highest possible (52 bits for javascript). MUST BE CONSISTENT. If you set this to another value other than 52, you will have to ensure you set bitDepth in options for querying methods.
+- `client: {redisClient}`
+- `zset: {String}`
+
+### proximity.addCoordinates(coordinateArray, {options}, callBack);
+Adds an array of new coordinates to your set. The `coordinateArray` must be in the form `[[lat, lon, name],[lat, lon, name],...,[lat, lon, name]]`. Again you can specify the geohash integer resolution at which to store (MUST BE CONSISTENT). Use this method for bulk additions, as it is much faster than individual adds.
+
+#### Options
+- `bitDepth: {Number, default is 52}`: the bit depth you want to store your geohashes in, usually the highest possible (52 bits for javascript). MUST BE CONSISTENT. If you set this to another value other than 52, you will have to ensure you set bitDepth in options for querying methods.
+- `client: {redisClient}`
+- `zset: {String}`
+
+### proximity.removeCoordinate(coordinateName, {options}, callBack);
+Remove the specified coordinate by name.
+
+#### Options
+- `client: {redisClient}`
+- `zset: {String}`
+
+### proximity.removeCoordinates(coordinateNameArray, {options}, callBack);
+Remove a set of coordinates by name. `coordinateNameArray` must be of the form `[nameA,nameB,nameC,...,nameN]`.
+
+#### Options
 - `client: {redisClient}`
 - `zset: {String}`
 
@@ -86,7 +119,7 @@ Use this function for a basic search by proximity within the given latitude and 
 
 If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you should cache the **geohash ranges** that are used to search for nearby locations. The geohash ranges are what the methods ultimately search within to find nearby points. So keeping these stored in a variable some place and passing them into a more basic search function will save some cycles (at least 5ms on a basic machine). This will save you quite a bit of processing time if you expect to refresh your searches often, and especially if you expect to have empty results often. Your processor is probably best used for other things.
 
-### proximity.getQueryRangesFromRadius(latitude, longitide, radius, {bitDepth=52});
+### proximity.getQueryRangesFromRadius(lat, lon, radius, {bitDepth=52});
 Get the query ranges to use with **proximity.queryByRanges**. This returns an array of geohash ranges to search your set for. `bitDepth` is optional and defaults to 52, set it if you have chosen to store your coordinates at a different bit depth. Store the return value of this function for making the same query often.
 
 ### proximity.queryByRanges(ranges, {options}, callBack);

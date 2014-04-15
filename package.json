@@ -13,7 +13,7 @@
     "redis",
     "geolocation"
   ],
-  "version": "0.0.3",
+  "version": "0.0.4",
   "repository": {
     "url": "https://github.com/arjunmehta/node-redis-proximity"
   },
@@ -39,6 +39,6 @@
     "url": "https://github.com/arjunmehta/node-redis-proximity/issues"
   },
   "homepage": "https://github.com/arjunmehta/node-redis-proximity",
-  "_id": "redis-proximity@0.0.3",
+  "_id": "redis-proximity@0.0.4",
   "_from": "redis-proximity@"
 }
