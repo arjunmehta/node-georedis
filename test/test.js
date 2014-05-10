@@ -1,3 +1,5 @@
+var test = require('assert');
+
 var csv = require('csv');
 var fs = require('fs');
 
@@ -10,88 +12,71 @@ proximity.initialize(client, "redisproximityzset");
 var lat = 43.646838,
     lon = -79.403723;
 
-var startTime;
-
-
 var oneToDelete = "";
 var arrayToDelete = [];
 var addArray = [];
 
 
-function basicQuery(){
-  startTime = new Date().getTime();
+exports.basicQuery = function(test){
+
   proximity.query(lat, lon, 50000, function(err, replies){
     if(err) throw err;
-    console.log("TIMESTAMP Concated Replies Basic Query", new Date().getTime()-startTime);
-    // console.log(JSON.stringify(replies));
     console.log("NUMBER OF GEOHASH MATCHES", replies.length);
-
-    setTimeout(function(){
-      performantQuery();
-    }, 3000);
-
-  });  
-}
+    test.equal(replies.length, 13260);
+    test.done();
+  }); 
+};
 
 
-function performantQuery(switcher){
-
+exports.performantQuery = function(test){
   var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
-  startTime = new Date().getTime();
 
   proximity.queryByRanges(ranges, function(err, replies){
     if(err) throw err;
-    console.log("TIMESTAMP Concated Replies Performant", new Date().getTime()-startTime);
-    // console.log(JSON.stringify(replies));
-    console.log("NUMBER OF GEOHASH MATCHES", replies.length);
-
-    if(switcher === undefined){
-      oneToDelete = replies[replies.length-1];
-      setTimeout(function(){
-        deleteOne();
-      }, 3000);
-    }
-    else if(switcher === "one"){
-      arrayToDelete = replies;
-      setTimeout(function(){
-        deleteMany();
-      }, 3000);
-    }
-
+    test.equal(replies.length, 13260);
+    test.done();
   });
-}
 
+};
 
-function deleteOne(){
-  startTime = new Date().getTime();
-  proximity.removeCoordinate(oneToDelete, function(err, reply){
+exports.deleteOne = function(test){
+  var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
+
+  proximity.queryByRanges(ranges, function(err, replies){
     if(err) throw err;
-    console.log("TIMESTAMP Delete One", new Date().getTime()-startTime);
-    console.log(JSON.stringify(reply));
+    oneToDelete = replies[replies.length-1];
 
-    setTimeout(function(){
-      performantQuery("one");
-    }, 3000);
+    proximity.removeCoordinate(oneToDelete, function(err, reply){
+      if(err) throw err;
+      // console.log("TIMESTAMP Delete One", new Date().getTime()-startTime);
+      // console.log(JSON.stringify(reply));
+      test.equal(reply, 1);
+      test.done();
+    });  
+  });
+};
 
-  });  
-}
 
+exports.deleteMany = function(test){
 
-function deleteMany(){
-  startTime = new Date().getTime();
-  proximity.removeCoordinates(arrayToDelete, function(err, reply){
+  var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
+
+  proximity.queryByRanges(ranges, function(err, replies){
+
     if(err) throw err;
-    console.log("TIMESTAMP Delete Many", new Date().getTime()-startTime);
-    console.log(JSON.stringify(reply));
+    arrayToDelete = replies;
 
-    setTimeout(function(){
-      performantQuery("many");
-    }, 3000);
+    proximity.removeCoordinates(arrayToDelete, function(err, reply){
+      if(err) throw err;
 
-  });  
-}
+      test.equal(reply, 13259);
+      test.done();
+    });
+  });
+};
 
-function addFromCSV(){  
+
+exports.addFromCSV = function(){  
 
   startTime = new Date().getTime();
   var i = 0;
@@ -108,11 +93,11 @@ function addFromCSV(){
 
     proximity.addNewCoordinate(lat, lon, name, function(err, reply){
       if(err) throw err;
-    });
-   
-    if(i%1000 === 0){
-      console.log(i, ":", name, lat, lon);
-    }
+      if(i%1000 === 0){
+        console.log(i, ":", name, lat, lon, reply, err);
+      }
+    });  
+
     i++;
 
   })
@@ -127,17 +112,16 @@ function addFromCSV(){
     console.log('END Number of lines: '+end);
     console.log('END Time: '+ (new Date().getTime()-startTime-3224) );
 
-    setTimeout(function(){
-      addFromCSVMulti();
-    }, 3000);
+    test.equal(end, 509068);
+    test.done();
 
   })
   .on('error', function(error){
     console.log(error.message);
   });  
-}
+};
 
-function addFromCSVMulti(){  
+exports.addFromCSVMulti = function(){  
 
   client.flushall();
 
@@ -172,14 +156,12 @@ function addFromCSVMulti(){
     console.log('END Number of lines: '+end);
 
     proximity.addCoordinates(addArray, function(err, reply){
-      console.log('END Time: '+ (new Date().getTime()-startTime-3224) );
-
       if(err) throw err;
-
-      setTimeout(function(){
-        basicQuery();
-      }, 3000);
-
+      // console.log('END Time: '+ (new Date().getTime()-startTime-3224) );
+      // console.log('Add Coordinates Multi Reply ', err, reply);
+      test.equal(err, null);
+      test.equal(reply, 432346);
+      test.done();
     });
 
 
@@ -187,7 +169,6 @@ function addFromCSVMulti(){
   .on('error', function(error){
     console.log(error.message);
   });  
-}
+};
 
-
-addFromCSV();
+return exports;
