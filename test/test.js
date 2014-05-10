@@ -85,9 +85,9 @@ exports.addFromCSVMulti = function(test){
     name = row[3]+row[4];
     addArray.push([lat, lon, name]);    
    
-    if(i%1000 === 0){
-      console.log(i, ":", name, lat, lon);
-    }
+    // if(i%1000 === 0){
+    //   console.log(i, ":", name, lat, lon);
+    // }
     i++;
 
   })
