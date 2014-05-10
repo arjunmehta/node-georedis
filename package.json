@@ -30,7 +30,7 @@
     "csv": ">=0.3.7"
   },
   "scripts": {
-    "test": "nodeunit tests/test.js"
+    "test": "nodeunit test/test.js"
   },
   "main": "./main",
   "license": "MIT",
