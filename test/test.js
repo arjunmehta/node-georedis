@@ -19,6 +19,8 @@ var addArray = [];
 
 exports.addFromCSV = function(test){  
 
+  test.expect(1);
+
   startTime = new Date().getTime();
   var i = 0;
 
@@ -63,6 +65,8 @@ exports.addFromCSV = function(test){
 };
 
 exports.addFromCSVMulti = function(test){  
+
+  test.expect(1);
 
   client.flushall();
 
@@ -115,6 +119,8 @@ exports.addFromCSVMulti = function(test){
 
 exports.basicQuery = function(test){
 
+  test.expect(1);
+
   proximity.query(lat, lon, 50000, function(err, replies){
     if(err) throw err;
     console.log("NUMBER OF GEOHASH MATCHES", replies.length);
@@ -125,6 +131,9 @@ exports.basicQuery = function(test){
 
 
 exports.performantQuery = function(test){
+
+  test.expect(1);
+
   var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
 
   proximity.queryByRanges(ranges, function(err, replies){
@@ -136,6 +145,9 @@ exports.performantQuery = function(test){
 };
 
 exports.deleteOne = function(test){
+
+  test.expect(1);
+
   var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
 
   proximity.queryByRanges(ranges, function(err, replies){
@@ -154,6 +166,8 @@ exports.deleteOne = function(test){
 
 
 exports.deleteMany = function(test){
+
+  test.expect(1);
 
   var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
 
