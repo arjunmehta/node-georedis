@@ -17,65 +17,6 @@ var arrayToDelete = [];
 var addArray = [];
 
 
-exports.basicQuery = function(test){
-
-  proximity.query(lat, lon, 50000, function(err, replies){
-    if(err) throw err;
-    console.log("NUMBER OF GEOHASH MATCHES", replies.length);
-    test.equal(replies.length, 13260);
-    test.done();
-  }); 
-};
-
-
-exports.performantQuery = function(test){
-  var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
-
-  proximity.queryByRanges(ranges, function(err, replies){
-    if(err) throw err;
-    test.equal(replies.length, 13260);
-    test.done();
-  });
-
-};
-
-exports.deleteOne = function(test){
-  var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
-
-  proximity.queryByRanges(ranges, function(err, replies){
-    if(err) throw err;
-    oneToDelete = replies[replies.length-1];
-
-    proximity.removeCoordinate(oneToDelete, function(err, reply){
-      if(err) throw err;
-      // console.log("TIMESTAMP Delete One", new Date().getTime()-startTime);
-      // console.log(JSON.stringify(reply));
-      test.equal(reply, 1);
-      test.done();
-    });  
-  });
-};
-
-
-exports.deleteMany = function(test){
-
-  var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
-
-  proximity.queryByRanges(ranges, function(err, replies){
-
-    if(err) throw err;
-    arrayToDelete = replies;
-
-    proximity.removeCoordinates(arrayToDelete, function(err, reply){
-      if(err) throw err;
-
-      test.equal(reply, 13259);
-      test.done();
-    });
-  });
-};
-
-
 exports.addFromCSV = function(){  
 
   startTime = new Date().getTime();
@@ -170,5 +111,67 @@ exports.addFromCSVMulti = function(){
     console.log(error.message);
   });  
 };
+
+
+exports.basicQuery = function(test){
+
+  proximity.query(lat, lon, 50000, function(err, replies){
+    if(err) throw err;
+    console.log("NUMBER OF GEOHASH MATCHES", replies.length);
+    test.equal(replies.length, 13260);
+    test.done();
+  }); 
+};
+
+
+exports.performantQuery = function(test){
+  var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
+
+  proximity.queryByRanges(ranges, function(err, replies){
+    if(err) throw err;
+    test.equal(replies.length, 13260);
+    test.done();
+  });
+
+};
+
+exports.deleteOne = function(test){
+  var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
+
+  proximity.queryByRanges(ranges, function(err, replies){
+    if(err) throw err;
+    oneToDelete = replies[replies.length-1];
+
+    proximity.removeCoordinate(oneToDelete, function(err, reply){
+      if(err) throw err;
+      // console.log("TIMESTAMP Delete One", new Date().getTime()-startTime);
+      // console.log(JSON.stringify(reply));
+      test.equal(reply, 1);
+      test.done();
+    });  
+  });
+};
+
+
+exports.deleteMany = function(test){
+
+  var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
+
+  proximity.queryByRanges(ranges, function(err, replies){
+
+    if(err) throw err;
+    arrayToDelete = replies;
+
+    proximity.removeCoordinates(arrayToDelete, function(err, reply){
+      if(err) throw err;
+
+      test.equal(reply, 13259);
+      test.done();
+    });
+  });
+};
+
+
+
 
 return exports;
