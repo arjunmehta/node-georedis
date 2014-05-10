@@ -17,7 +17,7 @@ var arrayToDelete = [];
 var addArray = [];
 
 
-exports.addFromCSV = function(){  
+exports.addFromCSV = function(test){  
 
   startTime = new Date().getTime();
   var i = 0;
@@ -62,7 +62,7 @@ exports.addFromCSV = function(){
   });  
 };
 
-exports.addFromCSVMulti = function(){  
+exports.addFromCSVMulti = function(test){  
 
   client.flushall();
 
