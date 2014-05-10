@@ -36,9 +36,9 @@ exports.addFromCSV = function(test){
 
     proximity.addNewCoordinate(lat, lon, name, function(err, reply){
       if(err) throw err;
-      if(i%1000 === 0){
-        console.log(i, ":", name, lat, lon, reply, err);
-      }
+      // if(i%1000 === 0){
+      //   console.log(i, ":", name, lat, lon, reply, err);
+      // }
     });  
 
     i++;
@@ -47,13 +47,13 @@ exports.addFromCSV = function(test){
   .on('close', function(count){
     // when writing to a file, use the 'close' event
     // the 'end' event may fire before the file has been written
-    console.log('CLOSE Number of lines: '+count);
-    console.log('CLOSE Time: '+ (new Date().getTime()-startTime) );
+    // console.log('CLOSE Number of lines: '+count);
+    // console.log('CLOSE Time: '+ (new Date().getTime()-startTime) );
 
   }).on('end', function(end){
 
-    console.log('END Number of lines: '+end);
-    console.log('END Time: '+ (new Date().getTime()-startTime-3224) );
+    // console.log('END Number of lines: '+end);
+    // console.log('END Time: '+ (new Date().getTime()-startTime-3224) );
 
     test.equal(end, 509068);
     test.done();
@@ -62,11 +62,12 @@ exports.addFromCSV = function(test){
   .on('error', function(error){
     console.log(error.message);
   });  
+
 };
 
 exports.addFromCSVMulti = function(test){  
 
-  test.expect(1);
+  test.expect(2);
 
   client.flushall();
 
