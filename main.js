@@ -160,7 +160,7 @@ var getQueryRangesFromRadius = function(lat, lon, radius, bitDepth){
 
   bitDepth = bitDepth || 52;
   var radiusBitDepth = rangeDepth(radius);
-  console.log("RADIUS BIT DEPTH:", radiusBitDepth);
+  // console.log("RADIUS BIT DEPTH:", radiusBitDepth);
 
   return getQueryRangesFromBitDepth(lat, lon, radiusBitDepth, bitDepth);
 };

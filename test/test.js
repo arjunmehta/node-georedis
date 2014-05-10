@@ -16,52 +16,18 @@ var oneToDelete = "";
 var arrayToDelete = [];
 var addArray = [];
 
+exports.addNew = function(test){
 
-exports.addFromCSV = function(test){  
+  client.flushall();
 
   test.expect(1);
 
-  startTime = new Date().getTime();
-  var i = 0;
-
-  var lat, lon;
-
-  csv()
-  .from.path(__dirname+'/GeoLiteCity-Location.csv', { delimiter: ',', escape: '"' })
-  .on('record', function(row,index){
-
-    lat = Number(row[5]);
-    lon = Number(row[6]);
-    name = row[3]+row[4];
-
-    proximity.addNewCoordinate(lat, lon, name, function(err, reply){
-      if(err) throw err;
-      // if(i%1000 === 0){
-      //   console.log(i, ":", name, lat, lon, reply, err);
-      // }
-    });  
-
-    i++;
-
-  })
-  .on('close', function(count){
-    // when writing to a file, use the 'close' event
-    // the 'end' event may fire before the file has been written
-    // console.log('CLOSE Number of lines: '+count);
-    // console.log('CLOSE Time: '+ (new Date().getTime()-startTime) );
-
-  }).on('end', function(end){
-
-    // console.log('END Number of lines: '+end);
-    // console.log('END Time: '+ (new Date().getTime()-startTime-3224) );
-
-    test.equal(end, 509068);
-    test.done();
-
-  })
-  .on('error', function(error){
-    console.log(error.message);
-  });  
+  proximity.addCoordinate(43.6667, -79.4167, "Toronto", function (err, reply){
+    if(err) throw err;
+    // console.log(err, reply);
+    test.equals(reply, 1);
+    test.done();    
+  });
 
 };
 
@@ -99,7 +65,7 @@ exports.addFromCSVMulti = function(test){
 
   }).on('end', function(end){
 
-    console.log('END Number of lines: '+end);
+    // console.log('END Number of lines: '+end);
 
     proximity.addCoordinates(addArray, function(err, reply){
       if(err) throw err;
@@ -124,7 +90,7 @@ exports.basicQuery = function(test){
 
   proximity.query(lat, lon, 50000, function(err, replies){
     if(err) throw err;
-    console.log("NUMBER OF GEOHASH MATCHES", replies.length);
+    // console.log("NUMBER OF GEOHASH MATCHES", replies.length);
     test.equal(replies.length, 13260);
     test.done();
   }); 
@@ -179,14 +145,17 @@ exports.deleteMany = function(test){
 
     proximity.removeCoordinates(arrayToDelete, function(err, reply){
       if(err) throw err;
-
       test.equal(reply, 13259);
+      client.quit();
       test.done();
     });
   });
 };
 
 
+exports.tearDown = function(done){
+  done();
+};
 
 
 return exports;

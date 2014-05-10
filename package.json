@@ -26,7 +26,7 @@
   "devDependencies": {
     "redis" : ">=0.10.0",
     "assert": ">=1.0",
-    "nodeunit": ">=0.8",
+    "nodeunit": ">=0.8.8",
     "csv": ">=0.3.7"
   },
   "scripts": {
