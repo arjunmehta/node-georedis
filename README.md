@@ -1,6 +1,8 @@
 node-redis-proximity
 =====================
 
+![travis-ci build](https://travis-ci.org/arjunmehta/node-redis-proximity.svg "travis-ci build")
+
 A node.js module that leverages the functionality of [node-geohash (ngeohash)](https://github.com/sunng87/node-geohash) to provide super fast proximity searches for geo coordinates.
 
 It should be noted that the method used here is likely to not be very precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. This module leverages a [process for spatial indexing as outlined by Yin Qiwen](https://github.com/yinqiwen/ardb/blob/master/doc/spatial-index.md).
