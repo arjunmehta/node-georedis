@@ -33,7 +33,7 @@ If you have more than one set of coordinates (ie. people and places) that you wa
 var redis = require('redis');
 var client = redis.createClient();
 
-var proximity = require('geoproximity');
+var proximity = require('geo-proximity');
 proximity.initialize(client, "locationsSet");
 ```
 
