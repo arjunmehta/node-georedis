@@ -4,18 +4,20 @@
     "email": "arjunmeht@gmail.com",
     "url": "http://www.arjunmehta.net/"
   },  
-  "name": "redis-proximity",
+  "name": "geo-proximity",
   "description": "geohash proximity library for nodejs using redis",
   "keywords": [
     "geohash",
     "proximity",
     "nearby",
     "redis",
-    "geolocation"
+    "geolocation",
+    "geoproximity",
+    "radius"
   ],
-  "version": "0.0.4",
+  "version": "1.0.0",
   "repository": {
-    "url": "https://github.com/arjunmehta/node-redis-proximity"
+    "url": "https://github.com/arjunmehta/node-geo-proximity"
   },
   "engines": {
     "node": ">=v0.2.0"
@@ -36,9 +38,9 @@
   "license": "MIT",
   "readmeFilename": "README.md",
   "bugs": {
-    "url": "https://github.com/arjunmehta/node-redis-proximity/issues"
+    "url": "https://github.com/arjunmehta/node-geo-proximity/issues"
   },
-  "homepage": "https://github.com/arjunmehta/node-redis-proximity",
-  "_id": "redis-proximity@0.0.4",
+  "homepage": "https://github.com/arjunmehta/node-geo-proximity",
+  "_id": "geo-proximity@1.0.0",
   "_from": "redis-proximity@"
 }
