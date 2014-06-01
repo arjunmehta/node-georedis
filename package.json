@@ -5,7 +5,7 @@
     "url": "http://www.arjunmehta.net/"
   },  
   "name": "geo-proximity",
-  "description": "geohash proximity library for nodejs using redis",
+  "description": "A node.js module that leverages geohashes to provide super fast proximity searches of geo coordinates.",
   "keywords": [
     "geohash",
     "proximity",
@@ -36,7 +36,6 @@
   },
   "main": "./main",
   "license": "MIT",
-  "readmeFilename": "README.md",
   "bugs": {
     "url": "https://github.com/arjunmehta/node-geo-proximity/issues"
   },
