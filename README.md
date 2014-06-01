@@ -1,29 +1,34 @@
-node-redis-proximity
+node-geo-proximity
 =====================
+
+**node-redis-proximity is renamed to node-geo-proximity with 1.0.0 release.**
 
 A node.js module that leverages the functionality of [node-geohash (ngeohash)](https://github.com/sunng87/node-geohash) to provide super fast proximity searches for geo coordinates.
 
-It should be noted that the method used here is likely to not be very precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. This module leverages a [process for spatial indexing as outlined by Yin Qiwen](https://github.com/yinqiwen/ardb/blob/master/doc/spatial-index.md).
+It should be noted that the method used here is not the most precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. This module leverages a [process for spatial indexing as outlined by Yin Qiwen](https://github.com/yinqiwen/ardb/blob/master/doc/spatial-index.md).
 
-Please leave feedback in the module's [GitHub issues tracker](https://github.com/arjunmehta/node-redis-proximity/issues).
+Please leave feedback in the module's [GitHub issues tracker](https://github.com/arjunmehta/node-geo-proximity/issues).
 
 ## Installation
 
 ```bash
-npm install redis-proximity
+npm install geo-proximity
 ```
 
-## Example Usage
-This module requires a functioning redis server running in order to work. Ideally, you should initialize it with your client and a zset name with which it will use for coordinate queries. But these can be specified in your function calls through method options.
 
-Of course you need to have redis installed on your machine and accessible to node. Visit [node-redis](https://github.com/mranney/node_redis) for more information on using redis into your node environment.
+## Example Usage
+This module requires a redis server in order to work and of course you need to have redis accessible to node. Visit [node-redis](https://github.com/mranney/node_redis) for more information on using redis into your node environment.
+
+You should at the very least initialize the module with your redis client, but if you only have one set of coordinates, you can initialize the module with your client AND a zset name with which it will use for coordinate queries.
+
+If you have more than one set of coordinates (ie. people and places) that you want to query separately, you can store and query them using optional parameters in the method calls. (see section on Multiple Sets)
 
 ```javascript
 var redis = require('redis');
 var client = redis.createClient();
 
-var proximity = require('redis-proximity');
-proximity.initialize(client, "mygeohashzset");
+var proximity = require('geoproximity');
+proximity.initialize(client, "locationsSet");
 ```
 
 ### Add Coordinates
@@ -35,7 +40,7 @@ proximity.addCoordinate(43.6667,-79.4167, "Toronto", function(err, reply){
   console.log("ADD successful:", reply)
 });
 
-//OR (much quicker for large sets)
+// OR (much quicker for large sets)
 var coordinates = [[43.6667,-79.4167, "Toronto"],
                    [39.9523,-75.1638, "Philadelphia"],
                    [37.4688,-122.1411, "Palo Alto"],
@@ -57,13 +62,12 @@ proximity.addCoordinates(coordinates, function(err, reply){
 Now you can look for points that exist within a certain range of any other coordinate in the system.
 
 ```javascript
-//look for all points within 5000m of Toronto.
+// look for all points within 5000m of Toronto.
 proximity.query(43.646838, -79.403723, 5000, function(err, replies){
   if(err) throw err;
   console.log(replies);
 });
 ```
-
 
 ### Remove points
 Of course you may need to remove some points from your set as users/temporary events/whatever no longer are part of the set.
@@ -74,12 +78,55 @@ proximity.removeCoordinate("New York", function(err, reply){
   console.log("Removed Coordinate", reply);
 });
 
-//OR Quicker for Bulk Removals
+// OR Quicker for Bulk Removals
 proximity.removeCoordinates(["New York", "St. John's", "San Francisco"], function(err, reply){
   if(err) throw err;
   console.log("Removed Coordinates", reply);
 });
 ```
+
+### Multiple zSets
+If you have different sets of coordinates, you can store and query them separately by passing options with a `zset` property that specifies the Redis ordered set to store/query them in. Removal and Performant Querying work the same way. Review the API to see where you can specify options.
+
+```javascript
+var people       = [[43.6667,-79.4167, "John"],
+                   [39.9523,-75.1638, "Shankar"],
+                   [37.4688,-122.1411, "Cynthia"],
+                   [37.7691,-122.4449, "Chen"]];
+
+var places = [[43.6667,-79.4167, "Toronto"],
+                   [39.9523,-75.1638, "Philadelphia"],
+                   [37.4688,-122.1411, "Palo Alto"],
+                   [37.7691,-122.4449, "San Francisco"],
+                   [47.5500,-52.6667, "St. John's"]];
+
+proximity.addCoordinates(people, {zset: "locations:people"}, function(err, reply){
+  if(err) throw err;
+  console.log("ADD successful:", reply)
+});
+
+proximity.addCoordinates(places, {zset: "locations:places"}, function(err, reply){
+  if(err) throw err;
+  console.log("ADD successful:", reply)
+});
+```
+
+```javascript
+// will find all PEOPLE ~5000m from the passed in coordinate
+proximity.query(43.646838, -79.403723, 5000, {zset: "locations:people"}, function(err, people){
+  if(err) throw err;
+  console.log(people);
+});
+
+// will find all PLACES ~5000m from the passed in coordinate
+proximity.query(43.646838, -79.403723, 5000, {zset: "locations:places"}, function(err, places){
+  if(err) throw err;
+  console.log(places);
+});
+```
+
+
+
 
 # API
 
@@ -153,8 +200,8 @@ Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find 
 As mentioned, you may want to cache the ranges to search for in your data model. Perhaps if you have a connection or user that is logged in, you can associate these ranges with their object.
 
 ```javascript
-//Imagine you have a set of users
-//each user has a certain latitude and longitude
+// Imagine you have a set of users
+// each user has a certain latitude and longitude
 var user = users[userID];
 var queryRadius = 5000;
 

@@ -43,31 +43,31 @@ var initialize = function(client, zSetName){
  * and 76.4378m radius accuracy etc.
  * 
  */
-var rangeIndex = [  0.5971,
-                    1.1943,
-                    2.3889,
-                    4.7774,
-                    9.5547,
-                    19.1095,
-                    38.2189,
-                    76.4378,
-                    152.8757,
-                    305.751,
-                    611.5028,
-                    1223.0056,
-                    2446.0112,
-                    4892.0224 ,
-                    9784.0449,
-                    19568.0898,
-                    39136.1797,
-                    78272.35938,
-                    156544.7188,
-                    313089.4375,
-                    626178.875,
-                    1252357.75,
-                    2504715.5,
-                    5009431,
-                    10018863
+var rangeIndex = [  0.6,            //52
+                    1,              //50
+                    2.19,           //48
+                    4.57,           //46
+                    9.34,           //44
+                    14.4,           //42  
+                    33.18,          //40  
+                    62.1,           //38  
+                    128.55,         //36    
+                    252.9,          //34    
+                    510.02,         //32
+                    1015.8,         //30
+                    2236.5,         //28
+                    3866.9,         //26
+                    8749.7,         //24      
+                    15664,          //22      
+                    33163.5,        //20      
+                    72226.3,        //18        
+                    150350,         //16        
+                    306600,         //14        
+                    474640,         //12      
+                    1099600,        //10      
+                    2349600,        //8      
+                    4849600,        //6    
+                    10018863        //4
                     ];
 
 
@@ -80,13 +80,14 @@ var rangeIndex = [  0.5971,
  * @returns {Number|null} bitDepth
  */
 var rangeDepth = function(radius){
-  for(var i=0; i < rangeIndex.length; i++){
-    if(radius < rangeIndex[i]){
+  for(var i=0; i < rangeIndex.length-1; i++){
+    if(radius - rangeIndex[i] < rangeIndex[i+1] - radius){
       return 52-(i*2);
     }
   }
   return 2;
 };
+
 
 /**
  * Nearby Hash Ranges by Resolution
@@ -145,6 +146,7 @@ function leftShift(integer, shft){
   return integer * Math.pow(2, shft);
 }
 
+
 /**
  * Nearby Hash Ranges by Radius
  *
@@ -165,6 +167,7 @@ var getQueryRangesFromRadius = function(lat, lon, radius, bitDepth){
   return getQueryRangesFromBitDepth(lat, lon, radiusBitDepth, bitDepth);
 };
 
+
 /**
  * Nearby Search (Asynchronous)
  *
@@ -179,16 +182,15 @@ var queryByRanges = function(ranges, options, callBack){
     options = {};
   }
 
-  var client = redis_client || options.client;
-  var zset = redis_clientZSetName || options.zset;
+  var client = options.client !== undefined ? options.client : redis_client;
+  var zset = options.zset !== undefined ? options.zset : redis_clientZSetName;
 
   var i,
-      range = [],
-      rangeLength = ranges.length;
+      range = [];
 
   var multi = client.multi();
 
-  for(i=0; i<rangeLength; i++){
+  for(i=0; i<ranges.length; i++){
     range = ranges[i];
     multi.ZRANGEBYSCORE(zset, range[0], range[1]);
   }
@@ -202,8 +204,9 @@ var queryByRanges = function(ranges, options, callBack){
   });
 };
 
+
 /**
- * Redise Proximity Search (Asynchronous)
+ * Redis Proximity Search (Asynchronous)
  *
  * @param {Number} lat
  * @param {Number} lon
@@ -223,13 +226,37 @@ var queryByProximity = function(lat, lon, radius, options, callBack){
   var ranges;
 
   if(options.ranges === undefined){
-    radiusBitDepth = (options.radiusBitDepth !== undefined) ? (options.radiusBitDepth || 48) : rangeDepth(radius);
+    radiusBitDepth = options.radiusBitDepth !== undefined ? options.radiusBitDepth : rangeDepth(radius);
     ranges = getQueryRangesFromBitDepth(lat, lon, radiusBitDepth, bitDepth);
   }
   else{
     ranges = options.ranges;
   }
   
+  queryByRanges(ranges, options, callBack);
+};
+
+
+/**
+ * Redis Query by Bit Depth (Asynchronous)
+ *
+ * @param {Number} lat
+ * @param {Number} lon
+ * @param {Number} radiusBitDepth (defaults to 24)
+ * @param {Object} options (ranges: {Array}, bitDepth: {Number}, client: {RedisClient}, zset: {Redis zSet name})
+ * @param {Function} callBack
+ */
+var queryByBitDepth = function(lat, lon, radiusBitDepth, options, callBack){
+
+  if(typeof options === "function" && callBack === undefined){
+    callBack = options;
+    options = {};
+  }
+
+  radiusBitDepth = radiusBitDepth || 24;
+  var bitDepth = options.bitDepth || 52;
+  var ranges = getQueryRangesFromBitDepth(lat, lon, radiusBitDepth, bitDepth);
+ 
   queryByRanges(ranges, options, callBack);
 };
 
@@ -251,16 +278,17 @@ var addCoordinate = function(lat, lon, key_name, options, callBack){
   }
 
   var bitDepth = options.bitDepth || 52;
-  var client = redis_client || options.client;
-  var zset = redis_clientZSetName || options.zset;
+  var client = options.client !== undefined ? options.client : redis_client;
+  var zset = options.zset !== undefined ? options.zset : redis_clientZSetName;
 
   client.zadd(zset, geohash.encode_int(lat, lon, bitDepth), key_name, callBack);
 };
 
+
 /**
  * Add New Redis Coordinates (Asynchronous)
  * 
- * Takes an array of coordinate Arrays in the form [lat, lon, key_name] and adds them to the zset
+ * Takes an array of coordinate arrays in the form [lat, lon, key_name] and adds them to the zset
  *
  * @param {Array} coordinateArray Set
  * @param {Object} options (bitDepth: {Number}, client: {RedisClient}, zset: {Redis zSet name})
@@ -274,15 +302,14 @@ var addCoordinates = function(coordinatesArray, options, callBack){
   }
 
   var bitDepth = options.bitDepth || 52;
-  var client = redis_client || options.client;
-  var zset = redis_clientZSetName || options.zset;
+  var client = options.client !== undefined ? options.client : redis_client;
+  var zset = options.zset !== undefined ? options.zset : redis_clientZSetName;
 
   var args = [];
   var i, hash;
 
   for (i=0; i<coordinatesArray.length; i++){
-    hash = geohash.encode_int(coordinatesArray[i][0], coordinatesArray[i][1], bitDepth);
-    args.push(hash);
+    args.push(geohash.encode_int(coordinatesArray[i][0], coordinatesArray[i][1], bitDepth));
     args.push(coordinatesArray[i][2]);
   }
 
@@ -306,8 +333,8 @@ var removeCoordinate = function(key_name, options, callBack){
     options = {};
   }
 
-  var client = redis_client || options.client;
-  var zset = redis_clientZSetName || options.zset;
+  var client = options.client !== undefined ? options.client : redis_client;
+  var zset = options.zset !== undefined ? options.zset : redis_clientZSetName;
 
   client.zrem(zset, key_name, callBack);
 };
@@ -329,8 +356,8 @@ var removeCoordinates = function(coordinateKeys, options, callBack){
     options = {};
   }
 
-  var client = redis_client || options.client;
-  var zset = redis_clientZSetName || options.zset;
+  var client = options.client !== undefined ? options.client : redis_client;
+  var zset = options.zset !== undefined ? options.zset : redis_clientZSetName;
 
   coordinateKeys.unshift(zset);
 
@@ -408,20 +435,20 @@ function intersect(a, b){
 }
 
 
-
 var geohashDistance = {
   'initialize': initialize,
   'getQueryRangesFromBitDepth':getQueryRangesFromBitDepth,
   'getQueryRangesFromRadius':getQueryRangesFromRadius,
   'queryByRanges': queryByRanges,
+  'queryByBitDepth': queryByBitDepth,
   'query': queryByProximity,
   'addNewCoordinate': addCoordinate,
   'addCoordinate': addCoordinate,
   'addCoordinates': addCoordinates,
   'removeCoordinate': removeCoordinate,
   'removeCoordinates': removeCoordinates,
+  'getMinMaxs': getMinMaxs,
   'queryCoordinatesInRange': queryCoordinatesInRange
 };
-
 
 module.exports = geohashDistance;
