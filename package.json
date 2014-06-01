@@ -42,5 +42,5 @@
   },
   "homepage": "https://github.com/arjunmehta/node-geo-proximity",
   "_id": "geo-proximity@1.0.2",
-  "_from": "redis-proximity@"
+  "_from": "geo-proximity@"
 }
