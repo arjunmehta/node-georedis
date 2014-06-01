@@ -8,7 +8,6 @@ A node.js module that leverages the functionality of [node-geohash (ngeohash)](h
 [![Build Status](https://travis-ci.org/arjunmehta/node-redis-proximity.svg?branch=master)](https://travis-ci.org/arjunmehta/node-redis-proximity)
 
 A node.js module that leverages the functionality of [node-geohash (ngeohash)](https://github.com/sunng87/node-geohash) and [node-redis](https://github.com/mranney/node_redis) to provide super fast proximity searches for geo coordinates.
->>>>>>> 1058393648e2fe0d170e80e27d2e9a867be87ed5
 
 It should be noted that the method used here is not the most precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. This module leverages a [process for spatial indexing as outlined by Yin Qiwen](https://github.com/yinqiwen/ardb/blob/master/doc/spatial-index.md).
 
@@ -23,7 +22,7 @@ npm install geo-proximity
 
 ## Example Usage
 This module requires a redis server in order to work and of course you need to have redis accessible to node. Visit [node-redis](https://github.com/mranney/node_redis) for more information on using redis into your node environment.
-=======
+
 This module requires a functioning redis server running in order to work. Ideally, you should initialize it with your client and a zset name with which it will use for coordinate queries. But these can be specified in your function calls through method options, which can be helpful if you want to create various sets of geocoordinates to query against.
 
 You should at the very least initialize the module with your redis client, but if you only have one set of coordinates, you can initialize the module with your client AND a zset name with which it will use for coordinate queries.
