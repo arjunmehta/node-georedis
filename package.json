@@ -15,7 +15,7 @@
     "geoproximity",
     "radius"
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": {
     "url": "https://github.com/arjunmehta/node-geo-proximity"
   },
@@ -41,6 +41,6 @@
     "url": "https://github.com/arjunmehta/node-geo-proximity/issues"
   },
   "homepage": "https://github.com/arjunmehta/node-geo-proximity",
-  "_id": "geo-proximity@1.0.0",
+  "_id": "geo-proximity@1.0.1",
   "_from": "redis-proximity@"
 }
