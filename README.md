@@ -3,7 +3,8 @@ node-geo-proximity
 **node-redis-proximity is renamed to node-geo-proximity with 1.0.0 release.**
 
 A node.js module that leverages the functionality of [node-geohash (ngeohash)](https://github.com/sunng87/node-geohash) to provide super fast proximity searches for geo coordinates.
-=======
+
+
 [![Build Status](https://travis-ci.org/arjunmehta/node-redis-proximity.svg?branch=master)](https://travis-ci.org/arjunmehta/node-redis-proximity)
 
 A node.js module that leverages the functionality of [node-geohash (ngeohash)](https://github.com/sunng87/node-geohash) and [node-redis](https://github.com/mranney/node_redis) to provide super fast proximity searches for geo coordinates.
