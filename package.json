@@ -39,7 +39,5 @@
   "bugs": {
     "url": "https://github.com/arjunmehta/node-geo-proximity/issues"
   },
-  "homepage": "https://github.com/arjunmehta/node-geo-proximity",
-  "_id": "geo-proximity@1.0.7",
-  "_from": "geo-proximity@"
+  "homepage": "https://github.com/arjunmehta/node-geo-proximity"
 }
