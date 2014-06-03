@@ -2,6 +2,9 @@ node-geo-proximity
 =====================
 **node-redis-proximity is renamed to node-geo-proximity with 1.0.0 release.**
 
+A node.js module that leverages the functionality of [node-geohash (ngeohash)](https://github.com/sunng87/node-geohash) to provide super fast proximity searches for geo coordinates.
+
+
 [![Build Status](https://travis-ci.org/arjunmehta/node-geo-proximity.svg?branch=master)](https://travis-ci.org/arjunmehta/node-geo-proximity)
 
 A node.js module that leverages the functionality of [node-geohash (ngeohash)](https://github.com/sunng87/node-geohash) and [node-redis](https://github.com/mranney/node_redis) to provide super fast proximity searches for geo coordinates.
@@ -19,6 +22,8 @@ npm install geo-proximity
 
 ## Example Usage
 This module requires a redis server in order to work and of course you need to have redis accessible to node. Visit [node-redis](https://github.com/mranney/node_redis) for more information on using redis into your node environment.
+
+This module requires a functioning redis server running in order to work. Ideally, you should initialize it with your client and a zset name with which it will use for coordinate queries. But these can be specified in your function calls through method options, which can be helpful if you want to create various sets of geocoordinates to query against.
 
 You should at the very least initialize the module with your redis client, but if you only have one set of coordinates, you can initialize the module with your client AND a zset name with which it will use for coordinate queries.
 
@@ -126,6 +131,9 @@ proximity.query(43.646838, -79.403723, 5000, {zset: "locations:places"}, functio
 });
 ```
 
+
+
+
 # API
 
 ## Initialization
@@ -135,7 +143,7 @@ Initialize the module with a redis client, and a ZSET name. This is not required
 
 ## Adding/Removing Coordinates
 
-### proximity.addCoordinate(lat, lon, {options}, callBack);
+### proximity.addCoordinate(lat, lon, coordinateName, {options}, callBack);
 Add a new coordinate to your set. You can get quite technical here by specifying the geohash integer resolution at which to store (MUST BE CONSISTENT).
 
 #### Options
