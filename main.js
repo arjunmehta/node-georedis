@@ -31,6 +31,8 @@ var redis_client;
 var initialize = function(client, zSetName){
   redis_clientZSetName = zSetName;
   redis_client = client;
+
+  return this;
 };
 
 

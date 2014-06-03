@@ -20,8 +20,6 @@ npm install geo-proximity
 ## Example Usage
 This module requires a redis server in order to work and of course you need to have redis accessible to node. Visit [node-redis](https://github.com/mranney/node_redis) for more information on using redis into your node environment.
 
-This module requires a functioning redis server running in order to work. Ideally, you should initialize it with your client and a zset name with which it will use for coordinate queries. But these can be specified in your function calls through method options, which can be helpful if you want to create various sets of geocoordinates to query against.
-
 You should at the very least initialize the module with your redis client, but if you only have one set of coordinates, you can initialize the module with your client AND a zset name with which it will use for coordinate queries.
 
 If you have more than one set of coordinates (ie. people and places) that you want to query separately, you can store and query them using optional parameters in the method calls. (see section on Multiple Sets)
@@ -30,30 +28,29 @@ If you have more than one set of coordinates (ie. people and places) that you wa
 var redis = require('redis');
 var client = redis.createClient();
 
-var proximity = require('geo-proximity');
-proximity.initialize(client, "locationsSet");
+var proximity = require('geo-proximity').initialize(client, "geo:locations");
 ```
 
 ### Add Coordinates
 Generally you'll have some trigger to add new coordinates to your set (a user logs in, or a new point gets added in your application), or perhaps you'll want to load all the coordinates from a file of existing places. Whatever the case you should add them to redis as folows:
 
 ```javascript
-proximity.addCoordinate(43.6667,-79.4167, "Toronto", function(err, reply){
+proximity.addCoordinate(43.6667, -79.4167, "Toronto", function(err, reply){
   if(err) throw err;
   console.log("ADD successful:", reply)
 });
 
 // OR (much quicker for large sets)
-var coordinates = [[43.6667,-79.4167,  "Toronto"],
-                   [39.9523,-75.1638,  "Philadelphia"],
-                   [37.4688,-122.1411, "Palo Alto"],
-                   [37.7691,-122.4449, "San Francisco"],
-                   [47.5500,-52.6667,  "St. John's"],
-                   [40.7143,-74.0060,  "New York"],
-                   [49.6500,-54.7500,  "Twillingate"],
-                   [45.4167,-75.7000,  "Ottawa"],
-                   [51.0833,-114.0833, "Calgary"],
-                   [18.9750,72.8258,   "Mumbai"]];
+var coordinates = [[43.6667, -79.4167,  "Toronto"],
+                   [39.9523, -75.1638,  "Philadelphia"],
+                   [37.4688, -122.1411, "Palo Alto"],
+                   [37.7691, -122.4449, "San Francisco"],
+                   [47.5500, -52.6667,  "St. John's"],
+                   [40.7143, -74.0060,  "New York"],
+                   [49.6500, -54.7500,  "Twillingate"],
+                   [45.4167, -75.7000,  "Ottawa"],
+                   [51.0833, -114.0833, "Calgary"],
+                   [18.9750, 72.8258,   "Mumbai"]];
 
 proximity.addCoordinates(coordinates, function(err, reply){
   if(err) throw err;
@@ -92,23 +89,23 @@ proximity.removeCoordinates(["New York", "St. John's", "San Francisco"], functio
 If you have different sets of coordinates, you can store and query them separately by passing options with a `zset` property that specifies the Redis ordered set to store/query them in. Removal and Performant Querying work the same way. Review the API to see where you can specify options.
 
 ```javascript
-var people       = [[43.6667,-79.4167, "John"],
-                   [39.9523,-75.1638,  "Shankar"],
-                   [37.4688,-122.1411, "Cynthia"],
-                   [37.7691,-122.4449, "Chen"]];
+var people       = [[43.6667,-79.4167,  "John"],
+                   [39.9523, -75.1638,  "Shankar"],
+                   [37.4688, -122.1411, "Cynthia"],
+                   [37.7691, -122.4449, "Chen"]];
 
-var places       = [[43.6667,-79.4167, "Toronto"],
-                   [39.9523,-75.1638,  "Philadelphia"],
-                   [37.4688,-122.1411, "Palo Alto"],
-                   [37.7691,-122.4449, "San Francisco"],
-                   [47.5500,-52.6667,  "St. John's"]];
+var places       = [[43.6667,-79.4167,  "Toronto"],
+                   [39.9523, -75.1638,  "Philadelphia"],
+                   [37.4688, -122.1411, "Palo Alto"],
+                   [37.7691, -122.4449, "San Francisco"],
+                   [47.5500, -52.6667,  "St. John's"]];
 
-proximity.addCoordinates(people, {zset: "locations:people"}, function(err, reply){
+proximity.addCoordinates(people, {zset: "geo:locations:people"}, function(err, reply){
   if(err) throw err;
   console.log("ADD successful:", reply)
 });
 
-proximity.addCoordinates(places, {zset: "locations:places"}, function(err, reply){
+proximity.addCoordinates(places, {zset: "geo:locations:places"}, function(err, reply){
   if(err) throw err;
   console.log("ADD successful:", reply)
 });
@@ -116,13 +113,13 @@ proximity.addCoordinates(places, {zset: "locations:places"}, function(err, reply
 
 ```javascript
 // will find all PEOPLE ~5000m from the passed in coordinate
-proximity.query(43.646838, -79.403723, 5000, {zset: "locations:people"}, function(err, people){
+proximity.query(43.646838, -79.403723, 5000, {zset: "geo:locations:people"}, function(err, people){
   if(err) throw err;
   console.log(people);
 });
 
 // will find all PLACES ~5000m from the passed in coordinate
-proximity.query(43.646838, -79.403723, 5000, {zset: "locations:places"}, function(err, places){
+proximity.query(43.646838, -79.403723, 5000, {zset: "geo:locations:places"}, function(err, places){
   if(err) throw err;
   console.log(places);
 });

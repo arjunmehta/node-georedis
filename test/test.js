@@ -3,8 +3,7 @@ var test = require('assert');
 var redis = require('redis');
 var client = redis.createClient();
 
-var proximity = require('../main.js');
-proximity.initialize(client, "redisproximityzset");
+var proximity = require('../main.js').initialize(client, "geo:locations");
 
 var lat = 43.646838,
     lon = -79.403723;
@@ -306,17 +305,17 @@ exports.differentSets = function(test){
                      [47.5500,-52.6667, "St. John's"]];
 
 
-  proximity.addCoordinates(people, {zset: "locations:people"}, function(err, reply){
+  proximity.addCoordinates(people, {zset: "geo:locations:people"}, function(err, reply){
     if(err) throw err;
     // console.log("ADD successful:", reply);
 
-    proximity.addCoordinates(places, {zset: "locations:places"}, function(err, reply){
+    proximity.addCoordinates(places, {zset: "geo:locations:places"}, function(err, reply){
       if(err) throw err;
       // console.log("ADD successful:", reply);
 
 
       // will find all PEOPLE ~5000m from the passed in coordinate
-      proximity.query(39.9523, -75.1638, 5000, {zset: "locations:people"}, function(err, people){
+      proximity.query(39.9523, -75.1638, 5000, {zset: "geo:locations:people"}, function(err, people){
         if(err) throw err;
         // console.log(people);
 
@@ -324,7 +323,7 @@ exports.differentSets = function(test){
 
 
         // will find all PLACES ~5000m from the passed in coordinate
-        proximity.query(39.9523, -75.1638, 5000, {zset: "locations:places"}, function(err, places){
+        proximity.query(39.9523, -75.1638, 5000, {zset: "geo:locations:places"}, function(err, places){
 
           if(err) throw err;
           // console.log(places);
