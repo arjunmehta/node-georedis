@@ -41,9 +41,8 @@ var rangeIndex = [  0.6,            //52
 
 var addArray = [];
 
-exports.addCoordinate = function(test){
 
-  console.log("Testing Basic Add...");
+exports.addCoordinate = function(test){
 
   client.flushall();
 
@@ -58,54 +57,38 @@ exports.addCoordinate = function(test){
 
 };
 
+
 exports.addCoordinates = function(test){  
 
+  client.flushall();
+  
   test.expect(2);
 
-  console.log("Testing Large Multiple Add...");
+  var coordinateRange;
+  var coordinateArray = [];
+  var distance = 0;
+  var count = 1;
 
-  client.flushall();
+  coordinateArray.push([lat, lon, "center_0"]);
 
-  startTime = new Date().getTime();
-  var i = 0;
+  for (var i = 0; i < 100000; i++) {
+    distance = i*(i/100);
+    coordinateRange = proximity.getMinMaxs(lat, lon, distance);
+    coordinateArray.push([coordinateRange.latmin, coordinateRange.lonmin, "sw_"+distance]);
+    coordinateArray.push([coordinateRange.latmax, coordinateRange.lonmin, "nw_"+distance]);
+    coordinateArray.push([coordinateRange.latmin, coordinateRange.lonmax, "se_"+distance]);
+    coordinateArray.push([coordinateRange.latmax, coordinateRange.lonmax, "ne_"+distance]);
+    count += 4;
+  }
 
-  var lat, lon;
+  proximity.addCoordinates(coordinateArray, function (err, reply){
+    if(err) throw err;
 
-  csv()
-  .from.path(__dirname+'/GeoLiteCity-Location.csv', { delimiter: ',', escape: '"' })
-  .on('record', function(row,index){
+    test.equal(err, null);
+    test.equal(400001, reply);
+    test.done();
+  });
 
-    lat = Number(row[5]);
-    lon = Number(row[6]);
-    name = row[3]+row[4];
-    addArray.push([lat, lon, name]);    
-   
-    // if(i%1000 === 0){
-    //   console.log(i, ":", name, lat, lon);
-    // }
-    // i++;
-
-  })
-  .on('close', function(count){
-
-    console.log('CLOSE Number of lines: '+count);
-    console.log('CLOSE Time: '+ (new Date().getTime()-startTime) );
-
-  }).on('end', function(end){
-
-    proximity.addCoordinates(addArray, function(err, reply){
-      if(err) throw err;
-
-      test.equal(err, null);
-      test.equal(reply, 432346);
-      test.done();
-    });
-
-
-  })
-  .on('error', function(error){
-    console.log(error.message);
-  });  
 };
 
 
@@ -116,7 +99,7 @@ exports.queryBasic = function(test){
   proximity.query(lat, lon, 50000, function(err, replies){
     if(err) throw err;
     // console.log("NUMBER OF GEOHASH MATCHES", replies.length);
-    test.equal(replies.length, 11503);
+    test.equal(replies.length, 6835);
     test.done();
   }); 
 };
@@ -130,11 +113,12 @@ exports.performantQuery = function(test){
 
   proximity.queryByRanges(ranges, function(err, replies){
     if(err) throw err;
-    test.equal(replies.length, 11503);
+    test.equal(replies.length, 6835);
     test.done();
   });
 
 };
+
 
 exports.removeCoordinate = function(test){
 
@@ -172,7 +156,7 @@ exports.removeCoordinates = function(test){
 
     proximity.removeCoordinates(arrayToDelete, function(err, reply){
       if(err) throw err;
-      test.equal(reply, 11502);
+      test.equal(reply, 6834);
       
       test.done();
     });
@@ -210,7 +194,6 @@ exports.addNearbyRanges = function(test){
     test.equal(count, reply);
     test.done();
   });
-
 };
 
 
@@ -261,6 +244,7 @@ function query(bitDepth, test, next){
     }
   });
 }
+
 
 var startRadius = 0.4;
 
@@ -357,8 +341,6 @@ exports.differentSets = function(test){
     });
   });
 };
-
-
 
 
 exports.tearDown = function(done){
