@@ -1,8 +1,5 @@
 var test = require('assert');
 
-var csv = require('csv');
-var fs = require('fs');
-
 var redis = require('redis');
 var client = redis.createClient();
 
@@ -109,9 +106,9 @@ exports.performantQuery = function(test){
 
   test.expect(1);
 
-  var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
+  var cachedQuery = proximity.getQueryCache(lat, lon, 50000);
 
-  proximity.queryByRanges(ranges, function(err, replies){
+  proximity.queryWithCache(cachedQuery, function(err, replies){
     if(err) throw err;
     test.equal(replies.length, 6835);
     test.done();

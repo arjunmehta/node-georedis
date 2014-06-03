@@ -44,16 +44,16 @@ proximity.addCoordinate(43.6667,-79.4167, "Toronto", function(err, reply){
 });
 
 // OR (much quicker for large sets)
-var coordinates = [[43.6667,-79.4167, "Toronto"],
-                   [39.9523,-75.1638, "Philadelphia"],
+var coordinates = [[43.6667,-79.4167,  "Toronto"],
+                   [39.9523,-75.1638,  "Philadelphia"],
                    [37.4688,-122.1411, "Palo Alto"],
                    [37.7691,-122.4449, "San Francisco"],
-                   [47.5500,-52.6667, "St. John's"],
-                   [40.7143,-74.0060, "New York"],
-                   [49.6500,-54.7500, "Twillingate"],
-                   [45.4167,-75.7000, "Ottawa"],
+                   [47.5500,-52.6667,  "St. John's"],
+                   [40.7143,-74.0060,  "New York"],
+                   [49.6500,-54.7500,  "Twillingate"],
+                   [45.4167,-75.7000,  "Ottawa"],
                    [51.0833,-114.0833, "Calgary"],
-                   [18.9750,72.8258, "Mumbai"]];
+                   [18.9750,72.8258,   "Mumbai"]];
 
 proximity.addCoordinates(coordinates, function(err, reply){
   if(err) throw err;
@@ -93,15 +93,15 @@ If you have different sets of coordinates, you can store and query them separate
 
 ```javascript
 var people       = [[43.6667,-79.4167, "John"],
-                   [39.9523,-75.1638, "Shankar"],
+                   [39.9523,-75.1638,  "Shankar"],
                    [37.4688,-122.1411, "Cynthia"],
                    [37.7691,-122.4449, "Chen"]];
 
-var places = [[43.6667,-79.4167, "Toronto"],
-                   [39.9523,-75.1638, "Philadelphia"],
+var places       = [[43.6667,-79.4167, "Toronto"],
+                   [39.9523,-75.1638,  "Philadelphia"],
                    [37.4688,-122.1411, "Palo Alto"],
                    [37.7691,-122.4449, "San Francisco"],
-                   [47.5500,-52.6667, "St. John's"]];
+                   [47.5500,-52.6667,  "St. John's"]];
 
 proximity.addCoordinates(people, {zset: "locations:people"}, function(err, reply){
   if(err) throw err;
@@ -188,10 +188,10 @@ Use this function for a basic search by proximity within the given latitude and 
 
 If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you should cache the **geohash ranges** that are used to search for nearby locations. The geohash ranges are what the methods ultimately search within to find nearby points. So keeping these stored in a variable some place and passing them into a more basic search function will save some cycles (at least 5ms on a basic machine). This will save you quite a bit of processing time if you expect to refresh your searches often, and especially if you expect to have empty results often. Your processor is probably best used for other things.
 
-### proximity.getQueryRangesFromRadius(lat, lon, radius, {bitDepth=52});
+### proximity.getQueryCache(lat, lon, radius, {bitDepth=52});
 Get the query ranges to use with **proximity.queryByRanges**. This returns an array of geohash ranges to search your set for. `bitDepth` is optional and defaults to 52, set it if you have chosen to store your coordinates at a different bit depth. Store the return value of this function for making the same query often.
 
-### proximity.queryByRanges(ranges, {options}, callBack);
+### proximity.queryWithCache(ranges, {options}, callBack);
 Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find points that fall within your range value.
 
 **Options:**
@@ -203,18 +203,13 @@ Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find 
 As mentioned, you may want to cache the ranges to search for in your data model. Perhaps if you have a connection or user that is logged in, you can associate these ranges with their object.
 
 ```javascript
-// Imagine you have a set of users
-// each user has a certain latitude and longitude
-var user = users[userID];
-var queryRadius = 5000;
+// will hold the generated query ranges used for the query. This will
+// save you some processing time for future queries using the same values
+var cachedQuery = proximity.getQueryCache(37.4688, -122.1411, 5000);
 
-user.proximityQueryRanges = proximity.getQueryRangesFromRadius(user.latitude, user.longitide, queryRadius);
-
-function search(user){
-  proximity.queryByRanges(user.proximityQueryRanges, function(err, replies){
-    console.log("Nearby Users to", user, "are", replies);
-  });
-}
+proximity.queryWithCache(cachedQuery, function(err, replies){
+  console.log("results to the query:", replies);
+});
 ```
 
 Get it? Got it?

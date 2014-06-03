@@ -437,18 +437,22 @@ function intersect(a, b){
 
 var geohashDistance = {
   'initialize': initialize,
-  'getQueryRangesFromBitDepth':getQueryRangesFromBitDepth,
-  'getQueryRangesFromRadius':getQueryRangesFromRadius,
-  'queryByRanges': queryByRanges,
-  'queryByBitDepth': queryByBitDepth,
+  'getQueryRangesFromBitDepth':getQueryRangesFromBitDepth,  // will deprecate interface
+  'getQueryRangesFromRadius':getQueryRangesFromRadius,      // will deprecate interface
+  'queryByRanges': queryByRanges,                           // will deprecate interface
+  'queryByBitDepth': queryByBitDepth,                       // will deprecate interface  
+  'addNewCoordinate': addCoordinate,                        // will deprecate interface
+  'getMinMaxs': getMinMaxs,                                 // really just for testing
+
   'query': queryByProximity,
-  'addNewCoordinate': addCoordinate,
   'addCoordinate': addCoordinate,
   'addCoordinates': addCoordinates,
   'removeCoordinate': removeCoordinate,
   'removeCoordinates': removeCoordinates,
-  'getMinMaxs': getMinMaxs,
-  'queryCoordinatesInRange': queryCoordinatesInRange
+  
+  'getQueryCache': getQueryRangesFromRadius,
+  'queryWithCache': queryByRanges
 };
+
 
 module.exports = geohashDistance;

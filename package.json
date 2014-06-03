@@ -15,7 +15,7 @@
     "geoproximity",
     "radius"
   ],
-  "version": "1.0.7",
+  "version": "1.1.0",
   "repository": {
     "url": "https://github.com/arjunmehta/node-geo-proximity"
   },
@@ -23,13 +23,12 @@
     "node": ">=v0.2.0"
   },
   "dependencies": {
-     "ngeohash": "~0.6.0"     
+     "ngeohash": "~0.6.0"
     },
   "devDependencies": {
     "redis" : "~0.10.0",
     "assert": "~1.0",
-    "nodeunit": "~0.8.8",
-    "csv": "~0.3.7"
+    "nodeunit": "~0.8.8"
   },
   "scripts": {
     "test": "nodeunit test/test.js"
