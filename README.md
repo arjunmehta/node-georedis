@@ -1,6 +1,6 @@
 node-geo-proximity
 =====================
-**node-redis-proximity is renamed to node-geo-proximity with 1.0.0 release.**
+**node-redis-proximity has been renamed to node-geo-proximity with 1.0.0 release.**
 
 [![Build Status](https://travis-ci.org/arjunmehta/node-geo-proximity.svg?branch=master)](https://travis-ci.org/arjunmehta/node-geo-proximity)
 
@@ -36,7 +36,7 @@ Generally you'll have some trigger to add new coordinates to your set (a user lo
 
 ```javascript
 proximity.addCoordinate(43.6667, -79.4167, "Toronto", function(err, reply){
-  if(err) throw err;
+  if(err) console.error(err);
   console.log("ADD successful:", reply)
 });
 
@@ -53,7 +53,7 @@ var coordinates = [[43.6667, -79.4167,  "Toronto"],
                    [18.9750, 72.8258,   "Mumbai"]];
 
 proximity.addCoordinates(coordinates, function(err, reply){
-  if(err) throw err;
+  if(err) console.error(err);
   console.log("ADD successful:", reply)
 });
 ```
@@ -64,7 +64,7 @@ Now you can look for points that exist within a certain range of any other coord
 ```javascript
 // look for all points within 5000m of Toronto.
 proximity.query(43.646838, -79.403723, 5000, function(err, replies){
-  if(err) throw err;
+  if(err) console.error(err);
   console.log(replies);
 });
 ```
@@ -74,13 +74,13 @@ Of course you may need to remove some points from your set as users/temporary ev
 
 ```javascript
 proximity.removeCoordinate("New York", function(err, reply){
-  if(err) throw err;
+  if(err) console.error(err);
   console.log("Removed Coordinate", reply);
 });
 
 // OR Quicker for Bulk Removals
 proximity.removeCoordinates(["New York", "St. John's", "San Francisco"], function(err, reply){
-  if(err) throw err;
+  if(err) console.error(err);
   console.log("Removed Coordinates", reply);
 });
 ```
@@ -101,12 +101,12 @@ var places       = [[43.6667,-79.4167,  "Toronto"],
                    [47.5500, -52.6667,  "St. John's"]];
 
 proximity.addCoordinates(people, {zset: "geo:locations:people"}, function(err, reply){
-  if(err) throw err;
+  if(err) console.error(err);
   console.log("ADD successful:", reply)
 });
 
 proximity.addCoordinates(places, {zset: "geo:locations:places"}, function(err, reply){
-  if(err) throw err;
+  if(err) console.error(err);
   console.log("ADD successful:", reply)
 });
 ```
@@ -114,13 +114,13 @@ proximity.addCoordinates(places, {zset: "geo:locations:places"}, function(err, r
 ```javascript
 // will find all PEOPLE ~5000m from the passed in coordinate
 proximity.query(43.646838, -79.403723, 5000, {zset: "geo:locations:people"}, function(err, people){
-  if(err) throw err;
+  if(err) console.error(err);
   console.log(people);
 });
 
 // will find all PLACES ~5000m from the passed in coordinate
 proximity.query(43.646838, -79.403723, 5000, {zset: "geo:locations:places"}, function(err, places){
-  if(err) throw err;
+  if(err) console.error(err);
   console.log(places);
 });
 ```

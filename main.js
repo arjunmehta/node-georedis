@@ -202,7 +202,7 @@ var queryByRanges = function(ranges, options, callBack){
     for(i=0; i< replies.length; i++){
       concatedReplies = concatedReplies.concat(replies[i]);
     }
-    if(callBack && typeof callBack === "function") callBack(err, concatedReplies);
+    if(typeof callBack === "function") callBack(err, concatedReplies);
   });
 };
 
@@ -398,7 +398,7 @@ var queryCoordinatesInRange = function(client, lat, lon, radius, callBack){
 
         var intersection = (replies[0].length < replies[1].length) ? intersect(lats, lons) : intersect(lons, lats);
 
-        if(callBack && typeof callBack == "function") callBack(err, intersection);
+        if(typeof callBack == "function") callBack(err, intersection);
       });
 };
 
@@ -439,19 +439,21 @@ function intersect(a, b){
 
 var geohashDistance = {
   'initialize': initialize,
+
   'getQueryRangesFromBitDepth':getQueryRangesFromBitDepth,  // will deprecate interface
   'getQueryRangesFromRadius':getQueryRangesFromRadius,      // will deprecate interface
   'queryByRanges': queryByRanges,                           // will deprecate interface
   'queryByBitDepth': queryByBitDepth,                       // will deprecate interface  
   'addNewCoordinate': addCoordinate,                        // will deprecate interface
+  
   'getMinMaxs': getMinMaxs,                                 // really just for testing
 
-  'query': queryByProximity,
   'addCoordinate': addCoordinate,
   'addCoordinates': addCoordinates,
   'removeCoordinate': removeCoordinate,
   'removeCoordinates': removeCoordinates,
-  
+
+  'query': queryByProximity,  
   'getQueryCache': getQueryRangesFromRadius,
   'queryWithCache': queryByRanges
 };
