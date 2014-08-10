@@ -13,25 +13,25 @@ var rangeIndex = [  0.6,            //52
                     2.19,           //48
                     4.57,           //46
                     9.34,           //44
-                    14.4,           //42  
-                    33.18,          //40  
-                    62.1,           //38  
-                    128.55,         //36    
-                    252.9,          //34    
+                    14.4,           //42
+                    33.18,          //40
+                    62.1,           //38
+                    128.55,         //36
+                    252.9,          //34
                     510.02,         //32
                     1015.8,         //30
                     2236.5,         //28
                     3866.9,         //26
-                    8749.7,         //24      
-                    15664,          //22      
-                    33163.5,        //20      
-                    72226.3,        //18        
-                    150350,         //16        
-                    306600,         //14        
-                    474640,         //12      
-                    1099600,        //10      
-                    2349600,        //8      
-                    4849600,        //6    
+                    8749.7,         //24
+                    15664,          //22
+                    33163.5,        //20
+                    72226.3,        //18
+                    150350,         //16
+                    306600,         //14
+                    474640,         //12
+                    1099600,        //10
+                    2349600,        //8
+                    4849600,        //6
                     10018863        //4
                     ];
 
@@ -48,16 +48,16 @@ exports.addCoordinate = function(test){
     if(err) throw err;
 
     test.equals(reply, 1);
-    test.done();    
+    test.done();
   });
 
 };
 
 
-exports.addCoordinates = function(test){  
+exports.addCoordinates = function(test){
 
   client.flushall();
-  
+
   test.expect(2);
 
   var coordinateRange;
@@ -97,7 +97,7 @@ exports.queryBasic = function(test){
     // console.log("NUMBER OF GEOHASH MATCHES", replies.length);
     test.equal(replies.length, 6835);
     test.done();
-  }); 
+  });
 };
 
 
@@ -133,7 +133,7 @@ exports.removeCoordinate = function(test){
       // console.log(JSON.stringify(reply));
       test.equal(reply, 1);
       test.done();
-    });  
+    });
   });
 };
 
@@ -153,7 +153,7 @@ exports.removeCoordinates = function(test){
     proximity.removeCoordinates(arrayToDelete, function(err, reply){
       if(err) throw err;
       test.equal(reply, 6834);
-      
+
       test.done();
     });
   });
@@ -163,7 +163,7 @@ exports.removeCoordinates = function(test){
 exports.addNearbyRanges = function(test){
 
   client.flushall();
-  
+
   test.expect(2);
 
   var coordinateRange;
@@ -200,7 +200,6 @@ exports.testRangeBitDepths = function(test){
   test.expect(25);
 
   query(startBitDepth, test, function(){
-    console.log("DONE TEXT RANGE BIT DEPTHS");
     test.done();
   });
 
@@ -241,7 +240,6 @@ function query(bitDepth, test, next){
   });
 }
 
-
 var startRadius = 0.4;
 
 exports.testRangesRadius = function(test){
@@ -249,7 +247,7 @@ exports.testRangesRadius = function(test){
   test.expect(22);
 
   queryRadius(startRadius, test, function(){
-    test.done();    
+    test.done();
   });
 
 };
@@ -313,14 +311,12 @@ exports.differentSets = function(test){
       if(err) throw err;
       // console.log("ADD successful:", reply);
 
-
       // will find all PEOPLE ~5000m from the passed in coordinate
       proximity.query(39.9523, -75.1638, 5000, {zset: "geo:locations:people"}, function(err, people){
         if(err) throw err;
         // console.log(people);
 
         test.equal(people[0], "Shankar");
-
 
         // will find all PLACES ~5000m from the passed in coordinate
         proximity.query(39.9523, -75.1638, 5000, {zset: "geo:locations:places"}, function(err, places){
@@ -329,13 +325,61 @@ exports.differentSets = function(test){
           // console.log(places);
 
           test.equal(places[0], "Philadelphia");
-          test.done();  
-          client.quit();        
+          test.done();
+          // client.quit();
 
         });
       });
     });
   });
+};
+
+
+
+exports.differentSetsWithValues = function(test){
+
+  test.expect(6);
+
+  proximity.query(39.9523, -75.1638, 5000000, {zset: "geo:locations:people", values: true}, function(err, people){
+
+    if(err) throw err;
+
+    // console.log(people);
+    // [37.4688,-122.1411, "Cynthia"],
+    // [ 'Cynthia', 37.468800991773605, -122.14110106229782 ]
+
+    var cynthia = people[1];
+    var inlatRange = (cynthia[1] > 37.4688-0.005 && cynthia[1] < 37.4688+0.005) ? true : false;
+    var inlonRange = (cynthia[2] > -122.1411-0.005 && cynthia[2] < -122.1411+0.005) ? true : false;
+
+    test.equal(cynthia[0], "Cynthia");
+    test.equal(inlatRange, true);
+    test.equal(inlonRange, true);
+
+    // will find all PLACES ~5000m from the passed in coordinate
+    proximity.query(39.9523, -75.1638, 5000000, {zset: "geo:locations:places", values: true}, function(err, places){
+
+      if(err) throw err;
+
+      // console.log(places);
+      // [39.9523,-75.1638, "Philadelphia"]
+      // [ 'Philadelphia', 39.95230123400688, -75.16379803419113 ]
+
+      var philadelphia = places[3];
+
+      inlatRange = (philadelphia[1] > 39.9523-0.005 && philadelphia[1] < 39.9523+0.005) ? true : false;
+      inlonRange = (philadelphia[2] > -75.1638-0.005 && philadelphia[2] < -75.1638+0.005) ? true : false;
+
+      test.equal(philadelphia[0], "Philadelphia");
+      test.equal(inlatRange, true);
+      test.equal(inlonRange, true);
+
+      test.done();
+      client.quit();
+
+    });
+  });
+
 };
 
 
