@@ -184,27 +184,74 @@ var queryByRanges = function(ranges, options, callBack){
     options = {};
   }
 
+  if(options.values !== undefined){
+    queryByRangesWithValues(ranges, options, callBack);
+  }
+  else{
+
+    var client = options.client !== undefined ? options.client : redis_client;
+    var zset = options.zset !== undefined ? options.zset : redis_clientZSetName;
+    var i, range = [];
+    var multi = client.multi();
+
+    for(i=0; i<ranges.length; i++){
+      range = ranges[i];
+      multi.ZRANGEBYSCORE(zset, range[0], range[1]);
+    }
+
+    multi.exec(function(err, replies){
+      var concatedReplies = [];
+      for(i=0; i<replies.length; i++){
+        concatedReplies = concatedReplies.concat(replies[i]);
+      }
+      if(typeof callBack === "function") callBack(err, concatedReplies);
+    });
+  }
+};
+
+
+/**
+ * Nearby Search (Asynchronous) with Values
+ *
+ * @param {Hash Integer Ranges} ranges
+ * @param {Object} options (client: {RedisClient}, zset: {Redis zSet name})
+ * @param {Function} callBack
+ */
+var queryByRangesWithValues = function(ranges, options, callBack){
+
+  if(typeof options === "function" && callBack === undefined){
+    callBack = options;
+    options = {};
+  }
+
   var client = options.client !== undefined ? options.client : redis_client;
   var zset = options.zset !== undefined ? options.zset : redis_clientZSetName;
-
-  var i,
-      range = [];
-
+  var i, range = [];
   var multi = client.multi();
+  var bitDepth = options.bitDepth || 52;
+
+  var k = 0, decoded;
 
   for(i=0; i<ranges.length; i++){
     range = ranges[i];
-    multi.ZRANGEBYSCORE(zset, range[0], range[1]);
+    multi.ZRANGEBYSCORE(zset, range[0], range[1], "WITHSCORES");
   }
 
   multi.exec(function(err, replies){
     var concatedReplies = [];
-    for(i=0; i< replies.length; i++){
-      concatedReplies = concatedReplies.concat(replies[i]);
+    for(i=0; i<replies.length; i++){
+      for(var j=0; j < replies[i].length; j+=2){
+        decoded = geohash.decode_int(replies[i][j+1], bitDepth);
+        concatedReplies[k] = [replies[i][j], decoded.latitude, decoded.longitude];
+        k++;
+      }
     }
+
     if(typeof callBack === "function") callBack(err, concatedReplies);
   });
+
 };
+
 
 
 /**
