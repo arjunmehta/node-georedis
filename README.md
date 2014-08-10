@@ -1,6 +1,5 @@
 node-geo-proximity
 =====================
-**node-redis-proximity has been renamed to node-geo-proximity with 1.0.0 release.**
 
 [![Build Status](https://travis-ci.org/arjunmehta/node-geo-proximity.svg?branch=master)](https://travis-ci.org/arjunmehta/node-geo-proximity)
 
@@ -126,8 +125,6 @@ proximity.query(43.646838, -79.403723, 5000, {zset: "geo:locations:places"}, fun
 ```
 
 
-
-
 # API
 
 ## Initialization
@@ -178,7 +175,7 @@ Use this function for a basic search by proximity within the given latitude and 
 - `bitDepth: {Number, default is 52}`: the bit depth your geohashes are stored in if they are not in the default 52 bits.
 - `client: {redisClient}`
 - `zset: {String}`
-
+- `values: {Boolean, default is false}`: Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
 
 
 ## Performant Querying
@@ -194,7 +191,8 @@ Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find 
 **Options:**
 - `client: {redisClient}`
 - `zset: {String}`
-
+- `values: {Boolean, default is false}`: Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
+- `bitDepth: {Number, default is 52}`: the bit depth your geohashes are stored in if they are not in the default 52 bits. Only needed if the `values` option is set.
 
 ## Example of Performant Method Usage
 As mentioned, you may want to cache the ranges to search for in your data model. Perhaps if you have a connection or user that is logged in, you can associate these ranges with their object.
