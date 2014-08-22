@@ -38,6 +38,8 @@ var rangeIndex = [  0.6,            //52
 var addArray = [];
 
 
+
+
 exports.addCoordinate = function(test){
 
   client.flushall();
@@ -159,6 +161,21 @@ exports.removeCoordinates = function(test){
   });
 };
 
+
+exports.testLargeRadius = function(test){
+
+  client.flushall();
+
+  test.expect(1);
+
+  proximity.addCoordinate(1,2,"debugger", function(err, reply){});
+  proximity.addCoordinate(2,3,"boostbob", function(err, reply){});
+  proximity.query(2,2,100000000, function(err, replies) {
+    test.equal(replies[2], null);
+    test.done();
+  });  
+
+};
 
 exports.addNearbyRanges = function(test){
 

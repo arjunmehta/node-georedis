@@ -43,32 +43,32 @@ var initialize = function(client, zSetName){
  * a particular bitDepth in reverse order from 52 bits. ie. rangeIndex[0] represents
  * 52 bits and an accuracy of a 0.5971m radius, while rangeIndex[7] represents 38 bits (52-(7*2))
  * and 76.4378m radius accuracy etc.
- * 
+ *
  */
 var rangeIndex = [  0.6,            //52
                     1,              //50
                     2.19,           //48
                     4.57,           //46
                     9.34,           //44
-                    14.4,           //42  
-                    33.18,          //40  
-                    62.1,           //38  
-                    128.55,         //36    
-                    252.9,          //34    
+                    14.4,           //42
+                    33.18,          //40
+                    62.1,           //38
+                    128.55,         //36
+                    252.9,          //34
                     510.02,         //32
                     1015.8,         //30
                     2236.5,         //28
                     3866.9,         //26
-                    8749.7,         //24      
-                    15664,          //22      
-                    33163.5,        //20      
-                    72226.3,        //18        
-                    150350,         //16        
-                    306600,         //14        
-                    474640,         //12      
-                    1099600,        //10      
-                    2349600,        //8      
-                    4849600,        //6    
+                    8749.7,         //24
+                    15664,          //22
+                    33163.5,        //20
+                    72226.3,        //18
+                    150350,         //16
+                    306600,         //14
+                    474640,         //12
+                    1099600,        //10
+                    2349600,        //8
+                    4849600,        //6
                     10018863        //4
                     ];
 
@@ -121,20 +121,24 @@ var getQueryRangesFromBitDepth = function(lat, lon, radiusBitDepth, bitDepth){
 
   var hash = geohash.encode_int(lat, lon, radiusBitDepth);
   var neighbors = geohash.neighbors_int(hash, radiusBitDepth);
-  
+
   neighbors.push(hash);
   neighbors.sort();
 
+  if(radiusBitDepth <= 4){
+    neighbors = getUniqueInArray(neighbors);
+  }
+
   for(i=0; i<neighbors.length; i++){
     lowerRange = neighbors[i];
-    upperRange = lowerRange + 1;    
+    upperRange = lowerRange + 1;
     while(neighbors[i+1] === upperRange){
       neighbors.shift();
       upperRange = neighbors[i]+1;
-    }    
+    }
     ranges.push([lowerRange, upperRange]);
   }
-  
+
   for(i=0; i<ranges.length; i++){
     range = ranges[i];
     range[0] = leftShift(range[0], bitDiff);
@@ -281,7 +285,7 @@ var queryByProximity = function(lat, lon, radius, options, callBack){
   else{
     ranges = options.ranges;
   }
-  
+
   queryByRanges(ranges, options, callBack);
 };
 
@@ -305,7 +309,7 @@ var queryByBitDepth = function(lat, lon, radiusBitDepth, options, callBack){
   radiusBitDepth = radiusBitDepth || 24;
   var bitDepth = options.bitDepth || 52;
   var ranges = getQueryRangesFromBitDepth(lat, lon, radiusBitDepth, bitDepth);
- 
+
   queryByRanges(ranges, options, callBack);
 };
 
@@ -336,7 +340,7 @@ var addCoordinate = function(lat, lon, key_name, options, callBack){
 
 /**
  * Add New Redis Coordinates (Asynchronous)
- * 
+ *
  * Takes an array of coordinate arrays in the form [lat, lon, key_name] and adds them to the zset
  *
  * @param {Array} coordinateArray Set
@@ -391,7 +395,7 @@ var removeCoordinate = function(key_name, options, callBack){
 
 /**
  * Remove Redis Coordinates (Asynchronous)
- * 
+ *
  * Takes an array of coordinate Arrays in the form [lat, lon, key_name] and adds them to the zset
  *
  * @param {String|Number} key_name
@@ -483,6 +487,20 @@ function intersect(a, b){
   return intersection;
 }
 
+function getUniqueInArray(arr){
+  var u = {}, a = [];
+
+  for(var i = 0; i < arr.length; ++i){
+    if(u[arr[i]]===1) {
+      continue;
+    }
+    a.push(arr[i]);
+    u[arr[i]] = 1;
+  }
+
+  return a;
+}
+
 
 var geohashDistance = {
   'initialize': initialize,
@@ -490,9 +508,9 @@ var geohashDistance = {
   'getQueryRangesFromBitDepth':getQueryRangesFromBitDepth,  // will deprecate interface
   'getQueryRangesFromRadius':getQueryRangesFromRadius,      // will deprecate interface
   'queryByRanges': queryByRanges,                           // will deprecate interface
-  'queryByBitDepth': queryByBitDepth,                       // will deprecate interface  
+  'queryByBitDepth': queryByBitDepth,                       // will deprecate interface
   'addNewCoordinate': addCoordinate,                        // will deprecate interface
-  
+
   'getMinMaxs': getMinMaxs,                                 // really just for testing
 
   'addCoordinate': addCoordinate,
@@ -500,7 +518,7 @@ var geohashDistance = {
   'removeCoordinate': removeCoordinate,
   'removeCoordinates': removeCoordinates,
 
-  'query': queryByProximity,  
+  'query': queryByProximity,
   'getQueryCache': getQueryRangesFromRadius,
   'queryWithCache': queryByRanges
 };
