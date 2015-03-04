@@ -1,42 +1,42 @@
 {
-  "author": {
-    "name": "Arjun Mehta",
-    "email": "arjunmeht@gmail.com",
-    "url": "http://www.arjunmehta.net/"
-  },  
-  "name": "geo-proximity",
-  "description": "A node.js module that leverages geohashes to provide super fast proximity searches of geo coordinates.",
-  "keywords": [
-    "geohash",
-    "proximity",
-    "nearby",
-    "redis",
-    "geolocation",
-    "geoproximity",
-    "radius"
-  ],
-  "version": "1.2.1",
-  "repository": {
-    "url": "https://github.com/arjunmehta/node-geo-proximity"
-  },
-  "engines": {
-    "node": ">=v0.2.0"
-  },
-  "dependencies": {
-     "ngeohash": "~0.6.0"
+    "author": {
+        "name": "Arjun Mehta",
+        "email": "arjunmeht@gmail.com",
+        "url": "http://www.arjunmehta.net/"
     },
-  "devDependencies": {
-    "redis" : "~0.10.0",
-    "assert": "~1.0",
-    "nodeunit": "~0.8.8"
-  },
-  "scripts": {
-    "test": "nodeunit test/test.js"
-  },
-  "main": "./main",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/arjunmehta/node-geo-proximity/issues"
-  },
-  "homepage": "https://github.com/arjunmehta/node-geo-proximity"
+    "name": "geo-proximity",
+    "description": "Super fast proximity searches of geo coordinates.",
+    "keywords": [
+        "geohash",
+        "proximity",
+        "nearby",
+        "redis",
+        "geolocation",
+        "geoproximity",
+        "radius"
+    ],
+    "version": "1.2.1",
+    "repository": {
+        "url": "https://github.com/arjunmehta/node-geo-proximity"
+    },
+    "engines": {
+        "node": ">=v0.2.0"
+    },
+    "dependencies": {
+        "ngeohash": "~0.6.0",
+        "redis": "~0.10.0"
+    },
+    "devDependencies": {
+        "assert": "~1.0",
+        "nodeunit": "~0.8.8"
+    },
+    "scripts": {
+        "test": "nodeunit test/test.js"
+    },
+    "main": "./main",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/arjunmehta/node-geo-proximity/issues"
+    },
+    "homepage": "https://github.com/arjunmehta/node-geo-proximity"
 }
