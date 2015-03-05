@@ -5,11 +5,13 @@ geo-proximity
 
 **Note:** *The API for version v2 has been completely rewritten!*
 
-This node/io.js module provides super fast proximity searches for geo locations.
+This node/io.js module provides super fast proximity searches for geo locations. More specifically:
+
+- Basic management (addition, querying and removal) of named geo locations.
+- Fast querying of nearby locations to a point. Fast like redis is fast.
+- An easy to use interface.
 
 It should be noted that the method used here is not the most precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. [Read more about how this module works](http://www.arjunmehta.net/geo-proximity.html).
-
-Please leave feedback in the module's [GitHub issues tracker](https://github.com/arjunmehta/node-geo-proximity/issues).
 
 ## Prerequisites
 
@@ -24,7 +26,7 @@ npm install geo-proximity
 
 
 ## Basic Usage
-If you have a redis server accessible to node/io.js, usage of this module should be extremely simple:
+Usage of this module should be extremely simple. Just make sure that your redis server is accessible to your node/io.js environment. Because this module uses redis as a store, almost all methods have integrated error handling for queries.
 
 ### Include
 
@@ -60,6 +62,28 @@ var locations = [[43.6667, -79.4167,  'Toronto'],
 proximity.addLocations(locations, function(err, reply){
   if(err) console.error(err)
   else console.log('added locations:', reply)
+})
+```
+
+
+### Recall the Coordinates of a Location
+
+```javascript
+proximity.location('Toronto', function(err, location){
+  if(err) console.error(err)
+  else console.log(location.name + "'s location is:", location.lat, location.lon)
+})
+```
+
+Or for multiple locations:
+
+```javascript
+proximity.locations(['Toronto', 'Philadelphia', 'Palo Alto', 'San Francisco', 'Ottawa'], function(err, locations){
+  if(err) console.error(err)
+  else {
+    for(var i = 0; i < locations.length, i++)
+      console.log(location.name + "'s location is:", location.lat, location.lon)
+  }
 })
 ```
 
@@ -154,6 +178,8 @@ places.query(43.646838, -79.403723, 5000, function(err, places){
 })
 ```
 
+#### Performant Querying
+
 
 # API
 
@@ -164,7 +190,7 @@ Initialize the module with a redis client, and a ZSET name. This is not required
 
 ## Adding/Removing Coordinates
 
-### proximity.addCoordinate(lat, lon, coordinateName, {options}, callBack)
+### proximity.addLocation(lat, lon, coordinateName, {options}, callBack)
 Add a new coordinate to your set. You can get quite technical here by specifying the geohash integer resolution at which to store (MUST BE CONSISTENT).
 
 #### Options
@@ -180,14 +206,14 @@ Adds an array of new coordinates to your set. The `coordinateArray` must be in t
 - `client: {redisClient}`
 - `zset: {String}`
 
-### proximity.removeCoordinate(coordinateName, {options}, callBack)
+### proximity.removeLocation(coordinateName, {options}, callBack)
 Remove the specified coordinate by name.
 
 #### Options
 - `client: {redisClient}`
 - `zset: {String}`
 
-### proximity.removeCoordinates(coordinateNameArray, {options}, callBack)
+### proximity.removeLocations(coordinateNameArray, {options}, callBack)
 Remove a set of coordinates by name. `coordinateNameArray` must be of the form `[nameA,nameB,nameC,...,nameN]`.
 
 #### Options
