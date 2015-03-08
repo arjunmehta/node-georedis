@@ -4,19 +4,16 @@ geo-proximity
 [![Build Status](https://travis-ci.org/arjunmehta/node-geo-proximity.svg?branch=master)](https://travis-ci.org/arjunmehta/node-geo-proximity)
 
 **Note:** *The API for version v2 has been completely rewritten!*
+**Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment.*
 
-This node/io.js module provides super fast proximity searches for geo locations. More specifically:
+This Node module provides super fast proximity searches for geo locations. More specifically:
 
-- Basic management (addition, querying and removal) of named geo locations.
-- Fast querying of nearby locations to a point. Fast like redis is fast.
-- An easy to use interface.
+- **Basic management (addition, querying and removal) of sets of named geo locations.**
+- **Fast querying of nearby locations to a point within a set. Fast like redis is fast.**
+- **An simple, easy to use, scalable interface.**
+- **Built-in query caching for improved performance of repeated queries.**
 
 It should be noted that the method used here is not the most precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. [Read more about how this module works](http://www.arjunmehta.net/geo-proximity.html).
-
-## Prerequisites
-
-This module requires Redis in order to work and of course your Redis server needs to be accessible to the module's environment (ie. node/io.js).
-
 
 ## Installation
 
@@ -24,14 +21,18 @@ This module requires Redis in order to work and of course your Redis server need
 npm install geo-proximity
 ```
 
-
 ## Basic Usage
-Usage of this module should be extremely simple. Just make sure that your redis server is accessible to your node/io.js environment. Because this module uses redis as a store, almost all methods have integrated error handling for queries.
+Usage of this module should be extremely simple. Just make sure that your redis server is accessible to your Node environment. Because this module uses redis as a store, almost all methods have integrated error handling for queries.
 
-### Include
+### Include and Initialize
+
+Include and initialize this module with a node-redis client instance.
 
 ```javascript
-var proximity = require('geo-proximity')
+var redis = require('redis'),
+    client = redis.createClient()
+
+var proximity = require('geo-proximity').initialize(client)
 ```
 
 ### Add Locations
@@ -45,7 +46,7 @@ proximity.addLocation(43.6667, -79.4167, 'Toronto', function(err, reply){
 })
 ```
 
-OR much quicker for large sets:
+If you have a large set you'd like to add in bulk, there a much quicker way:
 
 ```javascript
 var locations = [[43.6667, -79.4167,  'Toronto'],
