@@ -1,7 +1,8 @@
 var redis = require('redis');
 var client = redis.createClient();
 
-var proximity = require('../main.js').initialize(client);
+var proximity = require('../main.js').initialize(client),
+    people, places;
 
 var lat = 43.646838,
     lon = -79.403723;
@@ -59,7 +60,7 @@ exports['Add Location'] = function(test) {
 
     test.expect(1);
 
-    proximity.addLocation("Toronto", 43.6667, -79.4167, function(err, reply) {        
+    proximity.addLocation("Toronto", 43.6667, -79.4167, function(err, reply) {
         if (err) throw err;
         test.equal(reply, 1);
         test.done();
@@ -68,49 +69,49 @@ exports['Add Location'] = function(test) {
 };
 
 
-exports['Add Locations'] = function(test){
+exports['Add Locations'] = function(test) {
 
-  client.flushall();
+    client.flushall();
 
-  test.expect(2);
+    test.expect(2);
 
-  var locationRange;
-  var locationArray = [];
-  var distance = 0;
-  var count = 1;
+    var locationRange;
+    var locationArray = [];
+    var distance = 0;
+    var count = 1;
 
-  locationArray.push([lat, lon, "center_0"]);
+    locationArray.push([lat, lon, "center_0"]);
 
-  for (var i = 0; i < 100000; i++) {
-    distance = i*(i/100);
-    locationRange = getMinMaxs(lat, lon, distance);
-    locationArray.push([locationRange.latmin, locationRange.lonmin, "sw_"+distance]);
-    locationArray.push([locationRange.latmax, locationRange.lonmin, "nw_"+distance]);
-    locationArray.push([locationRange.latmin, locationRange.lonmax, "se_"+distance]);
-    locationArray.push([locationRange.latmax, locationRange.lonmax, "ne_"+distance]);
-    count += 4;
-  }
+    for (var i = 0; i < 100000; i++) {
+        distance = i * (i / 100);
+        locationRange = getMinMaxs(lat, lon, distance);
+        locationArray.push([locationRange.latmin, locationRange.lonmin, "sw_" + distance]);
+        locationArray.push([locationRange.latmax, locationRange.lonmin, "nw_" + distance]);
+        locationArray.push([locationRange.latmin, locationRange.lonmax, "se_" + distance]);
+        locationArray.push([locationRange.latmax, locationRange.lonmax, "ne_" + distance]);
+        count += 4;
+    }
 
-  proximity.addLocations(locationArray, function (err, reply){
-    if(err) throw err;
-    test.equal(err, null);
-    test.equal(400001, reply);
-    test.done();
-  });
+    proximity.addLocations(locationArray, function(err, reply) {
+        if (err) throw err;
+        test.equal(err, null);
+        test.equal(400001, reply);
+        test.done();
+    });
 
 };
 
 
-exports['Basic Query'] = function(test){
+exports['Basic Query'] = function(test) {
 
-  test.expect(1);
+    test.expect(1);
 
-  proximity.nearby(lat, lon, 50000, function(err, replies){
-    if(err) throw err;
-    // console.log("NUMBER OF GEOHASH MATCHES", replies.length);
-    test.equal(replies.length, 6835);
-    test.done();
-  });
+    proximity.nearby(lat, lon, 50000, function(err, replies) {
+        if (err) throw err;
+        // console.log("NUMBER OF GEOHASH MATCHES", replies.length);
+        test.equal(replies.length, 6835);
+        test.done();
+    });
 };
 
 
@@ -129,286 +130,230 @@ exports['Basic Query'] = function(test){
 // // };
 
 
-// exports['Remove Location'] = function(test){
+exports['Remove Location'] = function(test) {
 
-//   test.expect(1);
+    test.expect(1);
 
-//   var oneToDelete = "";
-//   var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
+    var oneToDelete = "";
+    // var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
 
-//   proximity.queryByRanges(ranges, function(err, replies){
-//     if(err) throw err;
-//     oneToDelete = replies[replies.length-1];
+    proximity.nearby(lat, lon, 50000, function(err, replies) {
+        if (err) throw err;
+        oneToDelete = replies[replies.length - 1];
 
-//     proximity.removelocation(oneToDelete, function(err, reply){
-//       if(err) throw err;
-//       // console.log("TIMESTAMP Delete One", new Date().getTime()-startTime);
-//       // console.log(JSON.stringify(reply));
-//       test.equal(reply, 1);
-//       test.done();
-//     });
-//   });
-// };
+        proximity.removeLocation(oneToDelete, function(err, numberRemoved) {
+            if (err) throw err;
+            // console.log("TIMESTAMP Delete One", new Date().getTime()-startTime);
+            // console.log(JSON.stringify(reply));
+            test.equal(numberRemoved, 1);
+            test.done();
+        });
+    });
+};
 
 
-// exports.removelocations = function(test){
+exports['Remove Locations'] = function(test) {
 
-//   test.expect(1);
+    test.expect(1);
 
-//   var arrayToDelete = [];
-//   var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
+    var arrayToDelete = [];
 
-//   proximity.queryByRanges(ranges, function(err, replies){
+    proximity.nearby(lat, lon, 50000, function(err, replies) {
 
-//     if(err) throw err;
-//     arrayToDelete = replies;
+        if (err) throw err;
+        arrayToDelete = replies;
 
-//     proximity.removelocations(arrayToDelete, function(err, reply){
-//       if(err) throw err;
-//       test.equal(reply, 6834);
+        proximity.removeLocations(arrayToDelete, function(err, numberRemoved) {
+            if (err) throw err;
+            test.equal(numberRemoved, 6834);
 
-//       test.done();
-//     });
-//   });
-// };
+            test.done();
+        });
+    });
+};
 
 
-// exports.testLargeRadius = function(test){
+exports['Large Radius'] = function(test) {
 
-//   client.flushall();
+    client.flushall();
 
-//   test.expect(1);
+    test.expect(1);
 
-//   proximity.addLocation(1,2,"debugger", function(err, reply){});
-//   proximity.addLocation(2,3,"boostbob", function(err, reply){});
-//   proximity.query(2,2,100000000, function(err, replies) {
-//     test.equal(replies[2], null);
-//     test.done();
-//   });  
+    proximity.addLocation(1, 2, "debugger", function(err, reply) {});
+    proximity.addLocation(2, 3, "boostbob", function(err, reply) {});
 
-// };
+    proximity.nearby(2, 2, 100000000, function(err, replies) {
+        test.equal(replies[2], null);
+        test.done();
+    });
+};
 
-// exports.addNearbyRanges = function(test){
+exports['Add Nearby Ranges'] = function(test) {
 
-//   client.flushall();
+    client.flushall();
 
-//   test.expect(2);
+    test.expect(2);
 
-//   var locationRange;
-//   var locationArray = [];
-//   var distance = 0;
-//   var count = 1;
+    var locationRange;
+    var locationArray = [];
+    var distance = 0;
+    var count = 1;
 
-//   locationArray.push([lat, lon, "center_0"]);
+    locationArray.push([lat, lon, "center_0"]);
 
-//   for (var i = 0; i < 100000; i++) {
-//     distance = i*(i/100);
-//     locationRange = getMinMaxs(lat, lon, distance);
-//     locationArray.push([locationRange.latmin, locationRange.lonmin, "sw_"+distance]);
-//     locationArray.push([locationRange.latmax, locationRange.lonmin, "nw_"+distance]);
-//     locationArray.push([locationRange.latmin, locationRange.lonmax, "se_"+distance]);
-//     locationArray.push([locationRange.latmax, locationRange.lonmax, "ne_"+distance]);
-//     count += 4;
-//   }
+    for (var i = 0; i < 100000; i++) {
+        distance = i * (i / 100);
+        locationRange = getMinMaxs(lat, lon, distance);
+        locationArray.push([locationRange.latmin, locationRange.lonmin, "sw_" + distance]);
+        locationArray.push([locationRange.latmax, locationRange.lonmin, "nw_" + distance]);
+        locationArray.push([locationRange.latmin, locationRange.lonmax, "se_" + distance]);
+        locationArray.push([locationRange.latmax, locationRange.lonmax, "ne_" + distance]);
+        count += 4;
+    }
 
-//   proximity.addLocations(locationArray, function (err, reply){
-//     if(err) throw err;
+    proximity.addLocations(locationArray, function(err, reply) {
+        if (err) throw err;
 
-//     test.equal(err, null);
-//     test.equal(count, reply);
-//     test.done();
-//   });
-// };
+        test.equal(err, null);
+        test.equal(count, reply);
+        test.done();
+    });
+};
 
 
-// var startBitDepth = 52;
 
-// exports.testRangeBitDepths = function(test){
+var startRadius = 0.4;
 
-//   test.expect(25);
+exports['Radii Ranges'] = function(test) {
 
-//   query(startBitDepth, test, function(){
-//     test.done();
-//   });
+    test.expect(22);
 
-// };
+    queryRadius(startRadius, test, function() {
+        test.done();
+    });
 
+};
 
-// function query(bitDepth, test, next){
+function queryRadius(radius, test, next) {
 
-//   // console.log("Querying bit depth", lat, lon, bitDepth);
+    proximity.nearby(lat, lon, radius, function(err, replies) {
 
-//   proximity.queryByBitDepth(lat, lon, bitDepth, function (err, replies){
+        if (err) throw err;
 
-//     if(err) throw err;
+        var max = 0;
+        var maxname = "";
 
-//     var max = 0;
-//     var maxname = "";
+        for (var i = 0; i < replies.length; i++) {
+            var split = replies[i].split("_");
+            if (Number(split[1]) > max) {
+                max = Number(split[1]);
+                maxname = replies[i];
+            }
+        }
 
-//     for (var i = 0; i < replies.length; i++) {
-//       var split = replies[i].split("_");
-//       if(Number(split[1]) > max){
-//         max = Number(split[1]);
-//         maxname = replies[i];
-//       }
-//     }
+        test.equal((max > radius - (radius / 2) || max < radius + (radius / 2)), true);
 
-//     test.equal((max > rangeIndex[(52-bitDepth)/2] || max < rangeIndex[((52-bitDepth)/2) + 1]), true);
+        console.log("Max Radius for Radius", radius, max, maxname);
 
-//     console.log("Max Radius for BitDepth", bitDepth, max, maxname );
+        startRadius *= 2;
 
-//     startBitDepth -= 2;
+        if (startRadius < 1000000) {
+            queryRadius(startRadius, test, next);
+        } else {
+            next();
+        }
+    });
+}
 
-//     if(startBitDepth > 2){
-//       query(startBitDepth, test, next);
-//     }
-//     else{
-//       next();
-//     }
-//   });
-// }
 
-// var startRadius = 0.4;
+exports['Multiple Sets'] = function(test) {
 
-// exports.testRangesRadius = function(test){
+    test.expect(2);
 
-//   test.expect(22);
+    var peopleLocations = [
+        [43.6667, -79.4167, "John"],
+        [39.9523, -75.1638, "Shankar"],
+        [37.4688, -122.1411, "Cynthia"],
+        [37.7691, -122.4449, "Chen"]
+    ];
 
-//   queryRadius(startRadius, test, function(){
-//     test.done();
-//   });
+    var placesLocations = [
+        [43.6667, -79.4167, "Toronto"],
+        [39.9523, -75.1638, "Philadelphia"],
+        [37.4688, -122.1411, "Palo Alto"],
+        [37.7691, -122.4449, "San Francisco"],
+        [47.5500, -52.6667, "St. John's"]
+    ];
 
-// };
 
-// function queryRadius(radius, test, next){
+    places = proximity.addSet('places');
+    people = proximity.addSet('people');
 
-//   // console.log("Querying bit depth", lat, lon, radius);
 
-//   proximity.query(lat, lon, radius, function (err, replies){
+    people.addLocations(peopleLocations, function(err, reply) {
 
-//     if(err) throw err;
+        if (err) throw err;
 
-//     var max = 0;
-//     var maxname = "";
+        places.addLocations(placesLocations, function(err, reply) {
 
-//     for (var i = 0; i < replies.length; i++) {
-//       var split = replies[i].split("_");
-//       if(Number(split[1]) > max){
-//         max = Number(split[1]);
-//         maxname = replies[i];
-//       }
-//     }
+            if (err) throw err;
 
-//     test.equal((max > radius-(radius/2) || max < radius+(radius/2)), true);
+            people.nearby(39.9523, -75.1638, 5000, function(err, people) {
+                if (err) throw err;
 
-//     console.log("Max Radius for Radius", radius, max, maxname );
+                test.equal(people[0], "Shankar");
+                places.nearby(39.9523, -75.1638, 5000, function(err, places) {
 
-//     startRadius *= 2;
+                    if (err) throw err;
+                    test.equal(places[0], "Philadelphia");
+                    test.done();
+                });
+            });
+        });
+    });
+};
 
-//     if(startRadius < 1000000){
-//       queryRadius(startRadius, test, next);
-//     }
-//     else{
-//       next();
-//     }
-//   });
-// }
 
 
-// exports.differentSets = function(test){
+exports['Multiple Sets With Values'] = function(test) {
 
-//   test.expect(2);
+    test.expect(6);
 
-//   var people       = [[43.6667,-79.4167, "John"],
-//                      [39.9523,-75.1638, "Shankar"],
-//                      [37.4688,-122.1411, "Cynthia"],
-//                      [37.7691,-122.4449, "Chen"]];
+    people.nearby(39.9523, -75.1638, 5000000, {
+        values: true
+    }, function(err, people) {
 
-//   var places       = [[43.6667,-79.4167, "Toronto"],
-//                      [39.9523,-75.1638, "Philadelphia"],
-//                      [37.4688,-122.1411, "Palo Alto"],
-//                      [37.7691,-122.4449, "San Francisco"],
-//                      [47.5500,-52.6667, "St. John's"]];
+        if (err) throw err;
 
+        var cynthia = people[1];
+        var inlatRange = (cynthia[1] > 37.4688 - 0.005 && cynthia[1] < 37.4688 + 0.005) ? true : false;
+        var inlonRange = (cynthia[2] > -122.1411 - 0.005 && cynthia[2] < -122.1411 + 0.005) ? true : false;
 
-//   proximity.addLocations(people, {zset: "geo:locations:people"}, function(err, reply){
-//     if(err) throw err;
-//     // console.log("ADD successful:", reply);
+        test.equal(cynthia[0], "Cynthia");
+        test.equal(inlatRange, true);
+        test.equal(inlonRange, true);
 
-//     proximity.addLocations(places, {zset: "geo:locations:places"}, function(err, reply){
-//       if(err) throw err;
-//       // console.log("ADD successful:", reply);
+        places.nearby(39.9523, -75.1638, 5000000, {            
+            values: true
+        }, function(err, places) {
 
-//       // will find all PEOPLE ~5000m from the passed in location
-//       proximity.query(39.9523, -75.1638, 5000, {zset: "geo:locations:people"}, function(err, people){
-//         if(err) throw err;
-//         // console.log(people);
+            if (err) throw err;
 
-//         test.equal(people[0], "Shankar");
+            var philadelphia = places[3];
 
-//         // will find all PLACES ~5000m from the passed in location
-//         proximity.query(39.9523, -75.1638, 5000, {zset: "geo:locations:places"}, function(err, places){
+            inlatRange = (philadelphia[1] > 39.9523 - 0.005 && philadelphia[1] < 39.9523 + 0.005) ? true : false;
+            inlonRange = (philadelphia[2] > -75.1638 - 0.005 && philadelphia[2] < -75.1638 + 0.005) ? true : false;
 
-//           if(err) throw err;
-//           // console.log(places);
+            test.equal(philadelphia[0], "Philadelphia");
+            test.equal(inlatRange, true);
+            test.equal(inlonRange, true);
 
-//           test.equal(places[0], "Philadelphia");
-//           test.done();
-//           // client.quit();
+            test.done();
+            client.quit();
 
-//         });
-//       });
-//     });
-//   });
-// };
-
-
-
-// exports.differentSetsWithValues = function(test){
-
-//   test.expect(6);
-
-//   proximity.query(39.9523, -75.1638, 5000000, {zset: "geo:locations:people", values: true}, function(err, people){
-
-//     if(err) throw err;
-
-//     // console.log(people);
-//     // [37.4688,-122.1411, "Cynthia"],
-//     // [ 'Cynthia', 37.468800991773605, -122.14110106229782 ]
-
-//     var cynthia = people[1];
-//     var inlatRange = (cynthia[1] > 37.4688-0.005 && cynthia[1] < 37.4688+0.005) ? true : false;
-//     var inlonRange = (cynthia[2] > -122.1411-0.005 && cynthia[2] < -122.1411+0.005) ? true : false;
-
-//     test.equal(cynthia[0], "Cynthia");
-//     test.equal(inlatRange, true);
-//     test.equal(inlonRange, true);
-
-//     // will find all PLACES ~5000m from the passed in location
-//     proximity.query(39.9523, -75.1638, 5000000, {zset: "geo:locations:places", values: true}, function(err, places){
-
-//       if(err) throw err;
-
-//       // console.log(places);
-//       // [39.9523,-75.1638, "Philadelphia"]
-//       // [ 'Philadelphia', 39.95230123400688, -75.16379803419113 ]
-
-//       var philadelphia = places[3];
-
-//       inlatRange = (philadelphia[1] > 39.9523-0.005 && philadelphia[1] < 39.9523+0.005) ? true : false;
-//       inlonRange = (philadelphia[2] > -75.1638-0.005 && philadelphia[2] < -75.1638+0.005) ? true : false;
-
-//       test.equal(philadelphia[0], "Philadelphia");
-//       test.equal(inlatRange, true);
-//       test.equal(inlonRange, true);
-
-//       test.done();
-//       client.quit();
-
-//     });
-//   });
-
-// };
+        });
+    });
+};
 
 
 exports['Quitting Client'] = function(test) {
@@ -418,23 +363,28 @@ exports['Quitting Client'] = function(test) {
 
 
 exports.tearDown = function(done) {
-    
+
     done();
 };
 
 
 
-function getMinMaxs(lat, lon, radius){
+function getMinMaxs(lat, lon, radius) {
 
-  var latr = radius/111111;
-  var lonr = radius/(111111 *  Math.abs(Math.cos(lat)));
+    var latr = radius / 111111;
+    var lonr = radius / (111111 * Math.abs(Math.cos(lat)));
 
-  var latmin = lat - latr;
-  var latmax = lat + latr;
-  var lonmin = lon - lonr;
-  var lonmax = lon + lonr;
+    var latmin = lat - latr;
+    var latmax = lat + latr;
+    var lonmin = lon - lonr;
+    var lonmax = lon + lonr;
 
-  return {latmin: latmin, latmax: latmax, lonmin: lonmin, lonmax: lonmax};
+    return {
+        latmin: latmin,
+        latmax: latmax,
+        lonmin: lonmin,
+        lonmax: lonmax
+    };
 }
 
 
