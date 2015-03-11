@@ -115,21 +115,6 @@ exports['Basic Query'] = function(test) {
 };
 
 
-// // exports.performantQuery = function(test){
-
-// //   test.expect(1);
-
-// //   var cachedQuery = proximity.getQueryCache(lat, lon, 50000);
-
-// //   proximity.queryWithCache(cachedQuery, function(err, replies){
-// //     if(err) throw err;
-// //     test.equal(replies.length, 6835);
-// //     test.done();
-// //   });
-
-// // };
-
-
 exports['Remove Location'] = function(test) {
 
     test.expect(1);

@@ -1,11 +1,14 @@
 var geohash = require('ngeohash');
+
 var query = require('./lib/query');
+var range = require('./lib/range');
 
+var core = new Set();
 
-var rangeDepth = query.rangeDepth,
-    getQueryRangesFromBitDepth = query.getQueryRangesFromBitDepth,
-    queryByRanges = query.queryByRanges,
-    queryByRangesWithValues = query.queryByRangesWithValues;
+// var rangeDepth = query.rangeDepth,
+//     getQueryRangesFromBitDepth = query.getQueryRangesFromBitDepth,
+//     queryByRanges = query.queryByRanges,
+//     queryByRangesWithValues = query.queryByRangesWithValues;
 
 
 function Set(opts) {
@@ -14,17 +17,22 @@ function Set(opts) {
 
     this.client = opts.client;
     this.zset = opts.zset || 'geo:locations';
+    this.caching = opts.cache !== undefined ? opts.cache : false;
+
     this.sets = {};
 }
 
 Set.prototype.initialize = function(redis_client, opts) {
+
     opts = opts || {};
 
     this.client = redis_client;
     this.zset = opts.zset ? opts.zset : (this.zset ? this.zset : 'geo:locations');
+
+    return this;
 };
 
-Set.prototype.addSet = function(set_name, callBack) {
+Set.prototype.addSet = function(set_name) {
     return new Set({
         client: this.client,
         zset: this.zset + ':' + set_name
@@ -32,7 +40,8 @@ Set.prototype.addSet = function(set_name, callBack) {
 };
 
 Set.prototype.addLocation = function(location_name, lat, lon, callBack) {
-    this.client.zadd(this.zset, geohash.encode_int(lat, lon, 52), key_name, callBack);
+
+    this.client.zadd(this.zset, geohash.encode_int(lat, lon, 52), location_name, callBack);
 };
 
 Set.prototype.addLocations = function(location_array, callBack) {
@@ -45,6 +54,7 @@ Set.prototype.addLocations = function(location_array, callBack) {
     }
 
     args.unshift(this.zset);
+    // console.log("ZADD LOCATIONS", args);
     this.client.zadd(args, callBack);
 };
 
@@ -72,14 +82,8 @@ Set.prototype.nearby = function(lat, lon, radius, opts, callBack) {
         opts = {};
     }
 
-    var ranges = getQueryRangesFromBitDepth(lat, lon, rangeDepth(radius), 52);
-
-    if (opts.values) {
-        queryByRangesWithValues(this, ranges, callBack);
-    } else {
-        queryByRanges(this, ranges, callBack);
-    }
+    var ranges = range(lat, lon, radius, this.caching);
+    query(this, ranges, opts.values, callBack);
 };
 
-
-module.exports = new Set();
+module.exports = exports = new Set();
