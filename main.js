@@ -5,11 +5,6 @@ var range = require('./lib/range');
 
 var core = new Set();
 
-// var rangeDepth = query.rangeDepth,
-//     getQueryRangesFromBitDepth = query.getQueryRangesFromBitDepth,
-//     queryByRanges = query.queryByRanges,
-//     queryByRangesWithValues = query.queryByRangesWithValues;
-
 
 function Set(opts) {
 
@@ -68,7 +63,7 @@ Set.prototype.removeLocations = function(location_name_array, callBack) {
 };
 
 Set.prototype.location = function(location_name, callBack) {
-    // body...
+    
 };
 
 Set.prototype.locations = function(location_name_array, callBack) {
