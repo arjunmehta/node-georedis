@@ -1,11 +1,11 @@
 var geohash = require('ngeohash');
 
 var query = require('./lib/query'),
-    queryByRanges = query.queryByRanges;
+    queryByRanges = query.queryByRanges,
+    location = query.location,
+    locations = query.locations;
 
 var range = require('./lib/range');
-
-var core = new Set();
 
 
 // main constructor
