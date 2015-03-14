@@ -6,11 +6,11 @@ geo-proximity
 **Note:** *The API for version v2 has been completely rewritten!*
 **Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment.*
 
-This Node module provides super fast proximity searches for geo locations. More specifically:
+This Node module provides everything you need to get proximity information for geo locations. More specifically:
 
-- **Basic management (addition, querying and removal) of sets of named geo locations.**
 - **Fast querying of nearby locations to a point within a set. Fast like redis is fast.**
-- **An simple, easy to use, scalable interface.**
+- **Basic management (addition, querying and removal) of sets of named geo locations.**
+- **A simple, easy to use, scalable interface.**
 - **Built-in query caching for improved performance of repeated queries.**
 
 It should be noted that the method used here is not the most precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. [Read more about how this module works](http://www.arjunmehta.net/geo-proximity.html).
@@ -46,7 +46,7 @@ proximity.addLocation(43.6667, -79.4167, 'Toronto', function(err, reply){
 })
 ```
 
-If you have a large set you'd like to add in bulk, there a much quicker way:
+If you have a large set you'd like to add in bulk, there's a much quicker way:
 
 ```javascript
 var locations = [[43.6667, -79.4167,  'Toronto'],
