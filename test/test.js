@@ -1,11 +1,13 @@
+var geohash = require('ngeohash');
 var redis = require('redis');
 var client = redis.createClient();
-
 var proximity = require('../main.js').initialize(client),
     people, places;
 
 var lat = 43.646838,
     lon = -79.403723;
+
+var locationArray = [];
 
 var rangeIndex = [
     0.6, //52
@@ -76,7 +78,7 @@ exports['Add Locations'] = function(test) {
     test.expect(2);
 
     var locationRange;
-    var locationArray = [];
+    locationArray = [];
     var distance = 0;
     var count = 1;
 
@@ -92,6 +94,8 @@ exports['Add Locations'] = function(test) {
         count += 4;
     }
 
+    // console.log(locationArray);
+
     proximity.addLocations(locationArray, function(err, reply) {
         if (err) throw err;
         test.equal(err, null);
@@ -101,6 +105,55 @@ exports['Add Locations'] = function(test) {
 
 };
 
+
+exports['Get Location'] = function(test) {
+
+    test.expect(4);
+
+    proximity.location('nw_99990000.25', function(err, point) {
+        if (err) throw err;
+        test.equal(err, null);
+        test.equal(point.name, 'nw_99990000.25');
+        test.equal(Math.round(point.latitude), 90);
+        test.equal(Math.round(point.longitude), -180);
+        test.done();
+    });
+};
+
+
+exports['Get Locations'] = function(test) {
+
+    var locationQuery = [],
+        locationArraySubset = [],
+        point, i, latlon;
+
+    for (i = 0; i < locationArray.length; i += 101) {
+        locationArraySubset.push(locationArray[i]);
+    }
+
+    for (i = 0; i < locationArraySubset.length; i++) {
+        locationQuery.push(locationArraySubset[i][2]);
+    }
+
+    test.expect((locationArraySubset.length * 3) + 2);
+
+    proximity.locations(locationQuery, function(err, points) {
+
+        if (err) throw err;
+        test.equal(err, null);
+        test.equal(points.length, locationArraySubset.length);
+
+        for (i = 0; i < points.length; i++) {
+            latlon = geohash.decode_int(geohash.encode_int(locationArraySubset[i][0], locationArraySubset[i][1]));
+            point = points[i];
+            test.equal(point.name, locationArraySubset[i][2]);
+            test.equal(Math.round(point.latitude), Math.round(latlon.latitude));
+            test.equal(Math.round(point.longitude), Math.round(latlon.longitude));
+        }
+
+        test.done();
+    });
+};
 
 exports['Basic Query'] = function(test) {
 
@@ -180,7 +233,7 @@ exports['Add Nearby Ranges'] = function(test) {
     test.expect(2);
 
     var locationRange;
-    var locationArray = [];
+    locationArray = [];
     var distance = 0;
     var count = 1;
 
@@ -238,7 +291,7 @@ function queryRadius(radius, test, next) {
 
         test.equal((max > radius - (radius / 2) || max < radius + (radius / 2)), true);
 
-        console.log("Max Radius for Radius", radius, max, maxname);
+        // console.log("Max Radius for Radius", radius, max, maxname);
 
         startRadius *= 2;
 
@@ -318,7 +371,7 @@ exports['Multiple Sets With Values'] = function(test) {
         test.equal(inlatRange, true);
         test.equal(inlonRange, true);
 
-        places.nearby(39.9523, -75.1638, 5000000, {            
+        places.nearby(39.9523, -75.1638, 5000000, {
             values: true
         }, function(err, places) {
 
@@ -347,8 +400,7 @@ exports['Quitting Client'] = function(test) {
 };
 
 
-exports.tearDown = function(done) {
-
+exports['tearDown'] = function(done) {
     done();
 };
 
