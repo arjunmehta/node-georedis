@@ -1,10 +1,14 @@
 var geohash = require('ngeohash');
 
-var query = require('./lib/query');
+var query = require('./lib/query'),
+    queryByRanges = query.queryByRanges;
+
 var range = require('./lib/range');
 
 var core = new Set();
 
+
+// main constructor
 
 function Set(opts) {
 
@@ -13,9 +17,10 @@ function Set(opts) {
     this.client = opts.client;
     this.zset = opts.zset || 'geo:locations';
     this.caching = opts.cache !== undefined ? opts.cache : false;
-
-    this.sets = {};
 }
+
+
+// initialization and new sets
 
 Set.prototype.initialize = function(redis_client, opts) {
 
@@ -34,8 +39,10 @@ Set.prototype.addSet = function(set_name) {
     });
 };
 
-Set.prototype.addLocation = function(location_name, lat, lon, callBack) {
 
+// adding locations
+
+Set.prototype.addLocation = function(location_name, lat, lon, callBack) {
     this.client.zadd(this.zset, geohash.encode_int(lat, lon, 52), location_name, callBack);
 };
 
@@ -53,6 +60,9 @@ Set.prototype.addLocations = function(location_array, callBack) {
     this.client.zadd(args, callBack);
 };
 
+
+// removing locations
+
 Set.prototype.removeLocation = function(location_name, callBack) {
     this.client.zrem(this.zset, location_name, callBack);
 };
@@ -62,13 +72,19 @@ Set.prototype.removeLocations = function(location_name_array, callBack) {
     this.client.zrem(location_name_array, callBack);
 };
 
+
+// querying location positions
+
 Set.prototype.location = function(location_name, callBack) {
-    
+    query.location(this, location_name, callBack);
 };
 
 Set.prototype.locations = function(location_name_array, callBack) {
-    // body...
+    query.locations(this, location_name_array, callBack);
 };
+
+
+// querying nearby locations
 
 Set.prototype.nearby = function(lat, lon, radius, opts, callBack) {
 
@@ -78,7 +94,8 @@ Set.prototype.nearby = function(lat, lon, radius, opts, callBack) {
     }
 
     var ranges = range(lat, lon, radius, this.caching);
-    query(this, ranges, opts.values, callBack);
+    queryByRanges(this, ranges, opts.values, callBack);
 };
+
 
 module.exports = exports = new Set();
