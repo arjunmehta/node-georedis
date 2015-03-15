@@ -121,9 +121,9 @@ proximity.removeLocations(['New York', 'St. John\'s', 'San Francisco'], function
 
 ## Advanced Usage
 
-### Specify a Redis Client instance/Set Name
+### Initializing with Options
 
-You can initialize `geo-proximity` with a specific redis client instance as well as specify a zSet name to use when storing/querying locations. You may also enable an experimental caching feature that should help with performance, but will use additional memory.
+You can initialize `geo-proximity` with a specific redis client instance, but you can also specify a ZSET name to use when storing/querying locations instead of the default `geo:locations`. You may also enable an experimental caching feature that should help with performance, but will use additional memory.
 
 ```javascript
 var redis = require('redis'),
