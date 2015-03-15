@@ -3,7 +3,7 @@ geo-proximity
 
 [![Build Status](https://travis-ci.org/arjunmehta/node-geo-proximity.svg?branch=master)](https://travis-ci.org/arjunmehta/node-geo-proximity)
 
-**Note:** *The API for v2.0.x has been completely rewritten!*</br>
+**Note:** *The API for v2.0.x has been completely rewritten!*<br/>
 **Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment.*
 
 ![geo-proximity title image](https://raw.githubusercontent.com/arjunmehta/node-geo-proximity/image/image/splash.png)
@@ -244,5 +244,5 @@ Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find 
 
 ## License
 
-The MIT License (MIT)</br>
+The MIT License (MIT)<br/>
 Copyright (c) 2014 Arjun Mehta
