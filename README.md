@@ -179,10 +179,21 @@ places.query(43.646838, -79.403723, 5000, function(err, places){
 })
 ```
 
+## Performant Querying
+If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you should cache the **geohash ranges** that are used to search for nearby locations. The geohash ranges are what the methods ultimately search within to find nearby points. So keeping these stored in a variable some place and passing them into a more basic search function will save some cycles (at least 5ms on a basic machine). This will save you quite a bit of processing time if you expect to refresh your searches often, and especially if you expect to have empty results often. Your processor is probably best used for other things.
 
-# API
+As mentioned, you may want to cache the ranges to search for in your data model. Perhaps if you have a connection or user that is logged in, you can associate these ranges with their object.
 
-## Initialization
+```javascript
+var cachedQuery = proximity.getQueryCache(37.4688, -122.1411, 5000)
+
+proximity.nearbyWithQuery(cachedQuery, function(err, replies){
+  console.log('results to the query:', replies)
+})
+```
+
+
+## API
 
 ### proximity.initialize(redisClient, options)
 Initialize the module with a redis client.
@@ -198,17 +209,14 @@ var proximity = require('geo-proximity').initialize(client, {
 })
 ```
 
-## Adding SubSets
 ### proximity.addSet(setName)
-This method will return a subset
-
-## Adding/Removing Coordinates
+This method will return a subset that can be queried and hold a unique set of locations from the main set. It will store these new locations in a new redis zset with a unique name related to the parent set (eg. `geo:locations:people`).
 
 ### proximity.addLocation(lat, lon, coordinateName, callBack)
-Add a new coordinate to your set. You can get quite technical here by specifying the geohash integer resolution at which to store (MUST BE CONSISTENT).
+Add a new coordinate to your set.
 
 ### proximity.addLocations(coordinateArray, callBack)
-Adds an array of new coordinates to your set. The `coordinateArray` must be in the form `[[lat, lon, name],[lat, lon, name],...,[lat, lon, name]]`. Again you can specify the geohash integer resolution at which to store (MUST BE CONSISTENT). Use this method for bulk additions, as it is much faster than individual adds.
+Adds an array of new coordinates to your set. The `coordinateArray` must be in the form `[[lat, lon, name],[lat, lon, name],...,[lat, lon, name]]`. Use this method for bulk additions, as it is much faster than individual adds.
 
 ### proximity.removeLocation(coordinateName, callBack)
 Remove the specified coordinate by name.
@@ -216,18 +224,11 @@ Remove the specified coordinate by name.
 ### proximity.removeLocations(coordinateNameArray, callBack)
 Remove a set of coordinates by name. `coordinateNameArray` must be of the form `[nameA,nameB,nameC,...,nameN]`.
 
-
-## Basic Querying
-
 ### proximity.nearby(lat, lon, radius, {options}, callBack)
-Use this function for a basic search by proximity within the given latitude and longitude and radius (in meters). It is not ideal to use this method if you intend on making the same query multiple times. **If performance is important and you'll be making the same query over and over again, it is recommended you instead have a look at proximity.queryByRanges and promixity.getQueryRangesFromRadius.** Otherwise this is an easy method to use.
+Use this function for a basic search by proximity within the given latitude and longitude and radius (in meters). It is not ideal to use this method if you intend on making the same query multiple times. **If performance is important and you'll be making the same query over and over again, it is recommended you instead have a look at proximity.nearbyWithQuery and promixity.getQueryCache.** Otherwise this is an easy method to use.
 
 **Options:**
 - `values` **Boolean**: Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
-
-
-## Performant Querying
-If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you should cache the **geohash ranges** that are used to search for nearby locations. The geohash ranges are what the methods ultimately search within to find nearby points. So keeping these stored in a variable some place and passing them into a more basic search function will save some cycles (at least 5ms on a basic machine). This will save you quite a bit of processing time if you expect to refresh your searches often, and especially if you expect to have empty results often. Your processor is probably best used for other things.
 
 ### proximity.getQueryCache(lat, lon, radius)
 Get the query ranges to use with **proximity.queryByRanges**. This returns an array of geohash ranges to search your set for. `bitDepth` is optional and defaults to 52, set it if you have chosen to store your coordinates at a different bit depth. Store the return value of this function for making the same query often.
@@ -238,42 +239,8 @@ Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find 
 **Options:**
 - `values: {Boolean, default is false}`: Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
 
-## Example of Performant Method Usage
-As mentioned, you may want to cache the ranges to search for in your data model. Perhaps if you have a connection or user that is logged in, you can associate these ranges with their object.
-
-```javascript
-// will hold the generated query ranges used for the query. This will
-// save you some processing time for future queries using the same values
-var cachedQuery = proximity.getQueryCache(37.4688, -122.1411, 5000)
-
-proximity.nearbyWithQuery(cachedQuery, function(err, replies){
-  console.log('results to the query:', replies)
-})
-```
-
-Get it? Got it?
-
 
 ## License
 
-The MIT License (MIT)
-
+The MIT License (MIT)</br>
 Copyright (c) 2014 Arjun Mehta
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the 'Software'), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
