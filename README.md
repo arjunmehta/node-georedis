@@ -245,7 +245,7 @@ Use this function for a basic search by proximity within the given latitude and 
 - `values` **Boolean**: Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
 
 ### proximity.getQueryCache(lat, lon, radius)
-Get the query ranges to use with **proximity.queryByRanges**. This returns an array of geohash ranges to search your set for. `bitDepth` is optional and defaults to 52, set it if you have chosen to store your coordinates at a different bit depth. Store the return value of this function for making the same query often.
+Get the query ranges to use with **proximity.nearbyWithQuery**. This returns an array of geohash ranges to search your set for. `bitDepth` is optional and defaults to 52, set it if you have chosen to store your coordinates at a different bit depth. Store the return value of this function for making the same query often.
 
 ### proximity.nearbyWithQuery(cache, {options}, callBack)
 Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find points that fall within your range value.
