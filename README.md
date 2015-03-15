@@ -74,7 +74,7 @@ proximity.addLocations(locations, function(err, reply){
 ```javascript
 proximity.location('Toronto', function(err, location){
   if(err) console.error(err)
-  else console.log(location.name + "'s location is:", location.lat, location.lon)
+  else console.log(location.name + "'s location is:", location.latitude, location.longitude)
 })
 ```
 
@@ -85,7 +85,7 @@ proximity.locations(['Toronto', 'Philadelphia', 'Palo Alto', 'San Francisco', 'O
   if(err) console.error(err)
   else {
     for(var i = 0; i < locations.length, i++)
-      console.log(location.name + "'s location is:", location.lat, location.lon)
+      console.log(location.name + "'s location is:", location.latitude, location.longitude)
   }
 })
 ```
@@ -219,6 +219,15 @@ This method will return a subset that can be queried and hold a unique set of lo
 
 ### proximity.addLocation(lat, lon, coordinateName, callBack)
 Add a new coordinate to your set.
+
+### proximity.addLocations(coordinateArray, callBack)
+Adds an array of new coordinates to your set. The `coordinateArray` must be in the form `[[lat, lon, name],[lat, lon, name],...,[lat, lon, name]]`. Use this method for bulk additions, as it is much faster than individual adds.
+
+### proximity.location(locationName, callBack)
+Retrieve the latitude and longitude of a specific named location. Returns an object with `name`, `latitude` and `longitude` properties.
+
+### proximity.locations(locationNameArray, callBack)
+Retrieve the latitude and longitude of a list of specific named locations. Returns an array of objects with `name`, `latitude` and `longitude` properties.
 
 ### proximity.addLocations(coordinateArray, callBack)
 Adds an array of new coordinates to your set. The `coordinateArray` must be in the form `[[lat, lon, name],[lat, lon, name],...,[lat, lon, name]]`. Use this method for bulk additions, as it is much faster than individual adds.
