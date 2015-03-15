@@ -193,7 +193,7 @@ exports['Performant Query'] = function(test) {
 
     var cachedQuery = proximity.getQueryCache(lat, lon, 50000);
 
-    proximity.nearbyWithQuery(cachedQuery, function(err, replies){
+    proximity.nearbyWithQueryCache(cachedQuery, function(err, replies){
         test.equal(replies.length, 6835);
         test.done();
     });
