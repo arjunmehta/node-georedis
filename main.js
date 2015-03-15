@@ -101,7 +101,7 @@ Set.prototype.getQueryCache = function(lat, lon, radius) {
     return range(lat, lon, radius, false);    
 };
 
-Set.prototype.nearbyWithQuery = function(ranges, opts, callBack) {
+Set.prototype.nearbyWithQueryCache = function(ranges, opts, callBack) {
 
     if (typeof opts === 'function' && callBack === undefined) {
         callBack = opts;
