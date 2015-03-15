@@ -155,6 +155,51 @@ exports['Get Locations'] = function(test) {
     });
 };
 
+
+exports['Generate Cache'] = function(test) {
+
+    var expected = [
+        [1785293350895616, 1785297645862912],
+        [1785319120699392, 1785323415666688],
+        [1785327710633984, 1785332005601280],
+        [1785478034489344, 1785486624423936],
+        [1785503804293120, 1785520984162304]
+    ];
+
+    test.expect(expected.length * 2);
+
+    var cachedQuery = proximity.getQueryCache(lat, lon, 50000);
+
+    for (var i = 0; i < expected.length; i++) {
+        test.equal(cachedQuery[i][0], expected[i][0]);
+        test.equal(cachedQuery[i][1], expected[i][1]);
+    }
+
+    test.done();
+};
+
+
+exports['Performant Query'] = function(test) {
+
+    var expected = [
+        [1785293350895616, 1785297645862912],
+        [1785319120699392, 1785323415666688],
+        [1785327710633984, 1785332005601280],
+        [1785478034489344, 1785486624423936],
+        [1785503804293120, 1785520984162304]
+    ];
+
+    test.expect(1);
+
+    var cachedQuery = proximity.getQueryCache(lat, lon, 50000);
+
+    proximity.nearbyWithQuery(cachedQuery, function(err, replies){
+        test.equal(replies.length, 6835);
+        test.done();
+    });
+};
+
+
 exports['Basic Query'] = function(test) {
 
     test.expect(1);
@@ -173,16 +218,15 @@ exports['Remove Location'] = function(test) {
     test.expect(1);
 
     var oneToDelete = "";
-    // var ranges = proximity.getQueryRangesFromRadius(lat, lon, 50000);
 
     proximity.nearby(lat, lon, 50000, function(err, replies) {
+        
         if (err) throw err;
+
         oneToDelete = replies[replies.length - 1];
 
         proximity.removeLocation(oneToDelete, function(err, numberRemoved) {
             if (err) throw err;
-            // console.log("TIMESTAMP Delete One", new Date().getTime()-startTime);
-            // console.log(JSON.stringify(reply));
             test.equal(numberRemoved, 1);
             test.done();
         });
@@ -302,17 +346,6 @@ function queryRadius(radius, test, next) {
     });
 }
 
-
-var caches = [];
-
-exports['Generate Caches'] = function(test) {
-
-    test.expect(22);
-
-    for (var i = 0; i < 100; i++) {
-        
-    }
-};
 
 exports['Multiple Sets'] = function(test) {
 
