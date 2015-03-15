@@ -269,7 +269,6 @@ exports['Radii Ranges'] = function(test) {
     queryRadius(startRadius, test, function() {
         test.done();
     });
-
 };
 
 function queryRadius(radius, test, next) {
@@ -303,6 +302,17 @@ function queryRadius(radius, test, next) {
     });
 }
 
+
+var caches = [];
+
+exports['Generate Caches'] = function(test) {
+
+    test.expect(22);
+
+    for (var i = 0; i < 100; i++) {
+        
+    }
+};
 
 exports['Multiple Sets'] = function(test) {
 
