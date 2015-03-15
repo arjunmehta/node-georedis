@@ -123,17 +123,20 @@ proximity.removeLocations(['New York', 'St. John\'s', 'San Francisco'], function
 
 ### Specify a Redis Client instance/Set Name
 
-You can initialize `geo-proximity` with a specific redis client instance as well as specify a zSet name to use when storing/querying locations. Read more about the [node-redis module](https://github.com/mranney/node_redis) to understand how you can configure your redis client.
+You can initialize `geo-proximity` with a specific redis client instance as well as specify a zSet name to use when storing/querying locations. You may also enable an experimental caching feature that should help with performance, but will use additional memory.
 
 ```javascript
 var redis = require('redis'),
     client = redis.createClient()
 
-var proximity = require('geo-proximity').initialize(client, 'geo:locations')
+var proximity = require('geo-proximity').initialize(client, {
+  zset: 'mySpecialLocationsSet',
+  cache: true
+})
 ```
 
 ### Multiple Sets
-If you have different sets of coordinates, you can store and query them separately by passing options with a `zset` property that specifies the Redis ordered set to store/query them in. Removal and Performant Querying work the same way. Review the API to see where you can specify options.
+If you have different sets of coordinates, you can store and query them separately by creating adding a new set.
 
 #### Create Sets
 ```javascript
@@ -141,7 +144,7 @@ var people = proximity.addSet('people')
 var places = proximity.addSet('places')
 ```
 
-#### Add Locations
+#### Add Locations to Different Sets
 ```javascript
 var peopleLocations = [[43.6667,-79.4167,   'John'],
                        [39.9523, -75.1638,  'Shankar'],
@@ -165,7 +168,7 @@ places.addLocations(placeLocations, function(err, reply){
 })
 ```
 
-#### Look for Nearby Locations
+#### Look for Nearby Locations In Different Sets
 
 ```javascript
 // will find all PEOPLE ~5000m from the passed in coordinate
@@ -182,9 +185,9 @@ places.query(43.646838, -79.403723, 5000, function(err, places){
 ```
 
 ## Performant Querying
-If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you should cache the **geohash ranges** that are used to search for nearby locations. The geohash ranges are what the methods ultimately search within to find nearby points. So keeping these stored in a variable some place and passing them into a more basic search function will save some cycles (at least 5ms on a basic machine). This will save you quite a bit of processing time if you expect to refresh your searches often, and especially if you expect to have empty results often. Your processor is probably best used for other things.
+If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you can cache the **geohash ranges** that are used to search for nearby locations. Use the **proximity.getQueryCache** and **proximity.nearbyWithQuery** methods together in order to do this.
 
-As mentioned, you may want to cache the ranges to search for in your data model. Perhaps if you have a connection or user that is logged in, you can associate these ranges with their object.
+The geohash ranges are what the **proximity.nearby** method ultimately searches within to find nearby points. So keeping these stored in a variable some place and passing them into a more basic search function will save some cycles (at least 5ms on a basic machine). This will save you quite a bit of processing time if you expect to refresh your searches often, and especially if you expect to have empty results often. Your processor is probably best used for other things.
 
 ```javascript
 var cachedQuery = proximity.getQueryCache(37.4688, -122.1411, 5000)
