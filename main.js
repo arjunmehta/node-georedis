@@ -93,7 +93,21 @@ Set.prototype.nearby = function(lat, lon, radius, opts, callBack) {
         opts = {};
     }
 
-    var ranges = range(lat, lon, radius, this.caching);
+    var ranges = range(lat, lon, radius, this.caching);    
+    queryByRanges(this, ranges, opts.values, callBack);
+};
+
+Set.prototype.getQueryCache = function(lat, lon, radius) {
+    return range(lat, lon, radius, false);    
+};
+
+Set.prototype.nearbyWithQuery = function(ranges, opts, callBack) {
+
+    if (typeof opts === 'function' && callBack === undefined) {
+        callBack = opts;
+        opts = {};
+    }
+
     queryByRanges(this, ranges, opts.values, callBack);
 };
 
