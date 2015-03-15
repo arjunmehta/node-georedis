@@ -3,8 +3,10 @@ geo-proximity
 
 [![Build Status](https://travis-ci.org/arjunmehta/node-geo-proximity.svg?branch=master)](https://travis-ci.org/arjunmehta/node-geo-proximity)
 
-**Note:** *The API for version v2 has been completely rewritten!*
+**Note:** *The API for v2.0.x has been completely rewritten!*</br>
 **Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment.*
+
+![geo-proximity title image](https://raw.githubusercontent.com/arjunmehta/node-geo-proximity/image/image/splash.png)
 
 This Node module provides everything you need to get proximity information for geo locations. More specifically:
 
