@@ -257,4 +257,4 @@ Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find 
 ## License
 
 The MIT License (MIT)<br/>
-Copyright (c) 2014 Arjun Mehta
+Copyright (c) 2015 Arjun Mehta
