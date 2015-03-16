@@ -85,7 +85,7 @@ proximity.locations(['Toronto', 'Philadelphia', 'Palo Alto', 'San Francisco', 'O
   if(err) console.error(err)
   else {
     for(var i = 0; i < locations.length; i++)
-      console.log(location.name + "'s location is:", location.latitude, location.longitude)
+      console.log(locations[i].name + "'s location is:", locations[i].latitude, locations[i].longitude)
   }
 })
 ```
