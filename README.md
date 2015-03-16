@@ -185,14 +185,14 @@ places.query(43.646838, -79.403723, 5000, function(err, places){
 ```
 
 ## Performant Querying
-If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you can cache the **geohash ranges** that are used to search for nearby locations. Use the **proximity.getQueryCache** and **proximity.nearbyWithQuery** methods together in order to do this.
+If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you can cache the **geohash ranges** that are used to search for nearby locations. Use the **proximity.getQueryCache** and **proximity.nearbyWithQueryCache** methods together in order to do this.
 
 The geohash ranges are what the **proximity.nearby** method ultimately searches within to find nearby points. So keeping these stored in a variable some place and passing them into a more basic search function will save some cycles (at least 5ms on a basic machine). This will save you quite a bit of processing time if you expect to refresh your searches often, and especially if you expect to have empty results often. Your processor is probably best used for other things.
 
 ```javascript
 var cachedQuery = proximity.getQueryCache(37.4688, -122.1411, 5000)
 
-proximity.nearbyWithQuery(cachedQuery, function(err, replies){
+proximity.nearbyWithQueryCache(cachedQuery, function(err, replies){
   console.log('results to the query:', replies)
 })
 ```
@@ -239,15 +239,15 @@ Remove the specified coordinate by name.
 Remove a set of coordinates by name. `coordinateNameArray` must be of the form `[nameA,nameB,nameC,...,nameN]`.
 
 ### proximity.nearby(lat, lon, radius, {options}, callBack)
-Use this function for a basic search by proximity within the given latitude and longitude and radius (in meters). It is not ideal to use this method if you intend on making the same query multiple times. **If performance is important and you'll be making the same query over and over again, it is recommended you instead have a look at proximity.nearbyWithQuery and promixity.getQueryCache.** Otherwise this is an easy method to use.
+Use this function for a basic search by proximity within the given latitude and longitude and radius (in meters). It is not ideal to use this method if you intend on making the same query multiple times. **If performance is important and you'll be making the same query over and over again, it is recommended you instead have a look at proximity.nearbyWithQueryCache and promixity.getQueryCache.** Otherwise this is an easy method to use.
 
 **Options:**
 - `values` **Boolean**: Default `false`. Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
 
 ### proximity.getQueryCache(lat, lon, radius)
-Get the query ranges to use with **proximity.nearbyWithQuery**. This returns an array of geohash ranges to search your set for. `bitDepth` is optional and defaults to 52, set it if you have chosen to store your coordinates at a different bit depth. Store the return value of this function for making the same query often.
+Get the query ranges to use with **proximity.nearbyWithQueryCache**. This returns an array of geohash ranges to search your set for. `bitDepth` is optional and defaults to 52, set it if you have chosen to store your coordinates at a different bit depth. Store the return value of this function for making the same query often.
 
-### proximity.nearbyWithQuery(cache, {options}, callBack)
+### proximity.nearbyWithQueryCache(cache, {options}, callBack)
 Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find points that fall within your range value.
 
 **Options:**
