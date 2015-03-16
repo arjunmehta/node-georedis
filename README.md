@@ -241,7 +241,7 @@ Remove a set of coordinates by name. `coordinateNameArray` must be of the form `
 ### proximity.nearby(lat, lon, radius, {options}, callBack)
 Use this function for a basic search by proximity within the given latitude and longitude and radius (in meters). It is not ideal to use this method if you intend on making the same query multiple times. **If performance is important and you'll be making the same query over and over again, it is recommended you instead have a look at proximity.nearbyWithQueryCache and promixity.getQueryCache.** Otherwise this is an easy method to use.
 
-**Options:**
+#### Options
 - `values` **Boolean**: Default `false`. Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
 
 ### proximity.getQueryCache(lat, lon, radius)
@@ -250,7 +250,7 @@ Get the query ranges to use with **proximity.nearbyWithQueryCache**. This return
 ### proximity.nearbyWithQueryCache(cache, {options}, callBack)
 Pass in query ranges returned by **proximity.getQueryRangesFromRadius** to find points that fall within your range value.
 
-**Options:**
+#### Options
 - `values` **Boolean**: Default `false`. Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
 
 
