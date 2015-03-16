@@ -1,10 +1,11 @@
 {
+    "name": "geo-proximity",
+    "version": "2.0.2",
     "author": {
         "name": "Arjun Mehta",
         "email": "arjunmeht@gmail.com",
         "url": "http://www.arjunmehta.net/"
     },
-    "name": "geo-proximity",
     "description": "Super fast proximity searches of geo coordinates.",
     "keywords": [
         "geohash",
@@ -15,7 +16,6 @@
         "geoproximity",
         "radius"
     ],
-    "version": "2.0.2",
     "repository": {
         "url": "https://github.com/arjunmehta/node-geo-proximity"
     },
