@@ -178,7 +178,7 @@ people.nearby(43.646838, -79.403723, 5000, function(err, people){
 })
 
 // will find all PLACES ~5000m from the passed in coordinate
-places.query(43.646838, -79.403723, 5000, function(err, places){
+places.nearby(43.646838, -79.403723, 5000, function(err, places){
   if(err) console.error(err)
   else console.log('places nearby:', places)
 })
