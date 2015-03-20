@@ -42,7 +42,7 @@ Set.prototype.addSet = function(set_name) {
 
 // adding locations
 
-Set.prototype.addLocation = function(location_name, lat, lon, callBack) {
+Set.prototype.addLocation = function(lat, lon, location_name, callBack) {
     this.client.zadd(this.zset, geohash.encode_int(lat, lon, 52), location_name, callBack);
 };
 
