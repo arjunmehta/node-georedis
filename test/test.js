@@ -62,7 +62,7 @@ exports['Add Location'] = function(test) {
 
     test.expect(1);
 
-    proximity.addLocation("Toronto", 43.6667, -79.4167, function(err, reply) {
+    proximity.addLocation(43.6667, -79.4167, "Toronto", function(err, reply) {
         if (err) throw err;
         test.equal(reply, 1);
         test.done();
