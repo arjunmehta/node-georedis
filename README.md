@@ -217,10 +217,10 @@ var proximity = require('geo-proximity').initialize(client, {
 ### proximity.addSet(setName)
 This method will return a subset that can be queried and hold a unique set of locations from the main set. It will store these new locations in a new redis zset with a unique name related to the parent set (eg. `geo:locations:people`).
 
-### proximity.addLocation(lat, lon, coordinateName, callBack)
+### proximity.addLocation(lat, lon, locationName, callBack)
 Add a new coordinate to your set.
 
-### proximity.addLocations(coordinateArray, callBack)
+### proximity.addLocations(locationArray, callBack)
 Adds an array of new coordinates to your set. The `coordinateArray` must be in the form `[[lat, lon, name],[lat, lon, name],...,[lat, lon, name]]`. Use this method for bulk additions, as it is much faster than individual adds.
 
 ### proximity.location(locationName, callBack)
