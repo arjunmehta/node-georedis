@@ -430,8 +430,30 @@ exports['Multiple Sets With Values'] = function(test) {
             test.equal(inlonRange, true);
 
             test.done();
-            client.quit();
+        });
+    });
+};
 
+exports['Deleting Set'] = function(test) {
+
+    test.expect(2);
+
+    proximity.deleteSet('people', function(err, res){
+
+        people.nearby(39.9523, -75.1638, 5000000, {
+            values: true
+        }, function(err, people) {
+            test.equal(people.length, 0);                  
+        });
+    });    
+
+    places.delete(function(err, res){
+
+        places.nearby(39.9523, -75.1638, 5000000, {
+            values: true
+        }, function(err, places) {  
+            test.equal(places.length, 0);
+            test.done();
         });
     });
 };
