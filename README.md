@@ -189,11 +189,11 @@ places.nearby(43.646838, -79.403723, 5000, function(err, places){
 If you no longer need one of your newly created sets, you can just delete it. Either of the following methods will remove the set from redis and destroy its contents. If you add locations to that set again it will recreate the set on redis and you can use as usual.
 
 ```javascript
-// will delete the contents of the people set
+// will delete the people set and its contents
 people.delete()
 
 // OR
-proximity.deleteSet('places')
+proximity.deleteSet('people')
 ```
 
 ## Performant Querying
