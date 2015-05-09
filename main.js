@@ -40,7 +40,7 @@ Set.prototype.addSet = function(set_name) {
 };
 
 Set.prototype.deleteSet = function(set_name, callBack) {
-    this.client.del(this.zset + set_name, callBack);
+    this.client.del(this.zset + ':' + set_name, callBack);
 };
 
 Set.prototype.delete = function(callBack) {
