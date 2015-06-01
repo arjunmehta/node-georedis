@@ -64,7 +64,6 @@ Set.prototype.addLocations = function(location_array, callBack) {
     }
 
     args.unshift(this.zset);
-    // console.log("ZADD LOCATIONS", args);
     this.client.zadd(args, callBack);
 };
 
