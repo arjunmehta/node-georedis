@@ -40,7 +40,6 @@ var rangeIndex = [
 var addArray = [];
 
 
-
 exports['Exporting OK'] = function(test) {
 
     client.flushall();
@@ -248,7 +247,6 @@ exports['Basic Query'] = function(test) {
 
     proximity.nearby(lat, lon, 50000, function(err, replies) {
         if (err) throw err;
-        // console.log("NUMBER OF GEOHASH MATCHES", replies.length);
         test.equal(replies.length, 6835);
         test.done();
     });
@@ -375,8 +373,6 @@ function queryRadius(radius, test, next) {
         }
 
         test.equal((max > radius - (radius / 2) || max < radius + (radius / 2)), true);
-
-        // console.log("Max Radius for Radius", radius, max, maxname);
 
         startRadius *= 2;
 
