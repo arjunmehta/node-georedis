@@ -239,10 +239,10 @@ Add a new coordinate to your set.
 Adds an array of new coordinates to your set. The `coordinateArray` must be in the form `[[lat, lon, name],[lat, lon, name],...,[lat, lon, name]]`. Use this method for bulk additions, as it is much faster than individual adds.
 
 ### proximity.location(locationName, callBack)
-Retrieve the latitude and longitude of a specific named location. Returns an object with `name`, `latitude` and `longitude` properties.
+Retrieve the latitude and longitude of a specific named location. Returns an object with `name`, `latitude` and `longitude` properties. `latitude` and `longitude` will be null if the location does not exist.
 
 ### proximity.locations(locationNameArray, callBack)
-Retrieve the latitude and longitude of a list of specific named locations. Returns an array of objects with `name`, `latitude` and `longitude` properties.
+Retrieve the latitude and longitude of a list of specific named locations. Returns an array of objects with `name`, `latitude` and `longitude` properties. `latitude` and `longitude` will be null if the location does not exist.
 
 ### proximity.addLocations(coordinateArray, callBack)
 Adds an array of new coordinates to your set. The `coordinateArray` must be in the form `[[lat, lon, name],[lat, lon, name],...,[lat, lon, name]]`. Use this method for bulk additions, as it is much faster than individual adds.
