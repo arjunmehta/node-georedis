@@ -55,6 +55,20 @@ exports['Exporting OK'] = function(test) {
 
 };
 
+exports['Location Null'] = function(test) {
+
+    client.flushall();
+
+    test.expect(2);
+
+    proximity.location("Toronto", function(err, reply) {
+        if (err) throw err;
+        test.equal(reply.name, "Toronto");
+        test.equal(reply.latitude, null);
+        test.done();
+    });
+};
+
 
 exports['Add Location'] = function(test) {
 
@@ -67,7 +81,6 @@ exports['Add Location'] = function(test) {
         test.equal(reply, 1);
         test.done();
     });
-
 };
 
 
@@ -94,15 +107,12 @@ exports['Add Locations'] = function(test) {
         count += 4;
     }
 
-    // console.log(locationArray);
-
     proximity.addLocations(locationArray, function(err, reply) {
         if (err) throw err;
         test.equal(err, null);
         test.equal(400001, reply);
         test.done();
     });
-
 };
 
 
@@ -156,6 +166,38 @@ exports['Get Locations'] = function(test) {
 };
 
 
+exports['Locations Null'] = function(test) {
+
+    test.expect(6);
+
+    var locationQuery = [
+        'sw_4682463.21',
+        'nw_4693288.96',
+        'se_4704127.21',
+        'non-existent',
+        'ne_4714977.96',
+        'sw_4726276',
+        'nw_4737152.25',
+        'se_4748041',
+        'ne_4758942.25',
+        'sw_4770292.81'
+    ];
+
+    proximity.locations(locationQuery, function(err, points) {
+
+        if (err) throw err;
+        test.equal(err, null);
+        test.equal(points.length, 10);
+        test.equal(points[3].latitude, null);
+        test.equal(points[3].name, 'non-existent');
+        test.equal(typeof points[0], 'object');
+        test.equal(typeof points[4], 'object');
+
+        test.done();
+    });
+};
+
+
 exports['Generate Cache'] = function(test) {
 
     var expected = [
@@ -193,7 +235,7 @@ exports['Performant Query'] = function(test) {
 
     var cachedQuery = proximity.getQueryCache(lat, lon, 50000);
 
-    proximity.nearbyWithQueryCache(cachedQuery, function(err, replies){
+    proximity.nearbyWithQueryCache(cachedQuery, function(err, replies) {
         test.equal(replies.length, 6835);
         test.done();
     });
@@ -220,7 +262,7 @@ exports['Remove Location'] = function(test) {
     var oneToDelete = "";
 
     proximity.nearby(lat, lon, 50000, function(err, replies) {
-        
+
         if (err) throw err;
 
         oneToDelete = replies[replies.length - 1];
@@ -270,6 +312,7 @@ exports['Large Radius'] = function(test) {
     });
 };
 
+
 exports['Add Nearby Ranges'] = function(test) {
 
     client.flushall();
@@ -301,7 +344,6 @@ exports['Add Nearby Ranges'] = function(test) {
         test.done();
     });
 };
-
 
 
 var startRadius = 0.4;
@@ -366,10 +408,8 @@ exports['Multiple Sets'] = function(test) {
         [47.5500, -52.6667, "St. John's"]
     ];
 
-
     places = proximity.addSet('places');
     people = proximity.addSet('people');
-
 
     people.addLocations(peopleLocations, function(err, reply) {
 
@@ -438,20 +478,20 @@ exports['Deleting Set'] = function(test) {
 
     test.expect(2);
 
-    proximity.deleteSet('people', function(err, res){
+    proximity.deleteSet('people', function(err, res) {
 
         people.nearby(39.9523, -75.1638, 5000000, {
             values: true
         }, function(err, people) {
-            test.equal(people.length, 0);                  
+            test.equal(people.length, 0);
         });
-    });    
+    });
 
-    places.delete(function(err, res){
+    places.delete(function(err, res) {
 
         places.nearby(39.9523, -75.1638, 5000000, {
             values: true
-        }, function(err, places) {  
+        }, function(err, places) {
             test.equal(places.length, 0);
             test.done();
         });
