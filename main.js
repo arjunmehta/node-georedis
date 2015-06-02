@@ -7,6 +7,8 @@ var query = require('./lib/query'),
 
 var range = require('./lib/range');
 
+var setIdCount = 0;
+
 
 // main constructor
 
@@ -35,7 +37,7 @@ Set.prototype.initialize = function(redis_client, opts) {
 Set.prototype.addSet = function(set_name) {
     return new Set({
         client: this.client,
-        zset: this.zset + ':' + set_name
+        zset: this.zset + ':' + (set_name || 'subset_' + randomId())
     });
 };
 
@@ -66,6 +68,13 @@ Set.prototype.addLocations = function(location_array, callBack) {
     args.unshift(this.zset);
     this.client.zadd(args, callBack);
 };
+
+
+// updating locations (same methods as add, existing locations get updated)
+
+Set.prototype.updateLocation = Set.prototype.addLocation;
+
+Set.prototype.updateLocations = Set.prototype.addLocations;
 
 
 // removing locations
@@ -100,12 +109,12 @@ Set.prototype.nearby = function(lat, lon, radius, opts, callBack) {
         opts = {};
     }
 
-    var ranges = range(lat, lon, radius, this.caching);    
+    var ranges = range(lat, lon, radius, this.caching);
     queryByRanges(this, ranges, opts.values, callBack);
 };
 
 Set.prototype.getQueryCache = function(lat, lon, radius) {
-    return range(lat, lon, radius, false);    
+    return range(lat, lon, radius, false);
 };
 
 Set.prototype.nearbyWithQueryCache = function(ranges, opts, callBack) {
@@ -117,6 +126,14 @@ Set.prototype.nearbyWithQueryCache = function(ranges, opts, callBack) {
 
     queryByRanges(this, ranges, opts.values, callBack);
 };
+
+
+// helpers
+
+function randomId() {
+    return '' + (~~(Math.random() * 1000000000000)).toString(36) + (setIdCount++);
+}
+
 
 
 module.exports = exports = new Set();
