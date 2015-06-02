@@ -404,7 +404,7 @@ exports['Multiple Sets'] = function(test) {
         [47.5500, -52.6667, "St. John's"]
     ];
 
-    places = proximity.addSet('places');
+    places = proximity.addSet();
     people = proximity.addSet('people');
 
     people.addLocations(peopleLocations, function(err, reply) {
