@@ -1,6 +1,6 @@
 {
     "name": "geo-proximity",
-    "version": "2.2.2",
+    "version": "2.3.0",
     "author": {
         "name": "Arjun Mehta",
         "email": "arjunmeht@gmail.com",
@@ -26,7 +26,7 @@
         "url": "https://github.com/arjunmehta/node-geo-proximity"
     },
     "dependencies": {
-        "ngeohash": "~0.6.0"        
+        "ngeohash": "~0.6.0"
     },
     "devDependencies": {
         "nodeunit": "~0.9.0",
