@@ -14,6 +14,7 @@ This Node module provides everything you need to get proximity information for g
 - **Basic management (addition, querying and removal) of sets of named geo locations.**
 - **A simple, easy to use, scalable interface.**
 - **Built-in query caching for improved performance of repeated queries.**
+- **Distributable methods (for browser based clients) alleviate computational load on server.**
 
 It should be noted that the method used here is not the most precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. [Read more about how this module works](http://gis.stackexchange.com/questions/18330/would-it-be-possible-to-use-geohash-for-proximity-searches/92331#92331).
 
@@ -209,6 +210,17 @@ proximity.nearbyWithQueryCache(cachedQuery, function(err, replies){
 })
 ```
 
+## Super Performant Scalable Querying
+Similar to the above method of increasing performance, you can use browserify and use this module in clients. The only method a client will have access to is the `getQueryCache` method. This way, your clients can take on the computational load of generating the geohash ranges to query within.
+
+No need to initialize the module to use it on the browser/client side, just do a regular require.
+
+```javascript
+var proximity = require('geo-proximity')
+var cachedQuery = proximity.getQueryCache(37.4688, -122.1411, 5000)
+```
+
+Pass the `cachedQuery` along to the server (using http or socket.io or anything) to use with the `nearbyWithQueryCache` method and send back the results.
 
 ## API
 
