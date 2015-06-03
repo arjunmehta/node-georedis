@@ -13,7 +13,6 @@ This Node module provides everything you need to get proximity information for g
 - **Fast querying of nearby locations to a point within a set. Fast like redis is fast.**
 - **Basic management (addition, querying and removal) of sets of named geo locations.**
 - **A simple, easy to use, scalable interface.**
-- **Built-in query caching for improved performance of repeated queries.**
 - **Distributable methods (for browser based clients) alleviate computational load on server.**
 
 It should be noted that the method used here is not the most precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. [Read more about how this module works](http://gis.stackexchange.com/questions/18330/would-it-be-possible-to-use-geohash-for-proximity-searches/92331#92331).
