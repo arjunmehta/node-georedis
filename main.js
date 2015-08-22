@@ -52,17 +52,20 @@ Set.prototype.delete = function(callBack) {
 
 // adding locations
 
-Set.prototype.addLocation = function(lat, lon, location_name, callBack) {
-    this.client.zadd(this.zset, geohash.encode_int(lat, lon, 52), location_name, callBack);
+Set.prototype.addLocation = function(location_name, coordinate, callBack) {
+    this.client.zadd(this.zset, geohash.encode_int(coordinate.latitude, coordinate.longitude, 52), location_name, callBack);
 };
 
-Set.prototype.addLocations = function(location_array, callBack) {
+Set.prototype.addLocations = function(location_set, callBack) {
 
     var args = [];
+    var locationName;
+    var location;
 
-    for (var i = 0; i < location_array.length; i++) {
-        args.push(geohash.encode_int(location_array[i][0], location_array[i][1], 52));
-        args.push(location_array[i][2]);
+    for (locationName in location_set) {
+        location = location_set[locationName];
+        args.push(geohash.encode_int(location.latitude, location.longitude, 52));
+        args.push(locationName);
     }
 
     args.unshift(this.zset);
