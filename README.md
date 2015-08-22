@@ -3,8 +3,8 @@ geo-proximity
 
 [![Build Status](https://travis-ci.org/arjunmehta/node-geo-proximity.svg?branch=master)](https://travis-ci.org/arjunmehta/node-geo-proximity)
 
-**Note:** *The API for v2.x.x has been completely rewritten!*<br/>
-**Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment.*
+**Note:** *v3.x.x has introduced major API changes! Please refer to the API/examples below*<br/>
+**Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment. Does not require redis geo commands but will leverage them if they are available (ie. >= Redis 3.2)*
 
 ![geo-proximity title image](https://raw.githubusercontent.com/arjunmehta/node-geo-proximity/image/image/splash.png)
 
@@ -14,8 +14,10 @@ This Node module provides everything you need to get proximity information for g
 - **Basic management (addition, querying and removal) of sets of named geo locations.**
 - **A simple, easy to use, scalable interface.**
 - **Distributable methods (for browser based clients) alleviate computational load on server.**
+- **Compatible input/output with the popular [GeoLib](https://github.com/manuelbieh/Geolib) module for further manipulation.**
+- **Defaults to use native [Redis geo commands](http://redis.io/commands#geo) if available (Redis v3.2+)**
 
-It should be noted that the method used here is not the most precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. [Read more about how this module works](http://gis.stackexchange.com/questions/18330/would-it-be-possible-to-use-geohash-for-proximity-searches/92331#92331).
+It should be noted that the algorithm used here is not the most precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. [Read more about how this module works](http://gis.stackexchange.com/questions/18330/would-it-be-possible-to-use-geohash-for-proximity-searches/92331#92331).
 
 ## Installation
 
@@ -42,7 +44,7 @@ var proximity = require('geo-proximity').initialize(client)
 Add locations individually:
 
 ```javascript
-proximity.addLocation(43.6667, -79.4167, 'Toronto', function(err, reply){
+proximity.addLocation('Toronto', {latitude: 43.6667, longitude: -79.4167},function(err, reply){
   if(err) console.error(err)
   else console.log('added location:', reply)
 })
@@ -51,16 +53,18 @@ proximity.addLocation(43.6667, -79.4167, 'Toronto', function(err, reply){
 If you have a large set you'd like to add in bulk, there's a much quicker way:
 
 ```javascript
-var locations = [[43.6667, -79.4167,  'Toronto'],
-                 [39.9523, -75.1638,  'Philadelphia'],
-                 [37.4688, -122.1411, 'Palo Alto'],
-                 [37.7691, -122.4449, 'San Francisco'],
-                 [47.5500, -52.6667,  'St. John\'s'],
-                 [40.7143, -74.0060,  'New York'],
-                 [49.6500, -54.7500,  'Twillingate'],
-                 [45.4167, -75.7000,  'Ottawa'],
-                 [51.0833, -114.0833, 'Calgary'],
-                 [18.9750, 72.8258,   'Mumbai']]
+var locations = {
+  'Toronto': {latitude: 43.6667, longitude: -79.4167},
+  'Philadelphia': {latitude: 39.9523, longitude: -75.1638},
+  'Palo Alto': {latitude: 37.4688, longitude: -122.1411},
+  'San Francisco': {latitude: 37.7691, longitude: -122.4449},
+  'St. John\'s': {latitude: 47.5500, longitude: -52.6667},
+  'New York': {latitude: 40.7143, longitude: -74.0060},
+  'Twillingate': {latitude: 49.6500, longitude: -54.7500},
+  'Ottawa': {latitude: 45.4167, longitude: -75.7000},
+  'Calgary': {latitude: 51.0833, longitude: -114.0833},
+  'Mumbai': {latitude: 18.9750, longitude: 72.8258}
+}
 
 proximity.addLocations(locations, function(err, reply){
   if(err) console.error(err)
@@ -74,7 +78,7 @@ proximity.addLocations(locations, function(err, reply){
 ```javascript
 proximity.location('Toronto', function(err, location){
   if(err) console.error(err)
-  else console.log(location.name + "'s location is:", location.latitude, location.longitude)
+  else console.log('Location for Toronto is: ', location.latitude, location.longitude)
 })
 ```
 
@@ -84,8 +88,9 @@ Or for multiple locations:
 proximity.locations(['Toronto', 'Philadelphia', 'Palo Alto', 'San Francisco', 'Ottawa'], function(err, locations){
   if(err) console.error(err)
   else {
-    for(var i = 0; i < locations.length; i++)
-      console.log(locations[i].name + "'s location is:", locations[i].latitude, locations[i].longitude)
+    for(var locationName in locations){
+      console.log(locationName + "'s location is:", locations[locationName].latitude, locations[locationName].longitude)
+    }
   }
 })
 ```
@@ -96,11 +101,29 @@ Now you can look for locations that exist approximately within a certain distanc
 
 ```javascript
 // look for all points within ~5000m of Toronto.
-proximity.nearby(43.646838, -79.403723, 5000, function(err, locations){
+proximity.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, locations){
   if(err) console.error(err)
   else console.log('nearby locations:', locations)
 })
 ```
+
+```javascript
+var options = {
+  withCoordinate: true,
+  withHash: true,
+  withDistance: true,
+  sort: 'ASC', // or 'DESC' or false (default)
+  units: 'm',
+  strictRadius: true
+}
+
+// look for all points within ~5000m of Toronto.
+proximity.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, options, function(err, locations){
+  if(err) console.error(err)
+  else console.log('nearby locations:', locations)
+})
+```
+
 
 ### Remove Locations
 Of course you may need to remove some points from your set as users/temporary events/whatever no longer are part of the set.
@@ -146,16 +169,20 @@ var places = proximity.addSet('places')
 
 #### Add Locations to Different Sets
 ```javascript
-var peopleLocations = [[43.6667,-79.4167,   'John'],
-                       [39.9523, -75.1638,  'Shankar'],
-                       [37.4688, -122.1411, 'Cynthia'],
-                       [37.7691, -122.4449, 'Chen']]
+var peopleLocations = {
+  'John': {latitude: 43.6667, longitude: -79.4167},
+  'Shankar': {latitude: 39.9523, longitude: -75.1638},
+  'Cynthia': {latitude: 37.4688, longitude: -122.1411},
+  'Chen': {latitude: 37.7691, longitude: -122.4449}
+}
 
-var placeLocations  = [[43.6667,-79.4167,   'Toronto'],
-                       [39.9523, -75.1638,  'Philadelphia'],
-                       [37.4688, -122.1411, 'Palo Alto'],
-                       [37.7691, -122.4449, 'San Francisco'],
-                       [47.5500, -52.6667,  'St. John\'s']]
+var placeLocations  = {
+  'Toronto': {latitude: 43.6667, longitude: -79.4167},
+  'Philadelphia': {latitude: 39.9523, longitude: -75.1638},
+  'Palo Alto': {latitude: 37.4688, longitude: -122.1411},
+  'San Francisco': {latitude: 37.7691, longitude: -122.4449},
+  'St. John\'s': {latitude: 47.5500, longitude: -52.6667}
+}
 
 people.addLocations(peopleLocations, function(err, reply){
   if(err) console.error(err)
@@ -172,13 +199,13 @@ places.addLocations(placeLocations, function(err, reply){
 
 ```javascript
 // will find all PEOPLE ~5000m from the passed in coordinate
-people.nearby(43.646838, -79.403723, 5000, function(err, people){
+people.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, people){
   if(err) console.error(err)
   else console.log('people nearby:', people)
 })
 
 // will find all PLACES ~5000m from the passed in coordinate
-places.nearby(43.646838, -79.403723, 5000, function(err, places){
+places.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, places){
   if(err) console.error(err)
   else console.log('places nearby:', places)
 })
