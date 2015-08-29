@@ -6,7 +6,7 @@ GeoRedis
 **Note:** *v3.x.x has introduced major API changes! Please refer to the API/examples below*<br/>
 **Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment. Does not require redis geo commands but will leverage them if they are available (ie. >= Redis 3.2)*
 
-![georedis title image](https://raw.githubusercontent.com/arjunmehta/node-node-geo-proximity/image/image/splash.png)
+![georedis title image](https://raw.githubusercontent.com/arjunmehta/node-geo-proximity/image/image/splash.png)
 
 This Node module provides everything you need to get proximity information for geo locations. More specifically:
 
