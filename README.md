@@ -6,23 +6,23 @@ GeoRedis
 **Note:** *v3.x.x has introduced major API changes! Please refer to the API/examples below*<br/>
 **Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment. Does not require redis geo commands but will leverage them if they are available (ie. >= Redis 3.2)*
 
-![georedis title image](https://raw.githubusercontent.com/arjunmehta/node-geo-proximity/image/image/splash.png)
+![geo-proximity title image](https://raw.githubusercontent.com/arjunmehta/node-geo-proximity/image/image/splash.png)
 
 This Node module provides everything you need to get proximity information for geo locations. More specifically:
 
 - **Basic management (addition, querying and removal) of sets of named geo locations.**
 - **Fast querying of nearby locations to a point within a set. Fast like redis is fast.**
 - **A simple, easy to use, scalable interface.**
-- **Distributable methods (for browser based clients) alleviate computational load on server.**
 - **Compatible input/output with the popular [GeoLib](https://github.com/manuelbieh/Geolib) module for further manipulation.**
 - **Defaults to use native [Redis geo commands](http://redis.io/commands#geo) if available (Redis v3.2+), but falls back to emulation otherwise**
+- **Distributable methods (for browser based clients) alleviate computational load on server.**
 
 It should be noted that the algorithm used here is not the most precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. [Read more about how this module works](http://gis.stackexchange.com/questions/18330/would-it-be-possible-to-use-geohash-for-proximity-searches/92331#92331).
 
 ## Installation
 
 ```bash
-npm install georedis
+npm install geo-proximity
 ```
 
 ## Basic Usage
@@ -36,12 +36,12 @@ Include and initialize this module with a node-redis client instance.
 var redis = require('redis'),
     client = redis.createClient()
 
-var geo = require('georedis').initialize(client)
+var geo = require('geo-proximity').initialize(client)
 ```
 
 ### Add Locations
 
-Add locations individually (uses `GEOADD`):
+Add locations individually:
 
 ```javascript
 geo.addLocation('Toronto', {latitude: 43.6667, longitude: -79.4167},function(err, reply){
@@ -120,9 +120,9 @@ geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, loc
 
 ```javascript
 var options = {
-  withCoordinate: true, // Will provide coordinates with locations
-  withHash: true, // Will provide a 52bit Geohash Integer
-  withDistance: true, // Will provide distance from query
+  withCoordinates: true, // Will provide coordinates with locations
+  withHashes: true, // Will provide a 52bit Geohash Integer
+  withDistances: true, // Will provide distance from query
   sort: 'ASC', // or 'DESC' or false (default)
   units: 'm',
   count: 100 // Number of results to return
@@ -158,13 +158,13 @@ geo.removeLocations(['New York', 'St. John\'s', 'San Francisco'], function(err, 
 
 ### Initializing with Options
 
-You can initialize `georedis` with a specific redis client instance, but you can also specify a ZSET name to use when storing/querying locations instead of the default `geo:locations`. You may also enable an experimental caching feature that should help with performance, but will use additional memory.
+You can initialize `geo-proximity` with a specific redis client instance, but you can also specify a ZSET name to use when storing/querying locations instead of the default `geo:locations`. You may also enable an experimental caching feature that should help with performance, but will use additional memory.
 
 ```javascript
 var redis = require('redis'),
     client = redis.createClient()
 
-var proximity = require('georedis').initialize(client, {
+var proximity = require('geo-proximity').initialize(client, {
   zset: 'mySpecialLocationsSet',
   cache: true
 })
@@ -254,7 +254,7 @@ Similar to the above method of increasing performance, you can use browserify an
 No need to initialize the module to use it on the browser/client side, just do a regular require.
 
 ```javascript
-var proximity = require('georedis')
+var proximity = require('geo-proximity')
 var cachedQuery = geo.getQueryCache(37.4688, -122.1411, 5000)
 ```
 
@@ -270,7 +270,7 @@ Initialize the module with a redis client.
 - `cache` **Boolean**: Default `false`. The module can cache queries to increase the speed of future queries that are similar. However, this can end up taking a bit of memory, and might not be necessary if you don't need to repeat queries.
 
 ```javascript
-var proximity = require('georedis').initialize(client, {
+var proximity = require('geo-proximity').initialize(client, {
   zset: 'locations',
   cache: false
 })
@@ -282,38 +282,46 @@ This method will return a subset that can be queried and hold a unique set of lo
 ### geo.deleteSet(setName, callBack)
 This method will delete a subset and its contents. You should use the callBack to check for errors or to wait for confirmation that the set is deleted, but this is probably not necessary.
 
-### geo.addLocation(lat, lon, locationName, callBack)
+### geo.addLocation(locationName, point, callBack)
 Add a new coordinate to your set.
 
-### geo.addLocations(locationArray, callBack)
-Adds an array of new coordinates to your set. The `coordinateArray` must be in the form `[[lat, lon, name],[lat, lon, name],...,[lat, lon, name]]`. Use this method for bulk additions, as it is much faster than individual adds.
+### geo.addLocations(locationSet, callBack)
+Adds a set of new coordinates to your set. Use this method for bulk additions, as it is much faster than individual adds. The `locationSet` must be in the form:
 
-### geo.updateLocation(lat, lon, locationName, callBack)
+```
+var locationSet = {
+  'locationA': {latitude: locationA_latitude, longitude: locationA_lattude},
+  'locationB': {latitude: locationB_latitude, longitude: locationB_lattude},
+  'locationC': {latitude: locationC_latitude, longitude: locationC_lattude}
+}
+```
+
+### geo.updateLocation(locationName, point, callBack)
 Update a coordinate to your set.
 
-### geo.updateLocations(locationArray, callBack)
+### geo.updateLocations(locationSet, callBack)
 Same syntax as `addLocations`. Updates all locations passed.
 
 ### geo.location(locationName, callBack)
 Retrieve the latitude and longitude of a specific named location. Returns an object with `name`, `latitude` and `longitude` properties. `latitude` and `longitude` will be null if the location does not exist.
 
 ### geo.locations(locationNameArray, callBack)
-Retrieve the latitude and longitude of a list of specific named locations. Returns an array of objects with `name`, `latitude` and `longitude` properties. `latitude` and `longitude` will be null if the location does not exist.
+Retrieve the latitude and longitude of a list of specific named locations. Returns a set of objects with location names as property names, each with `latitude` and `longitude` properties. `latitude` and `longitude` will be null if the location does not exist.
 
-### geo.removeLocation(coordinateName, callBack)
+### geo.removeLocation(locationName, callBack)
 Remove the specified coordinate by name.
 
-### geo.removeLocations(coordinateNameArray, callBack)
-Remove a set of coordinates by name. `coordinateNameArray` must be of the form `[nameA,nameB,nameC,...,nameN]`.
+### geo.removeLocations(locationNameArray, callBack)
+Remove a set of coordinates by name. `locationNameArray` must be of the form `[nameA,nameB,nameC,...,nameN]`.
 
 ### geo.delete(callBack)
 Removes all locations and deletes the zSet from Redis. You should use the callBack to check for errors or to wait for confirmation that the set is deleted, but this is probably not necessary.
 
-### geo.nearby(lat, lon, distance, {options}, callBack)
+### geo.nearby(point, distance, {options}, callBack)
 Use this function for a basic search by proximity within the given latitude and longitude and approximate distance (in meters). It is not ideal to use this method if you intend on making the same query multiple times. **If performance is important and you'll be making the same query over and over again, it is recommended you instead have a look at geo.nearbyWithQueryCache and promixity.getQueryCache.** Otherwise this is an easy method to use.
 
 #### Options
-- `values` **Boolean**: Default `false`. Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
+- `withCoordinates` **Boolean**: Default `false`. Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
 
 ### geo.getQueryCache(lat, lon, distance)
 Get the query ranges to use with **geo.nearbyWithQueryCache**. This returns an array of geohash ranges to search your set for. `bitDepth` is optional and defaults to 52, set it if you have chosen to store your coordinates at a different bit depth. Store the return value of this function for making the same query often.
@@ -322,7 +330,7 @@ Get the query ranges to use with **geo.nearbyWithQueryCache**. This returns an a
 Pass in query ranges returned by **geo.getQueryRangesFromRadius** to find points that fall within your range value.
 
 #### Options
-- `values` **Boolean**: Default `false`. Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
+- `withCoordinates` **Boolean**: Default `false`. Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
 
 
 ## License
