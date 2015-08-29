@@ -519,7 +519,7 @@ exports['Multiple Sets With Values'] = function(test) {
         latitude: 39.9523,
         longitude: -75.1638
     }, 5000000, {
-        values: true
+        withCoordinates: true
     }, function(err, people) {
 
         if (err) throw err;
@@ -536,7 +536,7 @@ exports['Multiple Sets With Values'] = function(test) {
             latitude: 39.9523,
             longitude: -75.1638
         }, 5000000, {
-            values: true
+            withCoordinates: true
         }, function(err, places) {
 
             if (err) throw err;
@@ -565,7 +565,7 @@ exports['Deleting Set'] = function(test) {
             latitude: 39.9523,
             longitude: -75.1638
         }, 5000000, {
-            values: true
+            withCoordinates: true
         }, function(err, people) {
             test.equal(Object.keys(people).length, 0);
         });
@@ -577,7 +577,7 @@ exports['Deleting Set'] = function(test) {
             latitude: 39.9523,
             longitude: -75.1638
         }, 5000000, {
-            values: true
+            withCoordinates: true
         }, function(err, places) {
             test.equal(Object.keys(places).length, 0);
             test.done();
