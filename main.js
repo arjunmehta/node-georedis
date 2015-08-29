@@ -103,7 +103,7 @@ Set.prototype.locations = function(location_name_array, callBack) {
 
 // querying nearby locations
 
-Set.prototype.nearby = function(lat, lon, radius, opts, callBack) {
+Set.prototype.nearby = function(point, radius, opts, callBack) {
 
     var ranges;
 
@@ -112,7 +112,7 @@ Set.prototype.nearby = function(lat, lon, radius, opts, callBack) {
         opts = {};
     }
 
-    ranges = range(lat, lon, radius, this.caching);
+    ranges = range(point.latitude, point.longitude, radius, this.caching);
     queryByRanges(this, ranges, opts.values, callBack);
 };
 
