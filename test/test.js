@@ -7,7 +7,12 @@ var proximity = require('../main.js').initialize(client),
 var lat = 43.646838,
     lon = -79.403723;
 
-var locationArray = [];
+var testPoint = {
+    latitude: lat,
+    longitude: lon
+};
+
+var locationSet = {};
 
 var rangeIndex = [
     0.6, //52
@@ -60,10 +65,10 @@ exports['Location Null'] = function(test) {
 
     test.expect(2);
 
-    proximity.location("Toronto", function(err, reply) {
+    proximity.location('Toronto', function(err, reply) {
         if (err) throw err;
-        test.equal(reply.name, "Toronto");
         test.equal(reply.latitude, null);
+        test.equal(reply.longitude, null);
         test.done();
     });
 };
@@ -75,7 +80,10 @@ exports['Add Location'] = function(test) {
 
     test.expect(1);
 
-    proximity.addLocation(43.6667, -79.4167, "Toronto", function(err, reply) {
+    proximity.addLocation('Toronto', {
+        latitude: 43.6667,
+        longitude: -79.4167
+    }, function(err, reply) {
         if (err) throw err;
         test.equal(reply, 1);
         test.done();
@@ -85,28 +93,40 @@ exports['Add Location'] = function(test) {
 
 exports['Add Locations'] = function(test) {
 
+    var locationRange;
+    var distance = 0;
+    var count = 1;
+
     client.flushall();
 
     test.expect(2);
 
-    var locationRange;
-    locationArray = [];
-    var distance = 0;
-    var count = 1;
-
-    locationArray.push([lat, lon, "center_0"]);
+    locationSet = {};
+    locationSet['center_0'] = testPoint;
 
     for (var i = 0; i < 100000; i++) {
         distance = i * (i / 100);
         locationRange = getMinMaxs(lat, lon, distance);
-        locationArray.push([locationRange.latmin, locationRange.lonmin, "sw_" + distance]);
-        locationArray.push([locationRange.latmax, locationRange.lonmin, "nw_" + distance]);
-        locationArray.push([locationRange.latmin, locationRange.lonmax, "se_" + distance]);
-        locationArray.push([locationRange.latmax, locationRange.lonmax, "ne_" + distance]);
+        locationSet['sw_' + distance] = {
+            latitude: locationRange.latmin,
+            longitude: locationRange.lonmin
+        };
+        locationSet['nw_' + distance] = {
+            latitude: locationRange.latmax,
+            longitude: locationRange.lonmin
+        };
+        locationSet['se_' + distance] = {
+            latitude: locationRange.latmin,
+            longitude: locationRange.lonmax
+        };
+        locationSet['ne_' + distance] = {
+            latitude: locationRange.latmax,
+            longitude: locationRange.lonmax
+        };
         count += 4;
     }
 
-    proximity.addLocations(locationArray, function(err, reply) {
+    proximity.addLocations(locationSet, function(err, reply) {
         if (err) throw err;
         test.equal(err, null);
         test.equal(400001, reply);
@@ -117,12 +137,11 @@ exports['Add Locations'] = function(test) {
 
 exports['Get Location'] = function(test) {
 
-    test.expect(4);
+    test.expect(3);
 
     proximity.location('nw_99990000.25', function(err, point) {
         if (err) throw err;
         test.equal(err, null);
-        test.equal(point.name, 'nw_99990000.25');
         test.equal(Math.round(point.latitude), 90);
         test.equal(Math.round(point.longitude), -180);
         test.done();
@@ -132,32 +151,35 @@ exports['Get Location'] = function(test) {
 
 exports['Get Locations'] = function(test) {
 
-    var locationQuery = [],
-        locationArraySubset = [],
-        point, i, latlon;
+    var locationQuery = [];
+    var locationArraySubset = [];
+    var point;
+    var i = 0;
+    var latlon;
 
-    for (i = 0; i < locationArray.length; i += 101) {
-        locationArraySubset.push(locationArray[i]);
+    for (var locationName in locationSet) {
+        if (i++ % 101 === 0) {
+            locationQuery.push(locationName)
+        }
     }
 
-    for (i = 0; i < locationArraySubset.length; i++) {
-        locationQuery.push(locationArraySubset[i][2]);
-    }
+    test.expect((locationQuery.length * 3) + 2);
 
-    test.expect((locationArraySubset.length * 3) + 2);
+    i = 0;
 
     proximity.locations(locationQuery, function(err, points) {
 
         if (err) throw err;
         test.equal(err, null);
-        test.equal(points.length, locationArraySubset.length);
+        test.equal(Object.keys(points).length, locationQuery.length);
 
-        for (i = 0; i < points.length; i++) {
-            latlon = geohash.decode_int(geohash.encode_int(locationArraySubset[i][0], locationArraySubset[i][1]));
-            point = points[i];
-            test.equal(point.name, locationArraySubset[i][2]);
+        for (var pointName in points) {
+            latlon = geohash.decode_int(geohash.encode_int(locationSet[locationQuery[i]].latitude, locationSet[locationQuery[i]].longitude));
+            point = points[pointName];
+            test.equal(pointName, locationQuery[i]);
             test.equal(Math.round(point.latitude), Math.round(latlon.latitude));
             test.equal(Math.round(point.longitude), Math.round(latlon.longitude));
+            i++;
         }
 
         test.done();
@@ -186,11 +208,11 @@ exports['Locations Null'] = function(test) {
 
         if (err) throw err;
         test.equal(err, null);
-        test.equal(points.length, 10);
-        test.equal(points[3].latitude, null);
-        test.equal(points[3].name, 'non-existent');
-        test.equal(typeof points[0], 'object');
-        test.equal(typeof points[4], 'object');
+        test.equal(Object.keys(points).length, 10);
+        test.equal(typeof points['non-existent'], 'object');
+        test.equal(typeof points['sw_4682463.21'], 'object');
+        test.equal(typeof points['nw_4737152.25'], 'object');
+        test.equal(points['non-existent'].latitude, null);
 
         test.done();
     });
@@ -245,9 +267,9 @@ exports['Basic Query'] = function(test) {
 
     test.expect(1);
 
-    proximity.nearby(lat, lon, 50000, function(err, replies) {
+    proximity.nearby(testPoint, 50000, function(err, replies) {
         if (err) throw err;
-        test.equal(replies.length, 6835);
+        test.equal(Object.keys(replies).length, 6835);
         test.done();
     });
 };
@@ -257,9 +279,9 @@ exports['Remove Location'] = function(test) {
 
     test.expect(1);
 
-    var oneToDelete = "";
+    var oneToDelete = '';
 
-    proximity.nearby(lat, lon, 50000, function(err, replies) {
+    proximity.nearby(testPoint, 50000, function(err, replies) {
 
         if (err) throw err;
 
@@ -280,7 +302,7 @@ exports['Remove Locations'] = function(test) {
 
     var arrayToDelete = [];
 
-    proximity.nearby(lat, lon, 50000, function(err, replies) {
+    proximity.nearby(testPoint, 50000, function(err, replies) {
 
         if (err) throw err;
         arrayToDelete = replies;
@@ -301,10 +323,19 @@ exports['Large Radius'] = function(test) {
 
     test.expect(1);
 
-    proximity.addLocation(1, 2, "debugger", function(err, reply) {});
-    proximity.addLocation(2, 3, "boostbob", function(err, reply) {});
+    proximity.addLocation('debugger', {
+        latitude: 1,
+        longitude: 2
+    }, function(err, reply) {});
+    proximity.addLocation('boostbob', {
+        latitude: 2,
+        longitude: 3
+    }, function(err, reply) {});
 
-    proximity.nearby(2, 2, 100000000, function(err, replies) {
+    proximity.nearby({
+        latitude: 2,
+        longitude: 2
+    }, 100000000, function(err, replies) {
         test.equal(replies[2], null);
         test.done();
     });
@@ -318,25 +349,37 @@ exports['Add Nearby Ranges'] = function(test) {
     test.expect(2);
 
     var locationRange;
-    locationArray = [];
     var distance = 0;
     var count = 1;
 
-    locationArray.push([lat, lon, "center_0"]);
+    locationSet = {};
+    locationSet['center_0'] = testPoint;
 
     for (var i = 0; i < 100000; i++) {
         distance = i * (i / 100);
         locationRange = getMinMaxs(lat, lon, distance);
-        locationArray.push([locationRange.latmin, locationRange.lonmin, "sw_" + distance]);
-        locationArray.push([locationRange.latmax, locationRange.lonmin, "nw_" + distance]);
-        locationArray.push([locationRange.latmin, locationRange.lonmax, "se_" + distance]);
-        locationArray.push([locationRange.latmax, locationRange.lonmax, "ne_" + distance]);
+
+        locationSet['sw_' + distance] = {
+            latitude: locationRange.latmin,
+            longitude: locationRange.lonmin
+        };
+        locationSet['nw_' + distance] = {
+            latitude: locationRange.latmax,
+            longitude: locationRange.lonmin
+        };
+        locationSet['se_' + distance] = {
+            latitude: locationRange.latmin,
+            longitude: locationRange.lonmax
+        };
+        locationSet['ne_' + distance] = {
+            latitude: locationRange.latmax,
+            longitude: locationRange.lonmax
+        };
         count += 4;
     }
 
-    proximity.addLocations(locationArray, function(err, reply) {
+    proximity.addLocations(locationSet, function(err, reply) {
         if (err) throw err;
-
         test.equal(err, null);
         test.equal(count, reply);
         test.done();
@@ -357,15 +400,18 @@ exports['Radii Ranges'] = function(test) {
 
 function queryRadius(radius, test, next) {
 
-    proximity.nearby(lat, lon, radius, function(err, replies) {
+    proximity.nearby({
+        latitude: lat,
+        longitude: lon
+    }, radius, function(err, replies) {
 
         if (err) throw err;
 
         var max = 0;
-        var maxname = "";
+        var maxname = '';
 
         for (var i = 0; i < replies.length; i++) {
-            var split = replies[i].split("_");
+            var split = replies[i].split('_');
             if (Number(split[1]) > max) {
                 max = Number(split[1]);
                 maxname = replies[i];
@@ -389,20 +435,47 @@ exports['Multiple Sets'] = function(test) {
 
     test.expect(2);
 
-    var peopleLocations = [
-        [43.6667, -79.4167, "John"],
-        [39.9523, -75.1638, "Shankar"],
-        [37.4688, -122.1411, "Cynthia"],
-        [37.7691, -122.4449, "Chen"]
-    ];
+    var peopleLocations = {
+        'John': {
+            latitude: 43.6667,
+            longitude: -79.4167
+        },
+        'Shankar': {
+            latitude: 39.9523,
+            longitude: -75.1638
+        },
+        'Cynthia': {
+            latitude: 37.4688,
+            longitude: -122.1411
+        },
+        'Chen': {
+            latitude: 37.7691,
+            longitude: -122.4449
+        }
+    };
 
-    var placesLocations = [
-        [43.6667, -79.4167, "Toronto"],
-        [39.9523, -75.1638, "Philadelphia"],
-        [37.4688, -122.1411, "Palo Alto"],
-        [37.7691, -122.4449, "San Francisco"],
-        [47.5500, -52.6667, "St. John's"]
-    ];
+    var placesLocations = {
+        'Toronto': {
+            latitude: 43.6667,
+            longitude: -79.4167
+        },
+        'Philadelphia': {
+            latitude: 39.9523,
+            longitude: -75.1638
+        },
+        'Palo Alto': {
+            latitude: 37.4688,
+            longitude: -122.1411
+        },
+        'San Francisco': {
+            latitude: 37.7691,
+            longitude: -122.4449
+        },
+        'St. John\'s': {
+            latitude: 47.5500,
+            longitude: -52.6667
+        }
+    };
 
     places = proximity.addSet();
     people = proximity.addSet('people');
@@ -415,14 +488,20 @@ exports['Multiple Sets'] = function(test) {
 
             if (err) throw err;
 
-            people.nearby(39.9523, -75.1638, 5000, function(err, people) {
+            people.nearby({
+                latitude: 39.9523,
+                longitude: -75.1638
+            }, 5000, function(err, people) {
                 if (err) throw err;
 
-                test.equal(people[0], "Shankar");
-                places.nearby(39.9523, -75.1638, 5000, function(err, places) {
+                test.equal(people[0], 'Shankar');
 
+                places.nearby({
+                    latitude: 39.9523,
+                    longitude: -75.1638
+                }, 5000, function(err, places) {
                     if (err) throw err;
-                    test.equal(places[0], "Philadelphia");
+                    test.equal(places[0], 'Philadelphia');
                     test.done();
                 });
             });
@@ -436,32 +515,38 @@ exports['Multiple Sets With Values'] = function(test) {
 
     test.expect(6);
 
-    people.nearby(39.9523, -75.1638, 5000000, {
+    people.nearby({
+        latitude: 39.9523,
+        longitude: -75.1638
+    }, 5000000, {
         values: true
     }, function(err, people) {
 
         if (err) throw err;
 
-        var cynthia = people[1];
-        var inlatRange = (cynthia[1] > 37.4688 - 0.005 && cynthia[1] < 37.4688 + 0.005) ? true : false;
-        var inlonRange = (cynthia[2] > -122.1411 - 0.005 && cynthia[2] < -122.1411 + 0.005) ? true : false;
+        var cynthia = people['Cynthia'];
+        var inlatRange = (cynthia.latitude > 37.4688 - 0.005 && cynthia.latitude < 37.4688 + 0.005) ? true : false;
+        var inlonRange = (cynthia.longitude > -122.1411 - 0.005 && cynthia.longitude < -122.1411 + 0.005) ? true : false;
 
-        test.equal(cynthia[0], "Cynthia");
+        test.equal(typeof cynthia, 'object');
         test.equal(inlatRange, true);
         test.equal(inlonRange, true);
 
-        places.nearby(39.9523, -75.1638, 5000000, {
+        places.nearby({
+            latitude: 39.9523,
+            longitude: -75.1638
+        }, 5000000, {
             values: true
         }, function(err, places) {
 
             if (err) throw err;
 
-            var philadelphia = places[3];
+            var philadelphia = places['Philadelphia'];
 
-            inlatRange = (philadelphia[1] > 39.9523 - 0.005 && philadelphia[1] < 39.9523 + 0.005) ? true : false;
-            inlonRange = (philadelphia[2] > -75.1638 - 0.005 && philadelphia[2] < -75.1638 + 0.005) ? true : false;
+            inlatRange = (philadelphia.latitude > 39.9523 - 0.005 && philadelphia.latitude < 39.9523 + 0.005) ? true : false;
+            inlonRange = (philadelphia.longitude > -75.1638 - 0.005 && philadelphia.longitude < -75.1638 + 0.005) ? true : false;
 
-            test.equal(philadelphia[0], "Philadelphia");
+            test.equal(typeof philadelphia, 'object');
             test.equal(inlatRange, true);
             test.equal(inlonRange, true);
 
@@ -476,19 +561,25 @@ exports['Deleting Set'] = function(test) {
 
     proximity.deleteSet('people', function(err, res) {
 
-        people.nearby(39.9523, -75.1638, 5000000, {
+        people.nearby({
+            latitude: 39.9523,
+            longitude: -75.1638
+        }, 5000000, {
             values: true
         }, function(err, people) {
-            test.equal(people.length, 0);
+            test.equal(Object.keys(people).length, 0);
         });
     });
 
     places.delete(function(err, res) {
 
-        places.nearby(39.9523, -75.1638, 5000000, {
+        places.nearby({
+            latitude: 39.9523,
+            longitude: -75.1638
+        }, 5000000, {
             values: true
         }, function(err, places) {
-            test.equal(places.length, 0);
+            test.equal(Object.keys(places).length, 0);
             test.done();
         });
     });
