@@ -1,11 +1,9 @@
 var geohash = require('ngeohash');
 
-var query = require('./lib/query'),
-    queryByRanges = query.queryByRanges,
-    location = query.location,
-    locations = query.locations;
-
+var query = require('./lib/query');
 var range = require('./lib/range');
+
+var queryByRanges = query.queryByRanges;
 
 var setIdCount = 0;
 
@@ -107,12 +105,14 @@ Set.prototype.locations = function(location_name_array, callBack) {
 
 Set.prototype.nearby = function(lat, lon, radius, opts, callBack) {
 
+    var ranges;
+
     if (typeof opts === 'function' && callBack === undefined) {
         callBack = opts;
         opts = {};
     }
 
-    var ranges = range(lat, lon, radius, this.caching);
+    ranges = range(lat, lon, radius, this.caching);
     queryByRanges(this, ranges, opts.values, callBack);
 };
 
