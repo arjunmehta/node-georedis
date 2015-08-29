@@ -57,13 +57,13 @@ Set.prototype.addLocation = function(location_name, coordinate, callBack) {
 Set.prototype.addLocations = function(location_set, callBack) {
 
     var args = [];
-    var locationName;
+    var location_ame;
     var location;
 
-    for (locationName in location_set) {
-        location = location_set[locationName];
+    for (location_ame in location_set) {
+        location = location_set[location_ame];
         args.push(geohash.encode_int(location.latitude, location.longitude, 52));
-        args.push(locationName);
+        args.push(location_ame);
     }
 
     args.unshift(this.zset);
@@ -113,7 +113,7 @@ Set.prototype.nearby = function(point, radius, opts, callBack) {
     }
 
     ranges = range(point.latitude, point.longitude, radius, this.caching);
-    queryByRanges(this, ranges, opts.values, callBack);
+    queryByRanges(this, ranges, opts.withCoordinates, callBack);
 };
 
 Set.prototype.getQueryCache = function(lat, lon, radius) {
@@ -127,7 +127,7 @@ Set.prototype.nearbyWithQueryCache = function(ranges, opts, callBack) {
         opts = {};
     }
 
-    queryByRanges(this, ranges, opts.values, callBack);
+    queryByRanges(this, ranges, opts.withCoordinates, callBack);
 };
 
 
