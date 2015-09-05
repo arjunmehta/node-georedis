@@ -1,73 +1,78 @@
-var geohash = require('ngeohash');
+var NativeInterface = require('./lib/interfaceNative');
+var EmulatedInterface = require('./lib/interfaceEmulated');
 
-var query = require('./lib/query');
-var range = require('./lib/range');
+var randomId = require('./lib/util/helper').randomId;
 
-var queryByRanges = query.queryByRanges;
-
-var setIdCount = 0;
+var native_commands = ['info', 'geoadd', 'geohash', 'geopos', 'geodist', 'georadius', 'georadiusbymember'];
 
 
 // main constructor
 
-function Set(opts) {
-
-    opts = opts || {};
-
-    this.client = opts.client;
-    this.zset = opts.zset || 'geo:locations';
-    this.caching = opts.cache !== undefined ? opts.cache : false;
+function Set(options) {
+    options = options || {};
+    this.zset = options.zset || 'geo:locations';
+    this.clientInterface = options.clientInterface;
 }
 
 
-// initialization and new sets
+// initialization
 
-Set.prototype.initialize = function(redis_client, opts) {
+Set.prototype.initialize = function(redis_client, options) {
+    options = options || {};
 
-    opts = opts || {};
+    this.clientInterface = new EmulatedInterface(redis_client);
 
-    this.client = redis_client;
-    this.zset = opts.zset ? opts.zset : (this.zset ? this.zset : 'geo:locations');
+    if (!this.zset) {
+        this.zset = options.zset ? options.zset : 'geo:locations';
+    }
+
+    checkNativeInterface(this, redis_client, options.nativeGeo);
 
     return this;
 };
 
+
+// managing sets
+
 Set.prototype.addSet = function(set_name) {
     return new Set({
-        client: this.client,
-        zset: this.zset + ':' + (set_name || 'subset_' + randomId())
+        zset: this.zset + ':' + (set_name || 'subset_' + randomId()),
+        clientInterface: this.clientInterface
     });
 };
 
 Set.prototype.deleteSet = function(set_name, callBack) {
-    this.client.del(this.zset + ':' + set_name, callBack);
+    this.clientInterface.del(this.zset + ':' + set_name, callBack);
 };
 
 Set.prototype.delete = function(callBack) {
-    this.client.del(this.zset, callBack);
+    this.clientInterface.del(this.zset, callBack);
 };
 
 
 // adding locations
 
-Set.prototype.addLocation = function(location_name, coordinate, callBack) {
-    this.client.zadd(this.zset, geohash.encode_int(coordinate.latitude, coordinate.longitude, 52), location_name, callBack);
+Set.prototype.addLocation = function(locationName, point, callBack) {
+    this.clientInterface.geoadd(locationName, point, this.zset, callBack);
 };
 
-Set.prototype.addLocations = function(location_set, callBack) {
+Set.prototype.addLocations = function(locationSet, callBack) {
+    this.clientInterface.geoadd_multi(locationSet, this.zset, callBack);
+};
 
-    var args = [];
-    var location_ame;
-    var location;
 
-    for (location_ame in location_set) {
-        location = location_set[location_ame];
-        args.push(geohash.encode_int(location.latitude, location.longitude, 52));
-        args.push(location_ame);
+// Calculations
+
+Set.prototype.getDistance = function(locationA, locationB, options, callBack) {
+
+    if (typeof options === 'function') {
+        callBack = options;
+        options = {};
+    } else {
+        options = options || {};
     }
 
-    args.unshift(this.zset);
-    this.client.zadd(args, callBack);
+    this.clientInterface.geodist(locationA, locationB, options.units, this.zset, callBack);
 };
 
 
@@ -80,61 +85,109 @@ Set.prototype.updateLocations = Set.prototype.addLocations;
 
 // removing locations
 
-Set.prototype.removeLocation = function(location_name, callBack) {
-    this.client.zrem(this.zset, location_name, callBack);
+Set.prototype.removeLocation = function(locationName, callBack) {
+    this.clientInterface.zrem([locationName], this.zset, callBack);
 };
 
-Set.prototype.removeLocations = function(location_name_array, callBack) {
-    location_name_array.unshift(this.zset);
-    this.client.zrem(location_name_array, callBack);
+Set.prototype.removeLocations = function(locationNameArray, callBack) {
+    this.clientInterface.zrem(locationNameArray, this.zset, callBack);
 };
 
 
 // querying location positions
 
-Set.prototype.location = function(location_name, callBack) {
-    query.location(this, location_name, callBack);
+Set.prototype.location = function(locationName, callBack) {
+    this.clientInterface.geopos([locationName], this.zset, callBack);
 };
 
-Set.prototype.locations = function(location_name_array, callBack) {
-    query.locations(this, location_name_array, callBack);
+Set.prototype.locations = function(locationNameArray, callBack) {
+    this.clientInterface.geopos(locationNameArray, this.zset, callBack);
+};
+
+
+// querying location geohashes
+
+Set.prototype.getGeohash = function(locationName, callBack) {
+    this.clientInterface.geohash([locationName], this.zset, callBack);
+};
+
+Set.prototype.getGeohashes = function(locationNameArray, callBack) {
+    this.clientInterface.geohashes(locationNameArray, this.zset, callBack);
 };
 
 
 // querying nearby locations
 
-Set.prototype.nearby = function(point, radius, opts, callBack) {
+Set.prototype.withinRadiusOf = function(location, distance, options, callBack) {
 
-    var ranges;
-
-    if (typeof opts === 'function' && callBack === undefined) {
-        callBack = opts;
-        opts = {};
+    if (typeof options === 'function') {
+        callBack = options;
+        options = {};
+    } else {
+        options = options || {};
     }
 
-    ranges = range(point.latitude, point.longitude, radius, this.caching);
-    queryByRanges(this, ranges, opts.withCoordinates, callBack);
-};
-
-Set.prototype.getQueryCache = function(lat, lon, radius) {
-    return range(lat, lon, radius, false);
-};
-
-Set.prototype.nearbyWithQueryCache = function(ranges, opts, callBack) {
-
-    if (typeof opts === 'function' && callBack === undefined) {
-        callBack = opts;
-        opts = {};
+    if (typeof location === 'string') {
+        this.clientInterface.georadiusbymember(location, distance, options, this.zset, callBack);
+    } else {
+        this.clientInterface.georadius(location, distance, options, this.zset, callBack);
     }
 
-    queryByRanges(this, ranges, opts.withCoordinates, callBack);
 };
+
+Set.prototype.nearby = function(location, distance, options, callBack) {
+
+    if (typeof options === 'function') {
+        callBack = options;
+        options = {};
+    } else {
+        options = options || {};
+    }
+
+    if (typeof location === 'string') {
+        this.clientInterface.nearbymember(location, distance, options, this.zset, callBack);
+    } else {
+        this.clientInterface.nearby(location, distance, options, this.zset, callBack);
+    }
+};
+
+
+// Query Range Methods
+
+// Set.prototype.getQueryCache = function(lat, lon, distance) {
+//     return range(lat, lon, distance);
+// };
+
+// Set.prototype.nearbyWithQueryCache = function(ranges, options, callBack) {
+
+//     if (typeof options === 'function' && callBack === undefined) {
+//         callBack = options;
+//         options = {};
+//     }
+
+//     query(this, this.zset, ranges, options.withCoordinates, callBack);
+// };
 
 
 // helpers
 
-function randomId() {
-    return '' + (~~(Math.random() * 1000000000000)).toString(36) + (setIdCount++);
+function checkNativeInterface(set, client, nativeGeo) {
+
+    if (client.send_command) {
+
+        if (nativeGeo === undefined) {
+
+            client.send_command('command', native_commands, function(err, response) {
+
+                if (!err && response[0][0] === 'geoadd') {
+                    set.clientInterface = new NativeInterface(client);
+                }
+            });
+
+        } else if (nativeGeo === true) {
+            set.clientInterface = new NativeInterface(client);
+        }
+    }
 }
 
 
