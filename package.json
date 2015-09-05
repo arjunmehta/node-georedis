@@ -1,48 +1,57 @@
 {
-    "name": "geo-proximity",
-    "version": "2.3.1",
-    "author": {
-        "name": "Arjun Mehta",
-        "email": "arjunmeht@gmail.com",
-        "url": "http://www.arjunmehta.net/"
-    },
-    "browser": "browser.js",
-    "description": "Super fast proximity searches of geo coordinates.",
-    "keywords": [
-        "geohash",
-        "proximity",
-        "nearby",
-        "locations",
-        "spatial index",
-        "2D spatial index",
-        "spatial",
-        "index",
-        "redis",
-        "geolocation",
-        "geoproximity",
-        "radius"
-    ],
-    "repository": {
-        "url": "https://github.com/arjunmehta/node-geo-proximity"
-    },
-    "dependencies": {
-        "ngeohash": "~0.6.0"
-    },
-    "devDependencies": {
-        "nodeunit": "~0.9.0",
-        "redis": "~0.10.0",
-        "browserify": "~9.0.3",
-        "chai": "~2.1.0",
-        "mocha": "~2.1.0",
-        "mocha-phantomjs": "~3.5.3"
-    },
-    "scripts": {
-        "test": "nodeunit test/test.js && browserify test/browser_test.js -o test/browser_test_compiled.js && echo '\n  Testing in Browser' && mocha-phantomjs test/browser.html"
-    },
-    "main": "./main",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/arjunmehta/node-geo-proximity/issues"
-    },
-    "homepage": "https://github.com/arjunmehta/node-geo-proximity"
+  "name": "georedis",
+  "version": "3.0.0",
+  "author": {
+    "name": "Arjun Mehta",
+    "email": "arjunmeht@gmail.com",
+    "url": "http://www.arjunmehta.net/"
+  },
+  "browser": "browser.js",
+  "description": "Super fast proximity searches of geo coordinates.",
+  "keywords": [
+    "geohash",
+    "proximity",
+    "nearby",
+    "locations",
+    "spatial index",
+    "2D spatial index",
+    "spatial",
+    "index",
+    "redis",
+    "geolocation",
+    "geoproximity",
+    "radius",
+    "redis geo",
+    "geo redis",
+    "geoadd",
+    "geopos",
+    "geodist",
+    "georadius",
+    "georadiusbymember",
+    "geolib"
+  ],
+  "repository": {
+    "url": "https://github.com/arjunmehta/node-geo-proximity"
+  },
+  "dependencies": {
+    "geolib": "~2.0.18",
+    "ngeohash": "~0.6.0"
+  },
+  "devDependencies": {
+    "nodeunit": "~0.9.0",
+    "redis": "~0.10.0",
+    "browserify": "~9.0.3",
+    "chai": "~2.1.0",
+    "mocha": "~2.1.0",
+    "mocha-phantomjs": "~3.5.3"
+  },
+  "scripts": {
+    "test": "nodeunit test/test.js && browserify test/browser_test.js -o test/browser_test_compiled.js && echo '\n  Testing in Browser' && mocha-phantomjs test/browser.html"
+  },
+  "main": "./main",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/arjunmehta/node-geo-proximity/issues"
+  },
+  "homepage": "https://github.com/arjunmehta/node-geo-proximity"
 }
