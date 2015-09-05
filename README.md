@@ -3,21 +3,25 @@ GeoRedis
 
 [![Build Status](https://travis-ci.org/arjunmehta/node-geo-proximity.svg?branch=3.0.0)](https://travis-ci.org/arjunmehta/node-geo-proximity)
 
-**Note:** *v3.x.x has introduced major API changes! Please refer to the API/examples below*<br/>
-**Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment. Does not require redis geo commands but will leverage them if they are available (ie. >= Redis 3.2)*
+**Note:** *node-geo-proximity is now node-georedis*
+**Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment.*
+**Note:** *This module will use native redis geo commands if they are available, and fallback to an emulation if not available.*
 
 ![geo-proximity title image](https://raw.githubusercontent.com/arjunmehta/node-geo-proximity/image/image/splash.png)
 
-This Node module provides everything you need to get proximity information for geo locations. More specifically:
+This Node module provides comprehensive location management and queries to all your special projects. More specifically:
 
 - **Basic management (addition, querying and removal) of sets of named geo locations.**
 - **Fast querying of nearby locations to a point within a set. Fast like redis is fast.**
 - **A simple, easy to use, scalable interface.**
 - **Compatible input/output with the popular [GeoLib](https://github.com/manuelbieh/Geolib) module for further manipulation.**
 - **Defaults to use native [Redis geo commands](http://redis.io/commands#geo) if available (Redis v3.2+), but falls back to emulation otherwise**
+
+Other bonuses:
+- **Supports node-redis, ioredis and fakeredis node modules**.
 - **Distributable methods (for browser based clients) alleviate computational load on server.**
 
-It should be noted that the algorithm used here is not the most precise, but the query is very fast, and should be appropriate for most consumer applications looking for this basic function. [Read more about how this module works](http://gis.stackexchange.com/questions/18330/would-it-be-possible-to-use-geohash-for-proximity-searches/92331#92331).
+[Read more about how this module works](http://gis.stackexchange.com/questions/18330/would-it-be-possible-to-use-geohash-for-proximity-searches/92331#92331).
 
 ## Installation
 
@@ -28,9 +32,34 @@ npm install geo-proximity
 ## Basic Usage
 Usage of this module should be extremely simple. Just make sure that your Redis server is accessible to your Node environment. Because this module uses Redis as a store, almost all methods have integrated error handling for queries.
 
+<!-- ### Locations and Location Sets.
+In order to use this module, you just need to learn two basic data forms.
+
+A `location` is of the form:
+
+``` javascript
+var location = {
+  latitude: 43.6667, 
+  longitude: -79.4167
+}
+```
+
+A `locationSet` is a keyed object made of multiple `location`s of the form:
+
+``` javascript
+var locationSet = {
+  'Toronto': {latitude: 43.6667, longitude: -79.4167},
+  'Philadelphia': {latitude: 39.9523, longitude: -75.1638},
+  'Palo Alto': {latitude: 37.4688, longitude: -122.1411},
+}
+```
+
+Okay. Great! Now we're ready to actually use the module.
+-->
+
 ### Include and Initialize
 
-Include and initialize this module with a node-redis client instance.
+Include and initialize this module with a redis client instance.
 
 ```javascript
 var redis = require('redis'),
@@ -53,7 +82,7 @@ geo.addLocation('Toronto', {latitude: 43.6667, longitude: -79.4167},function(err
 If you have a large set you'd like to add in bulk, there's a much quicker way:
 
 ```javascript
-var locations = {
+var locationSet = {
   'Toronto': {latitude: 43.6667, longitude: -79.4167},
   'Philadelphia': {latitude: 39.9523, longitude: -75.1638},
   'Palo Alto': {latitude: 37.4688, longitude: -122.1411},
@@ -66,7 +95,7 @@ var locations = {
   'Mumbai': {latitude: 18.9750, longitude: 72.8258}
 }
 
-geo.addLocations(locations, function(err, reply){
+geo.addLocations(locationSet, function(err, reply){
   if(err) console.error(err)
   else console.log('added locations:', reply)
 })
@@ -95,20 +124,10 @@ geo.locations(['Toronto', 'Philadelphia', 'Palo Alto', 'San Francisco', 'Ottawa'
 })
 ```
 
-```javascript
-var options = {
-  asHash: true // == GEOHASH
-}
-
-geo.location('Toronto', function(err, location){
-  if(err) console.error(err)
-  else console.log('Location for Toronto is: ', location.latitude, location.longitude)
-})
-```
 
 ### Search for Nearby Locations
 
-Now you can look for locations that exist approximately within a certain distance of any particular coordinate in the system.
+Now you can look for locations that exist approximately within a certain distance of any particular coordinate in the system. This method will return an `Array` of location names `[locationNameA, locationNameB, locationNameC]`.
 
 ```javascript
 // look for all points within ~5000m of Toronto.
@@ -118,6 +137,9 @@ geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, loc
 })
 ```
 
+
+Or, if you're more particular about how you'd like your results returned, pass in some `options`. Note that by passing in options, the method will return an `Array` of `locations`.
+
 ```javascript
 var options = {
   withCoordinates: true, // Will provide coordinates with locations
@@ -126,11 +148,21 @@ var options = {
   sort: 'ASC', // or 'DESC' or false (default)
   units: 'm',
   count: 100 // Number of results to return
-  strictRadius: true,
+  precise: true,
 }
 
 // look for all points within ~5000m of Toronto.
 geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, options, function(err, locations){
+  if(err) console.error(err)
+  else console.log('nearby locations:', locations)
+})
+```
+
+
+If you know the name of a location that you'd like to do a nearby search within, instead of passing in location defition, just pass in a `locationName` as the first argument:
+
+```javascript
+geo.nearby('Toronto', 5000, options, function(err, locations){
   if(err) console.error(err)
   else console.log('nearby locations:', locations)
 })
@@ -235,7 +267,7 @@ people.delete()
 geo.deleteSet('people')
 ```
 
-## Performant Querying
+<!-- ## Performant Querying
 If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you can cache the **geohash ranges** that are used to search for nearby locations. Use the **geo.getQueryCache** and **geo.nearbyWithQueryCache** methods together in order to do this.
 
 The geohash ranges are what the **geo.nearby** method ultimately searches within to find nearby points. So keeping these stored in a variable some place and passing them into a more basic search function will save some cycles (at least 5ms on a basic machine). This will save you quite a bit of processing time if you expect to refresh your searches often, and especially if you expect to have empty results often. Your processor is probably best used for other things.
@@ -258,7 +290,7 @@ var proximity = require('geo-proximity')
 var cachedQuery = geo.getQueryCache(37.4688, -122.1411, 5000)
 ```
 
-Pass the `cachedQuery` along to the server (using http or socket.io or anything) to use with the `nearbyWithQueryCache` method and send back the results.
+Pass the `cachedQuery` along to the server (using http or socket.io or anything) to use with the `nearbyWithQueryCache` method and send back the results. -->
 
 ## API
 
@@ -314,23 +346,44 @@ Remove the specified coordinate by name.
 ### geo.removeLocations(locationNameArray, callBack)
 Remove a set of coordinates by name. `locationNameArray` must be of the form `[nameA,nameB,nameC,...,nameN]`.
 
+### geo.distance(locationNameA, locationNameB, {options}, callBack)
+Get the distance between two locations. Takes two `locationName`s, and returns the distance between.
+
+#### Options
+- `units` **String**: Default `'m'`. Instead of returning distance in meters, return the distance in a unit of your choice: `['km', 'cm', 'mm', 'mi', 'ft']`
+
+
 ### geo.delete(callBack)
 Removes all locations and deletes the zSet from Redis. You should use the callBack to check for errors or to wait for confirmation that the set is deleted, but this is probably not necessary.
 
-### geo.nearby(point, distance, {options}, callBack)
-Use this function for a basic search by proximity within the given latitude and longitude and approximate distance (in meters). It is not ideal to use this method if you intend on making the same query multiple times. **If performance is important and you'll be making the same query over and over again, it is recommended you instead have a look at geo.nearbyWithQueryCache and promixity.getQueryCache.** Otherwise this is an easy method to use.
+### geo.nearby(point|locationName, distance, {options}, callBack)
+First argument can either be an object with `latitude` and `longitude`, or a `locationName` as a **String**
+
+Returns an `Array` of either `locationName`s or `locations`.
+
+Use this function for a basic search by proximity within the given latitude and longitude and distance.
 
 #### Options
-- `withCoordinates` **Boolean**: Default `false`. Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
+- `units` **String**: Default `'m'`. Will consider these units for all `distance` related data.
+- `withCoordinates` **Boolean**: Default `false`. Will provide `latitude` and `longitude` properties to returned `locations`.
+- `withDistances` **Boolean**: Default `false`. Will provide `distance` property with the distance this point is from the queried point.
+- `withHashes` **Boolean**: Default `false`. Will provide a `hash` property containing a base32 geohash to the returned `locations`.
+- `order` **String|Boolean**: Default `false`. Will sort the nearby locations `Array` by distance from the queried point. `true|'ASC'` or `'DESC'`.
+- `precise` **Boolean**: Default `false`. If your Redis server doesn't have native geo commands, you can enable this option to ensure that results are within the queried `distance`.
+- `count` **Number**: Default `unlimited`. If you'd like to limit the results to a certain number, you can. Note that this is not guaranteed to necessarily reduce compulational load at all.
 
-### geo.getQueryCache(lat, lon, distance)
+### geo.radius(point|locationName, radius, {options}, callBack)
+The same as **geo.nearby** except that the `precise` is always `true`.
+
+
+<!-- ### geo.getQueryCache(lat, lon, distance)
 Get the query ranges to use with **geo.nearbyWithQueryCache**. This returns an array of geohash ranges to search your set for. `bitDepth` is optional and defaults to 52, set it if you have chosen to store your coordinates at a different bit depth. Store the return value of this function for making the same query often.
 
 ### geo.nearbyWithQueryCache(cache, {options}, callBack)
 Pass in query ranges returned by **geo.getQueryRangesFromRadius** to find points that fall within your range value.
 
 #### Options
-- `withCoordinates` **Boolean**: Default `false`. Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes.
+- `withCoordinates` **Boolean**: Default `false`. Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes. -->
 
 
 ## License
