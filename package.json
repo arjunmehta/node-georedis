@@ -6,8 +6,7 @@
     "email": "arjunmeht@gmail.com",
     "url": "http://www.arjunmehta.net/"
   },
-  "browser": "browser.js",
-  "description": "Super fast proximity searches of geo coordinates.",
+  "description": "Super fast geo queries.",
   "keywords": [
     "geohash",
     "proximity",
