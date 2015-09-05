@@ -5,7 +5,7 @@ GeoRedis
 
 **Note:** *node-geo-proximity is now node-georedis*<br>
 **Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment.*<br>
-**Note:** *This module will use native redis geo commands if they are available, and fallback to an emulation if not available.*<br>
+**Note:** *This module will use native [Redis geo commands](http://redis.io/commands#geo) if they are available, and fallback to an emulation if not available.*<br>
 
 ![geo-proximity title image](https://raw.githubusercontent.com/arjunmehta/node-geo-proximity/image/image/splash.png)
 
