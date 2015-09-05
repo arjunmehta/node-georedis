@@ -13,13 +13,13 @@ This Node module provides comprehensive location management and queries to all y
 
 - **Basic management (addition, querying and removal) of sets of named geo locations.**
 - **Fast querying of nearby locations to a point within a set. Fast like redis is fast.**
+- **Defaults to use native [Redis geo commands](http://redis.io/commands#geo) if available (means extra performance!), but falls back to emulation otherwise**
 - **A simple, easy to use, scalable interface.**
-- **Compatible input/output with the popular [GeoLib](https://github.com/manuelbieh/Geolib) module for further manipulation.**
-- **Defaults to use native [Redis geo commands](http://redis.io/commands#geo) if available (Redis v3.2+), but falls back to emulation otherwise**
 
 Other bonuses:
 - **Supports node-redis, ioredis and fakeredis node modules**.
-- **Distributable methods (for browser based clients) alleviate computational load on server.**
+- **Compatible input/output with the popular [GeoLib](https://github.com/manuelbieh/Geolib) module for further manipulation.**
+<!-- - **Distributable methods (for browser based clients) alleviate computational load on server.** -->
 
 [Read more about how this module works](http://gis.stackexchange.com/questions/18330/would-it-be-possible-to-use-geohash-for-proximity-searches/92331#92331).
 
