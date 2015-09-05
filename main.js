@@ -63,7 +63,7 @@ Set.prototype.addLocations = function(locationSet, callBack) {
 
 // Calculations
 
-Set.prototype.getDistance = function(locationA, locationB, options, callBack) {
+Set.prototype.distance = function(locationNameA, locationNameB, options, callBack) {
 
     if (typeof options === 'function') {
         callBack = options;
@@ -72,7 +72,7 @@ Set.prototype.getDistance = function(locationA, locationB, options, callBack) {
         options = options || {};
     }
 
-    this.clientInterface.geodist(locationA, locationB, options.units, this.zset, callBack);
+    this.clientInterface.geodist(locationNameA, locationNameB, options.units, this.zset, callBack);
 };
 
 
@@ -118,7 +118,7 @@ Set.prototype.getGeohashes = function(locationNameArray, callBack) {
 
 // querying nearby locations
 
-Set.prototype.withinRadiusOf = function(location, distance, options, callBack) {
+Set.prototype.radius = function(location, radius, options, callBack) {
 
     if (typeof options === 'function') {
         callBack = options;
@@ -128,9 +128,9 @@ Set.prototype.withinRadiusOf = function(location, distance, options, callBack) {
     }
 
     if (typeof location === 'string') {
-        this.clientInterface.georadiusbymember(location, distance, options, this.zset, callBack);
+        this.clientInterface.georadiusbymember(location, radius, options, this.zset, callBack);
     } else {
-        this.clientInterface.georadius(location, distance, options, this.zset, callBack);
+        this.clientInterface.georadius(location, radius, options, this.zset, callBack);
     }
 
 };
