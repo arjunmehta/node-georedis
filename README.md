@@ -3,9 +3,9 @@ GeoRedis
 
 [![Build Status](https://travis-ci.org/arjunmehta/node-geo-proximity.svg?branch=3.0.0)](https://travis-ci.org/arjunmehta/node-geo-proximity)
 
-**Note:** *node-geo-proximity is now node-georedis*
-**Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment.*
-**Note:** *This module will use native redis geo commands if they are available, and fallback to an emulation if not available.*
+**Note:** *node-geo-proximity is now node-georedis*<br>
+**Note:** *This module requires a [Redis](http://redis.io) server to be accessible to your Node environment.*<br>
+**Note:** *This module will use native redis geo commands if they are available, and fallback to an emulation if not available.*<br>
 
 ![geo-proximity title image](https://raw.githubusercontent.com/arjunmehta/node-geo-proximity/image/image/splash.png)
 
