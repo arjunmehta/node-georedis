@@ -45,7 +45,7 @@
     "mocha-phantomjs": "~3.5.3"
   },
   "scripts": {
-    "test": "nodeunit test/test.js && browserify test/browser_test.js -o test/browser_test_compiled.js && echo '\n  Testing in Browser' && mocha-phantomjs test/browser.html"
+    "test": "nodeunit test/test.js"
   },
   "main": "./main",
   "license": "MIT",
