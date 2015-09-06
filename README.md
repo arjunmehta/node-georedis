@@ -250,12 +250,13 @@ Initialize the module with a redis client.
 
 #### Options
 - `zset` **String**: Default `geo:locations`. Set this option to specify a zset name to use to store location values.
-- `cache` **Boolean**: Default `false`. The module can cache queries to increase the speed of future queries that are similar. However, this can end up taking a bit of memory, and might not be necessary if you don't need to repeat queries.
+- `nativeGeo` **Boolean**: Default `true` if Redis supports geo commands, `false` if not. Force to `false` if you don't want to make use of native geo commands for some reason. Forcing to `true` on non0supported versions of redis will likely cause errors.
+
 
 ```javascript
 var proximity = require('georedis').initialize(client, {
   zset: 'locations',
-  cache: false
+  nativeGeo: false
 })
 ```
 
