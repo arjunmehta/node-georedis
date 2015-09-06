@@ -30,7 +30,7 @@
     "geolib"
   ],
   "repository": {
-    "url": "https://github.com/arjunmehta/node-geo-proximity"
+    "url": "https://github.com/arjunmehta/node-geo-proximity/tree/3.0.0"
   },
   "dependencies": {
     "geolib": "~2.0.18",
@@ -52,5 +52,5 @@
   "bugs": {
     "url": "https://github.com/arjunmehta/node-geo-proximity/issues"
   },
-  "homepage": "https://github.com/arjunmehta/node-geo-proximity"
+  "homepage": "https://github.com/arjunmehta/node-geo-proximity/tree/3.0.0"
 }
