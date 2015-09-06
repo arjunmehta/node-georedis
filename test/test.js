@@ -2,6 +2,7 @@ var geohash = require('ngeohash');
 var redis = require('redis');
 var client = redis.createClient();
 
+// var geo = require('../main.js').initialize(client);
 var geo = require('../main.js').initialize(client, {
     nativeGeo: false
 });
@@ -118,24 +119,24 @@ exports['Add Locations'] = function(test) {
     locationSet = {};
     locationSet['center_0'] = testPoint;
 
-    for (var i = 0; i < 100000; i++) {
+    for (var i = 0; i < 50000; i++) {
         distance = i * (i / 100);
         locationRange = getMinMaxs(lat, lon, distance);
 
         locationSet['sw_' + distance] = {
-            latitude: locationRange.latmin % 90,
+            latitude: locationRange.latmin % 85,
             longitude: locationRange.lonmin % 180
         };
         locationSet['nw_' + distance] = {
-            latitude: locationRange.latmax % 90,
+            latitude: locationRange.latmax % 85,
             longitude: locationRange.lonmin % 180
         };
         locationSet['se_' + distance] = {
-            latitude: locationRange.latmin % 90,
+            latitude: locationRange.latmin % 85,
             longitude: locationRange.lonmax % 180
         };
         locationSet['ne_' + distance] = {
-            latitude: locationRange.latmax % 90,
+            latitude: locationRange.latmax % 85,
             longitude: locationRange.lonmax % 180
         };
 
@@ -291,7 +292,7 @@ exports['Locations Null'] = function(test) {
 //     var cachedQuery = geo.getQueryCache(lat, lon, 50000);
 
 //     geo.nearbyWithQueryCache(cachedQuery, function(err, replies) {
-//         test.equal(replies.length, 6835);
+//         test.equal(replies.length, 6902);
 //         test.done();
 //     });
 // };
@@ -310,7 +311,7 @@ exports['Basic Query'] = function(test) {
         if (err) throw err;
         test.equal(typeof replies, 'object');
         test.equal(Array.isArray(replies), true);
-        test.equal(replies.length, 6835);
+        test.equal(replies.length, 6902);
         test.equal(typeof replies[0], 'string');
         test.equal(typeof replies.locationSet, 'object');
         test.done();
@@ -334,7 +335,7 @@ exports['Basic Query with Coordinates'] = function(test) {
 
         test.equal(typeof replies, 'object');
         test.equal(Array.isArray(replies), true);
-        test.equal(replies.length, 6835);
+        test.equal(replies.length, 6902);
         test.equal(typeof replies[0], 'object');
         test.equal(typeof replies[0].distance, 'undefined');
         test.equal(typeof replies[0].hash, 'undefined');
@@ -353,7 +354,7 @@ exports['Basic Query with Coordinates and Precision'] = function(test) {
         precise: true
     };
 
-    test.expect(9 + 7966);
+    test.expect(9 + 8057);
 
     startTime = new Date().getTime();
 
@@ -369,7 +370,7 @@ exports['Basic Query with Coordinates and Precision'] = function(test) {
 
         test.equal(typeof replies, 'object');
         test.equal(Array.isArray(replies), true);
-        test.equal(replies.length, 7966);
+        test.equal(replies.length, 8057);
         test.equal(typeof replies[0], 'object');
         test.equal(typeof replies[0].distance, 'number');
         test.equal(typeof replies[0].latitude, 'number');
@@ -426,7 +427,7 @@ exports['Remove Locations'] = function(test) {
             console.log('Remove Locations execution time:', (new Date().getTime() - startTime));
 
             if (err) throw err;
-            test.equal(numberRemoved, 6834);
+            test.equal(numberRemoved, 6901);
             test.done();
         });
     });
@@ -475,24 +476,24 @@ exports['Add Nearby Ranges'] = function(test) {
     locationSet = {};
     locationSet['center_0'] = testPoint;
 
-    for (var i = 0; i < 100000; i++) {
+    for (var i = 0; i < 50000; i++) {
         distance = i * (i / 100);
         locationRange = getMinMaxs(lat, lon, distance);
 
         locationSet['sw_' + distance] = {
-            latitude: locationRange.latmin % 90,
+            latitude: locationRange.latmin % 85,
             longitude: locationRange.lonmin % 180
         };
         locationSet['nw_' + distance] = {
-            latitude: locationRange.latmax % 90,
+            latitude: locationRange.latmax % 85,
             longitude: locationRange.lonmin % 180
         };
         locationSet['se_' + distance] = {
-            latitude: locationRange.latmin % 90,
+            latitude: locationRange.latmin % 85,
             longitude: locationRange.lonmax % 180
         };
         locationSet['ne_' + distance] = {
-            latitude: locationRange.latmax % 90,
+            latitude: locationRange.latmax % 85,
             longitude: locationRange.lonmax % 180
         };
 
