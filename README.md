@@ -120,7 +120,7 @@ var options = {
   withCoordinates: true, // Will provide coordinates with locations
   withHashes: true, // Will provide a 52bit Geohash Integer
   withDistances: true, // Will provide distance from query
-  sort: 'ASC', // or 'DESC' or true (same as 'ASC'), false (default)
+  order: 'ASC', // or 'DESC' or true (same as 'ASC'), false (default)
   units: 'm', // or 'km', 'mi', 'ft'
   count: 100, // Number of results to return
   accurate: true // Useful if in emulated mode and accuracy is important
@@ -319,7 +319,7 @@ Use this function for a basic search by proximity within the given latitude and 
 - `withCoordinates` **Boolean**: Default `false`. Will provide `latitude` and `longitude` properties to returned `locations`.
 - `withDistances` **Boolean**: Default `false`. Will provide `distance` property with the distance this point is from the queried point.
 - `withHashes` **Boolean**: Default `false`. Will provide a `hash` property containing a base32 geohash to the returned `locations`.
-- `order` **String|Boolean**: Default `false`. Will sort the nearby locations `Array` by distance from the queried point. `true|'ASC'` or `'DESC'`.
+- `order` **String|Boolean**: Default `false`. Will order the nearby locations `Array` by distance from the queried point. `true|'ASC'` or `'DESC'`.
 - `accurate` **Boolean**: Default `false`. If your Redis server doesn't have native geo commands, you can enable this option to ensure that results are within the queried `distance`.
 - `count` **Number**: Default `unlimited`. If you'd like to limit the results to a certain number, you can. Note that this is not guaranteed to necessarily reduce compulational load at all.
 
