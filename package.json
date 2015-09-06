@@ -44,6 +44,7 @@
   },
   "scripts": {
     "test": "nodeunit test/test.js",
+    "testNative": "nodeunit test/testNative.js",
     "benchmark": "node ./test/benchmark.js"
   },
   "main": "./main",
