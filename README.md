@@ -1,13 +1,13 @@
 GeoRedis
 =====================
 
-[![Build Status](https://travis-ci.org/arjunmehta/node-geo-proximity.svg?branch=3.0.0)](https://travis-ci.org/arjunmehta/node-geo-proximity)
+[![Build Status](https://travis-ci.org/arjunmehta/node-georedis.svg)](https://travis-ci.org/arjunmehta/node-georedis)
 
 **Note:** *node-geo-proximity is now node-georedis*<br>
 **Note:** *Requires a [Redis](http://redis.io) server to be accessible to your Node environment.*<br>
 **Note:** *Will use native [Redis geo commands](http://redis.io/commands#geo) if they are available, and fallback to an emulation if not available.*<br>
 
-![geo-proximity title image](https://raw.githubusercontent.com/arjunmehta/node-geo-proximity/image/image/splash.png)
+![georedis title image](https://raw.githubusercontent.com/arjunmehta/node-georedis/image/image/splash.png)
 
 This Node module provides comprehensive location management and queries to all your special projects. More specifically:
 
