@@ -21,10 +21,7 @@ Set.prototype.initialize = function(redis_client, options) {
     options = options || {};
 
     this.clientInterface = new EmulatedInterface(redis_client);
-
-    if (!this.zset) {
-        this.zset = options.zset ? options.zset : 'geo:locations';
-    }
+    this.zset = options.zset ? options.zset : 'geo:locations';
 
     checkNativeInterface(this, redis_client, options.nativeGeo);
 
