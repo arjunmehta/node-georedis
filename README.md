@@ -117,13 +117,13 @@ Or, if you're more particular about how you'd like your results returned, pass i
 
 ```javascript
 var options = {
-  withCoordinates: true, // Will provide coordinates with locations
-  withHashes: true, // Will provide a 52bit Geohash Integer
-  withDistances: true, // Will provide distance from query
-  order: 'ASC', // or 'DESC' or true (same as 'ASC'), false (default)
-  units: 'm', // or 'km', 'mi', 'ft'
-  count: 100, // Number of results to return
-  accurate: true // Useful if in emulated mode and accuracy is important
+  withCoordinates: true, // Will provide coordinates with locations, default false
+  withHashes: true, // Will provide a 52bit Geohash Integer, default false
+  withDistances: true, // Will provide distance from query, default false
+  order: 'ASC', // or 'DESC' or true (same as 'ASC'), default false
+  units: 'm', // or 'km', 'mi', 'ft', default 'm'
+  count: 100, // Number of results to return, default undefined
+  accurate: true // Useful if in emulated mode and accuracy is important, default false
 }
 
 // look for all points within ~5000m of Toronto with the options.
