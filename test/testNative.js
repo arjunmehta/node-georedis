@@ -9,8 +9,6 @@ var geo = require('../main.js').initialize(client);
 
 var people;
 var places;
-var startTime;
-var endTime;
 
 var lat = 43.646838,
     lon = -79.403723;
@@ -51,6 +49,7 @@ var rangeIndex = [
 ];
 
 var addArray = [];
+var startRadius = 0.4;
 
 
 exports['Exporting OK'] = function(test) {
@@ -67,16 +66,15 @@ exports['Exporting OK'] = function(test) {
 
 };
 
+
 exports['Location Null'] = function(test) {
 
     client.flushall();
 
     test.expect(1);
 
-    startTime = new Date().getTime();
 
     geo.location('Toronto', function(err, reply) {
-        console.log('Location Null execution time:', (new Date().getTime() - startTime));
         if (err) throw err;
         test.equal(reply, null);
         test.done();
@@ -90,20 +88,16 @@ exports['Add Location'] = function(test) {
 
     test.expect(1);
 
-    startTime = new Date().getTime();
 
     geo.addLocation('Toronto', {
         latitude: 43.6667,
         longitude: -79.4167
     }, function(err, reply) {
-        console.log('Add Location execution time:', (new Date().getTime() - startTime));
         if (err) throw err;
         test.equal(reply, 1);
         test.done();
     });
 };
-
-
 
 
 exports['Add Locations'] = function(test) {
@@ -145,10 +139,7 @@ exports['Add Locations'] = function(test) {
 
     // console.log('adding Location Set', locationSet);
 
-    startTime = new Date().getTime();
-
     geo.addLocations(locationSet, function(err, reply) {
-        console.log('Add Locations execution time:', (new Date().getTime() - startTime));
         if (err) throw err;
         test.equal(err, null);
         test.equal(count, reply);
@@ -161,11 +152,7 @@ exports['Get Location'] = function(test) {
 
     test.expect(3);
 
-    startTime = new Date().getTime();
-
     geo.location('sw_616696.09', function(err, point) {
-
-        console.log('Get Location execution time:', (new Date().getTime() - startTime));
 
         if (err) throw err;
         test.equal(err, null);
@@ -194,11 +181,7 @@ exports['Get Locations'] = function(test) {
 
     i = 0;
 
-    startTime = new Date().getTime();
-
     geo.locations(locationQuery, function(err, points) {
-
-        console.log('Get Locations execution time:', (new Date().getTime() - startTime));
 
         if (err) throw err;
         test.equal(err, null);
@@ -235,11 +218,7 @@ exports['Locations Null'] = function(test) {
         'sw_4770292.81'
     ];
 
-    startTime = new Date().getTime();
-
     geo.locations(locationQuery, function(err, points) {
-
-        console.log('Locations Null execution time:', (new Date().getTime() - startTime));
 
         if (err) throw err;
         test.equal(err, null);
@@ -302,11 +281,7 @@ exports['Basic Query'] = function(test) {
 
     test.expect(5);
 
-    startTime = new Date().getTime();
-
     geo.nearby(testPoint, 50000, function(err, replies) {
-
-        console.log('Basic Query execution time:', (new Date().getTime() - startTime));
 
         if (err) throw err;
         test.equal(typeof replies, 'object');
@@ -318,6 +293,26 @@ exports['Basic Query'] = function(test) {
     });
 };
 
+
+exports['Basic Query in Order'] = function(test) {
+
+    test.expect(5);
+
+    geo.nearby(testPoint, 50000, {
+        order: true
+    }, function(err, replies) {
+
+        if (err) throw err;
+        test.equal(typeof replies, 'object');
+        test.equal(Array.isArray(replies), true);
+        test.equal(replies.length, 8060);
+        test.equal(typeof replies[0], 'string');
+        test.equal(typeof replies.locationSet, 'object');
+        test.done();
+    });
+};
+
+
 exports['Basic Query with Coordinates'] = function(test) {
     var options = {
         withCoordinates: true
@@ -325,15 +320,9 @@ exports['Basic Query with Coordinates'] = function(test) {
 
     test.expect(9);
 
-    startTime = new Date().getTime();
-
     geo.nearby(testPoint, 50000, options, function(err, replies) {
 
-        console.log('Basic Query with Coordinates execution time:', (new Date().getTime() - startTime));
-
         if (err) throw err;
-
-        console.log('Native with Coordinates:', replies[0].latitude, replies[0].longitude);
 
         test.equal(typeof replies, 'object');
         test.equal(Array.isArray(replies), true);
@@ -350,6 +339,56 @@ exports['Basic Query with Coordinates'] = function(test) {
 };
 
 
+exports['Basic Query in Order with Coordinates'] = function(test) {
+
+    test.expect(9);
+
+    geo.nearby(testPoint, 50000, {
+        order: true,
+        withCoordinates: true
+    }, function(err, replies) {
+
+        if (err) throw err;
+        test.equal(typeof replies, 'object');
+        test.equal(Array.isArray(replies), true);
+        test.equal(replies.length, 8060);
+        test.equal(typeof replies[0], 'object');
+        test.equal(typeof replies[0].distance, 'undefined');
+        test.equal(typeof replies[0].hash, 'undefined');
+        test.equal(typeof replies[0].latitude, 'number');
+        test.equal(typeof replies[0].longitude, 'number');
+        test.equal(typeof replies.locationSet, 'object');
+        test.done();
+    });
+};
+
+
+exports['Basic Query with Hashes'] = function(test) {
+    var options = {
+        withHashes: true
+    };
+
+    test.expect(9);
+
+    geo.nearby(testPoint, 50000, options, function(err, replies) {
+
+        if (err) throw err;
+
+        test.equal(typeof replies, 'object');
+        test.equal(Array.isArray(replies), true);
+        test.equal(replies.length, 8060);
+        test.equal(typeof replies[0], 'object');
+        test.equal(typeof replies[0].distance, 'undefined');
+        test.equal(typeof replies[0].hash, 'number');
+        test.equal(typeof replies[0].latitude, 'undefined');
+        test.equal(typeof replies[0].longitude, 'undefined');
+        test.equal(typeof replies.locationSet, 'object');
+
+        test.done();
+    });
+};
+
+
 exports['Basic Query with Coordinates and Precision'] = function(test) {
     var options = {
         withCoordinates: true,
@@ -359,11 +398,7 @@ exports['Basic Query with Coordinates and Precision'] = function(test) {
 
     test.expect(9 + 8060);
 
-    startTime = new Date().getTime();
-
     geo.nearby(testPoint, 50000, options, function(err, replies) {
-
-        console.log('Basic Query with Coordinates and precision execution time:', (new Date().getTime() - startTime));
 
         if (err) throw err;
 
@@ -397,11 +432,7 @@ exports['Remove Location'] = function(test) {
 
         oneToDelete = replies[replies.length - 1];
 
-        startTime = new Date().getTime();
-
         geo.removeLocation(oneToDelete, function(err, numberRemoved) {
-
-            console.log('Remove Location execution time:', (new Date().getTime() - startTime));
 
             if (err) throw err;
             test.equal(numberRemoved, 1);
@@ -423,11 +454,7 @@ exports['Remove Locations'] = function(test) {
 
         arrayToDelete = replies;
 
-        startTime = new Date().getTime();
-
         geo.removeLocations(arrayToDelete, function(err, numberRemoved) {
-
-            console.log('Remove Locations execution time:', (new Date().getTime() - startTime));
 
             if (err) throw err;
             test.equal(numberRemoved, 8059);
@@ -452,14 +479,13 @@ exports['Large Radius'] = function(test) {
         longitude: 3
     }, function(err, reply) {});
 
-    startTime = new Date().getTime();
 
     geo.nearby({
         latitude: 2,
         longitude: 2
     }, 100000000, function(err, replies) {
 
-        console.log('Large Radius execution time:', (new Date().getTime() - startTime));
+
         test.equal(replies[2], null);
         test.done();
     });
@@ -505,11 +531,7 @@ exports['Add Nearby Ranges'] = function(test) {
 
     // console.log('adding Location Set', locationSet);
 
-    startTime = new Date().getTime();
-
     geo.addLocations(locationSet, function(err, reply) {
-
-        console.log('Add Nearby Ranges execution time:', (new Date().getTime() - startTime));
 
         if (err) throw err;
         test.equal(err, null);
@@ -518,8 +540,6 @@ exports['Add Nearby Ranges'] = function(test) {
     });
 };
 
-
-var startRadius = 0.4;
 
 exports['Radii Ranges'] = function(test) {
 
@@ -532,14 +552,10 @@ exports['Radii Ranges'] = function(test) {
 
 function queryRadius(radius, test, next) {
 
-    startTime = new Date().getTime();
-
     geo.nearby({
         latitude: lat,
         longitude: lon
     }, radius, function(err, replies) {
-
-        console.log('Query Radius ' + startRadius + ' execution time:', (new Date().getTime() - startTime));
 
         if (err) throw err;
 
@@ -646,7 +662,6 @@ exports['Multiple Sets'] = function(test) {
 };
 
 
-
 exports['Multiple Sets With Values'] = function(test) {
 
     test.expect(6);
@@ -693,15 +708,13 @@ exports['Multiple Sets With Values'] = function(test) {
     });
 };
 
+
 exports['Deleting Set'] = function(test) {
 
     test.expect(2);
 
-    startTime = new Date().getTime();
-
     geo.deleteSet('people', function(err, res) {
 
-        console.log('Deleting Set execution time:', (new Date().getTime() - startTime));
 
         people.nearby({
             latitude: 39.9523,
@@ -739,6 +752,7 @@ exports['tearDown'] = function(done) {
 };
 
 
+// Helpers
 
 function getMinMaxs(lat, lon, radius) {
 
