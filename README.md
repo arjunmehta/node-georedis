@@ -48,7 +48,7 @@ var geo = require('georedis').initialize(client)
 Add locations individually:
 
 ```javascript
-geo.addLocation('Toronto', {latitude: 43.6667, longitude: -79.4167},function(err, reply){
+geo.addLocation('Toronto', {latitude: 43.6667, longitude: -79.4167}, function(err, reply){
   if(err) console.error(err)
   else console.log('added location:', reply)
 })
