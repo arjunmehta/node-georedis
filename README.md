@@ -21,10 +21,6 @@ Other bonuses:
 - **Supports node-redis, ioredis and fakeredis node modules**.
 - **Compatible input/output with the popular [GeoLib](https://github.com/manuelbieh/Geolib) module for further manipulation.**
 
-<!-- 
-- **Distributable methods (for browser based clients) alleviate computational load on server.** 
--->
-
 [Read more about how this module works](http://gis.stackexchange.com/questions/18330/would-it-be-possible-to-use-geohash-for-proximity-searches/92331#92331).
 
 ## Installation
@@ -35,31 +31,6 @@ npm install georedis
 
 ## Basic Usage
 Usage of this module should be extremely simple. Just make sure that your Redis server is accessible to your Node environment. Because this module uses Redis as a store, almost all methods have integrated error handling for queries.
-
-<!-- ### Locations and Location Sets.
-In order to use this module, you just need to learn two basic data forms.
-
-A `location` is of the form:
-
-``` javascript
-var location = {
-  latitude: 43.6667, 
-  longitude: -79.4167
-}
-```
-
-A `locationSet` is a keyed object made of multiple `location`s of the form:
-
-``` javascript
-var locationSet = {
-  'Toronto': {latitude: 43.6667, longitude: -79.4167},
-  'Philadelphia': {latitude: 39.9523, longitude: -75.1638},
-  'Palo Alto': {latitude: 37.4688, longitude: -122.1411},
-}
-```
-
-Okay. Great! Now we're ready to actually use the module.
--->
 
 ### Include and Initialize
 
@@ -271,30 +242,6 @@ people.delete()
 geo.deleteSet('people')
 ```
 
-<!-- ## Performant Querying
-If you intend on performing the same query over and over again with the same initial coordinate and the same distance, you can cache the **geohash ranges** that are used to search for nearby locations. Use the **geo.getQueryCache** and **geo.nearbyWithQueryCache** methods together in order to do this.
-
-The geohash ranges are what the **geo.nearby** method ultimately searches within to find nearby points. So keeping these stored in a variable some place and passing them into a more basic search function will save some cycles (at least 5ms on a basic machine). This will save you quite a bit of processing time if you expect to refresh your searches often, and especially if you expect to have empty results often. Your processor is probably best used for other things.
-
-```javascript
-var cachedQuery = geo.getQueryCache(37.4688, -122.1411, 5000)
-
-geo.nearbyWithQueryCache(cachedQuery, function(err, replies){
-  console.log('results to the query:', replies)
-})
-```
-
-## Super Performant Scalable Querying
-Similar to the above method of increasing performance, you can use browserify and use this module in clients. The only method a client will have access to is the `getQueryCache` method. This way, your clients can take on the computational load of generating the geohash ranges to query within.
-
-No need to initialize the module to use it on the browser/client side, just do a regular require.
-
-```javascript
-var proximity = require('geo-proximity')
-var cachedQuery = geo.getQueryCache(37.4688, -122.1411, 5000)
-```
-
-Pass the `cachedQuery` along to the server (using http or socket.io or anything) to use with the `nearbyWithQueryCache` method and send back the results. -->
 
 ## API
 
@@ -356,7 +303,6 @@ Get the distance between two locations. Takes two `locationName`s, and returns t
 #### Options
 - `units` **String**: Default `'m'`. Instead of returning distance in meters, return the distance in a unit of your choice: `['km', 'cm', 'mm', 'mi', 'ft']`
 
-
 ### geo.delete(callBack)
 Removes all locations and deletes the zSet from Redis. You should use the callBack to check for errors or to wait for confirmation that the set is deleted, but this is probably not necessary.
 
@@ -378,16 +324,6 @@ Use this function for a basic search by proximity within the given latitude and 
 
 ### geo.radius(point|locationName, radius, {options}, callBack)
 The same as **geo.nearby** except that the `accurate` option is always `true`.
-
-
-<!-- ### geo.getQueryCache(lat, lon, distance)
-Get the query ranges to use with **geo.nearbyWithQueryCache**. This returns an array of geohash ranges to search your set for. `bitDepth` is optional and defaults to 52, set it if you have chosen to store your coordinates at a different bit depth. Store the return value of this function for making the same query often.
-
-### geo.nearbyWithQueryCache(cache, {options}, callBack)
-Pass in query ranges returned by **geo.getQueryRangesFromRadius** to find points that fall within your range value.
-
-#### Options
-- `withCoordinates` **Boolean**: Default `false`. Instead of returning a flat array of key names, it will instead return a full set of keynames with coordinates in the form of `[[name, lat, lon], [name, lat, lon]...]`.This will be a slower query compared to just returning the keynames because the coordinates need to be calculated from the stored geohashes. -->
 
 
 ## License
