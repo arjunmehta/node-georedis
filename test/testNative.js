@@ -293,6 +293,22 @@ exports['Basic Query'] = function(test) {
     });
 };
 
+exports['Basic Query by Member'] = function(test) {
+
+    test.expect(5);
+
+    geo.nearby('center_0', 50000, function(err, replies) {
+
+        if (err) throw err;
+        test.equal(typeof replies, 'object');
+        test.equal(Array.isArray(replies), true);
+        test.equal(replies.length, 8060);
+        test.equal(typeof replies[0], 'string');
+        test.equal(typeof replies.locationSet, 'object');
+        test.done();
+    });
+};
+
 
 exports['Basic Query in Order'] = function(test) {
 
@@ -393,7 +409,7 @@ exports['Basic Query with Coordinates and Precision'] = function(test) {
     var options = {
         withCoordinates: true,
         withDistances: true,
-        precise: true
+        accurate: true
     };
 
     test.expect(9 + 8060);

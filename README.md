@@ -13,6 +13,7 @@ This Node module provides comprehensive location management and queries to all y
 
 - **Basic management (addition, querying and removal) of sets of named geo locations.**
 - **Fast querying of nearby locations to a point within a set. Fast like redis is fast.**
+- **Sort, limit, and get location and distance information of nearby query results.**
 - **Defaults to use native [Redis geo commands](http://redis.io/commands#geo) if available (means extra performance!), but falls back to emulation otherwise**
 - **A simple, easy to use, scalable interface.**
 
@@ -134,7 +135,7 @@ Now you can look for locations that exist approximately within a certain distanc
 
 ```javascript
 // look for all points within ~5000m of Toronto.
-geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, locations){
+geo.radius({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, locations){
   if(err) console.error(err)
   else console.log('nearby locations:', locations)
 })
@@ -148,14 +149,14 @@ var options = {
   withCoordinates: true, // Will provide coordinates with locations
   withHashes: true, // Will provide a 52bit Geohash Integer
   withDistances: true, // Will provide distance from query
-  sort: 'ASC', // or 'DESC' or false (default)
-  units: 'm',
-  count: 100 // Number of results to return
-  precise: true,
+  sort: 'ASC', // or 'DESC' or true (same as 'ASC'), false (default)
+  units: 'm', // or 'km', 'mi', 'ft'
+  count: 100, // Number of results to return
+  accurate: true // Useful if in emulated mode and precision is important
 }
 
 // look for all points within ~5000m of Toronto.
-geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, options, function(err, locations){
+geo.radius({latitude: 43.646838, longitude: -79.403723}, 5000, options, function(err, locations){
   if(err) console.error(err)
   else console.log('nearby locations:', locations)
 })
@@ -165,7 +166,7 @@ geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, options, function
 If you know the name of a location that you'd like to do a nearby search within, instead of passing in location defition, just pass in a `locationName` as the first argument:
 
 ```javascript
-geo.nearby('Toronto', 5000, options, function(err, locations){
+geo.radius('Toronto', 5000, options, function(err, locations){
   if(err) console.error(err)
   else console.log('nearby locations:', locations)
 })

@@ -106,7 +106,7 @@ suite.add({
     fn: function(deferred) {
         geo.nearby(testPoint, 500000, {
             order: true,
-            precise: true
+            accurate: true
         }, function(err, replies) {
             if (err) throw err;
             deferred.resolve();
@@ -130,7 +130,7 @@ suite.add({
     fn: function(deferred) {
         geoEmulated.nearby(testPoint, 500000, {
             order: true,
-            precise: true
+            accurate: true
         }, function(err, replies) {
             if (err) throw err;
             deferred.resolve();
@@ -157,7 +157,7 @@ suite.add({
     fn: function(deferred) {
         geo.nearby(testPoint, 50000, {
             order: true,
-            precise: true,
+            accurate: true,
             count: 10
         }, function(err, replies) {
             if (err) throw err;
@@ -182,7 +182,7 @@ suite.add({
     fn: function(deferred) {
         geoEmulated.nearby(testPoint, 50000, {
             order: true,
-            precise: true,
+            accurate: true,
             count: 10
         }, function(err, replies) {
             if (err) throw err;
@@ -210,7 +210,7 @@ suite.add({
     fn: function(deferred) {
         geo.nearby(testPoint, 500, {
             order: true,
-            precise: true
+            accurate: true
         }, function(err, replies) {
             if (err) throw err;
             deferred.resolve();
@@ -234,7 +234,7 @@ suite.add({
     fn: function(deferred) {
         geoEmulated.nearby(testPoint, 500, {
             order: true,
-            precise: true
+            accurate: true
         }, function(err, replies) {
             if (err) throw err;
             deferred.resolve();
@@ -261,7 +261,7 @@ suite.add({
     fn: function(deferred) {
         geo.nearby(testPoint, 500, {
             order: true,
-            precise: true,
+            accurate: true,
             withDistances: true,
             withCoordinates: true
         }, function(err, replies) {
@@ -287,7 +287,7 @@ suite.add({
     fn: function(deferred) {
         geoEmulated.nearby(testPoint, 500, {
             order: true,
-            precise: true,
+            accurate: true,
             withDistances: true,
             withCoordinates: true
         }, function(err, replies) {
@@ -316,7 +316,7 @@ suite.add({
     fn: function(deferred) {
         geo.nearby(testPoint, 5, {
             order: true,
-            precise: true,
+            accurate: true,
             withDistances: true,
             withCoordinates: true
         }, function(err, replies) {
@@ -342,7 +342,7 @@ suite.add({
     fn: function(deferred) {
         geoEmulated.nearby(testPoint, 5, {
             order: true,
-            precise: true,
+            accurate: true,
             withDistances: true,
             withCoordinates: true
         }, function(err, replies) {
