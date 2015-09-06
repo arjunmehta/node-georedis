@@ -309,6 +309,7 @@ exports['Basic Query'] = function(t) {
     });
 };
 
+
 exports['Basic Query by Member'] = function(t) {
 
     t.expect(5);
@@ -321,6 +322,21 @@ exports['Basic Query by Member'] = function(t) {
         t.equal(replies.length, 8060);
         t.equal(typeof replies[0], 'string');
         t.equal(typeof replies.locationSet, 'object');
+        t.done();
+    });
+};
+
+
+exports['Basic Query by Null Member'] = function(t) {
+
+    t.expect(3);
+
+    geo.nearby('non-existent', 50000, function(err, replies) {
+
+        console.log('NATIVE non-existent', err, replies);
+        t.equal((err === null), false);
+        t.equal(Array.isArray(replies), false);
+        t.equal(replies, null);
         t.done();
     });
 };
