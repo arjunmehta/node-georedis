@@ -230,7 +230,36 @@ places.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, 
 })
 ```
 
-#### Delete Different Sets
+
+#### The `locationSet` Property
+Because javascript doesn't guarantee sorted sets, it makes more sense for the `nearby` method to by default be an `Array`. But you can convert this array to an object by simple using the `locationSet` property on the returned `Array`.
+
+```javascript
+geo.nearby('Toronto', 5000, options, function(err, locations){
+  if(err) console.error(err)
+  else console.log('nearby locations as a Set:', locations.locationSet)
+})
+```
+
+This object will have the form:
+
+```javascript
+{
+  'locationNameA': {
+    latitude: xx,
+    longitude: xx,
+    distance: xx
+  },
+  'locationNameB': {
+    latitude: xx,
+    longitude: xx,
+    distance: xx
+  },
+  // etc...
+}
+```
+
+#### Delete Sets
 
 If you no longer need one of your newly created sets, you can just delete it. Either of the following methods will remove the set from redis and destroy its contents. If you add locations to that set again it will recreate the set on redis and you can use as usual.
 
