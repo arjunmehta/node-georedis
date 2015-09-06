@@ -52,41 +52,41 @@ var addArray = [];
 var startRadius = 0.4;
 
 
-exports['Exporting OK'] = function(test) {
+exports['Exporting OK'] = function(t) {
 
     client.flushall();
 
-    test.expect(4);
+    t.expect(4);
 
-    test.equal(typeof geo === 'object', true);
-    test.equal(typeof geo.initialize === 'function', true);
-    test.equal(geo.clientInterface.client.constructor.name, 'RedisClient');
-    test.equal(geo.zset, 'geo:locations');
-    test.done();
+    t.equal(typeof geo === 'object', true);
+    t.equal(typeof geo.initialize === 'function', true);
+    t.equal(geo.clientInterface.client.constructor.name, 'RedisClient');
+    t.equal(geo.zset, 'geo:locations');
+    t.done();
 
 };
 
 
-exports['Location Null'] = function(test) {
+exports['Location Null'] = function(t) {
 
     client.flushall();
 
-    test.expect(1);
+    t.expect(1);
 
 
     geo.location('Toronto', function(err, reply) {
         if (err) throw err;
-        test.equal(reply, null);
-        test.done();
+        t.equal(reply, null);
+        t.done();
     });
 };
 
 
-exports['Add Location'] = function(test) {
+exports['Add Location'] = function(t) {
 
     client.flushall();
 
-    test.expect(1);
+    t.expect(1);
 
 
     geo.addLocation('Toronto', {
@@ -94,13 +94,13 @@ exports['Add Location'] = function(test) {
         longitude: -79.4167
     }, function(err, reply) {
         if (err) throw err;
-        test.equal(reply, 1);
-        test.done();
+        t.equal(reply, 1);
+        t.done();
     });
 };
 
 
-exports['Add Locations'] = function(test) {
+exports['Add Locations'] = function(t) {
 
     var locationRange;
     var distance = 0;
@@ -108,7 +108,7 @@ exports['Add Locations'] = function(test) {
 
     client.flushall();
 
-    test.expect(2);
+    t.expect(2);
 
     locationSet = {};
     locationSet['center_0'] = testPoint;
@@ -141,29 +141,29 @@ exports['Add Locations'] = function(test) {
 
     geo.addLocations(locationSet, function(err, reply) {
         if (err) throw err;
-        test.equal(err, null);
-        test.equal(count, reply);
-        test.done();
+        t.equal(err, null);
+        t.equal(count, reply);
+        t.done();
     });
 };
 
 
-exports['Get Location'] = function(test) {
+exports['Get Location'] = function(t) {
 
-    test.expect(3);
+    t.expect(3);
 
     geo.location('sw_616696.09', function(err, point) {
 
         if (err) throw err;
-        test.equal(err, null);
-        test.equal(Math.round(point.latitude * 100), Math.round(locationSet['sw_616696.09'].latitude * 100));
-        test.equal(Math.round(point.longitude * 100), Math.round(locationSet['sw_616696.09'].longitude * 100));
-        test.done();
+        t.equal(err, null);
+        t.equal(Math.round(point.latitude * 100), Math.round(locationSet['sw_616696.09'].latitude * 100));
+        t.equal(Math.round(point.longitude * 100), Math.round(locationSet['sw_616696.09'].longitude * 100));
+        t.done();
     });
 };
 
 
-exports['Get Locations'] = function(test) {
+exports['Get Locations'] = function(t) {
 
     var locationQuery = [];
     var locationArraySubset = [];
@@ -177,33 +177,33 @@ exports['Get Locations'] = function(test) {
         }
     }
 
-    test.expect((locationQuery.length * 3) + 2);
+    t.expect((locationQuery.length * 3) + 2);
 
     i = 0;
 
     geo.locations(locationQuery, function(err, points) {
 
         if (err) throw err;
-        test.equal(err, null);
-        test.equal(Object.keys(points).length, locationQuery.length);
+        t.equal(err, null);
+        t.equal(Object.keys(points).length, locationQuery.length);
 
         for (var pointName in points) {
             latlon = geohash.decode_int(geohash.encode_int(locationSet[locationQuery[i]].latitude, locationSet[locationQuery[i]].longitude));
             point = points[pointName];
-            test.equal(pointName, locationQuery[i]);
-            test.equal(Math.round(point.latitude), Math.round(latlon.latitude));
-            test.equal(Math.round(point.longitude), Math.round(latlon.longitude));
+            t.equal(pointName, locationQuery[i]);
+            t.equal(Math.round(point.latitude), Math.round(latlon.latitude));
+            t.equal(Math.round(point.longitude), Math.round(latlon.longitude));
             i++;
         }
 
-        test.done();
+        t.done();
     });
 };
 
 
-exports['Locations Null'] = function(test) {
+exports['Locations Null'] = function(t) {
 
-    test.expect(6);
+    t.expect(6);
 
     var locationQuery = [
         'sw_4682463.21',
@@ -221,19 +221,19 @@ exports['Locations Null'] = function(test) {
     geo.locations(locationQuery, function(err, points) {
 
         if (err) throw err;
-        test.equal(err, null);
-        test.equal(Object.keys(points).length, 10);
-        test.equal(typeof points['non-existent'], 'object');
-        test.equal(typeof points['sw_4682463.21'], 'object');
-        test.equal(typeof points['nw_4737152.25'], 'object');
-        test.equal(points['non-existent'], null);
+        t.equal(err, null);
+        t.equal(Object.keys(points).length, 10);
+        t.equal(typeof points['non-existent'], 'object');
+        t.equal(typeof points['sw_4682463.21'], 'object');
+        t.equal(typeof points['nw_4737152.25'], 'object');
+        t.equal(points['non-existent'], null);
 
-        test.done();
+        t.done();
     });
 };
 
 
-// exports['Generate Cache'] = function(test) {
+// exports['Generate Cache'] = function(t) {
 
 //     var expected = [
 //         [1785293350895616, 1785297645862912],
@@ -243,20 +243,20 @@ exports['Locations Null'] = function(test) {
 //         [1785503804293120, 1785520984162304]
 //     ];
 
-//     test.expect(expected.length * 2);
+//     t.expect(expected.length * 2);
 
 //     var cachedQuery = geo.getQueryCache(lat, lon, 50000);
 
 //     for (var i = 0; i < expected.length; i++) {
-//         test.equal(cachedQuery[i][0], expected[i][0]);
-//         test.equal(cachedQuery[i][1], expected[i][1]);
+//         t.equal(cachedQuery[i][0], expected[i][0]);
+//         t.equal(cachedQuery[i][1], expected[i][1]);
 //     }
 
-//     test.done();
+//     t.done();
 // };
 
 
-// exports['Performant Query'] = function(test) {
+// exports['Performant Query'] = function(t) {
 
 //     var expected = [
 //         [1785293350895616, 1785297645862912],
@@ -266,98 +266,98 @@ exports['Locations Null'] = function(test) {
 //         [1785503804293120, 1785520984162304]
 //     ];
 
-//     test.expect(1);
+//     t.expect(1);
 
 //     var cachedQuery = geo.getQueryCache(lat, lon, 50000);
 
 //     geo.nearbyWithQueryCache(cachedQuery, function(err, replies) {
-//         test.equal(replies.length, 6902);
-//         test.done();
+//         t.equal(replies.length, 6902);
+//         t.done();
 //     });
 // };
 
 
-exports['Basic Query'] = function(test) {
+exports['Basic Query'] = function(t) {
 
-    test.expect(5);
+    t.expect(5);
 
     geo.nearby(testPoint, 50000, function(err, replies) {
 
         if (err) throw err;
-        test.equal(typeof replies, 'object');
-        test.equal(Array.isArray(replies), true);
-        test.equal(replies.length, 8060);
-        test.equal(typeof replies[0], 'string');
-        test.equal(typeof replies.locationSet, 'object');
-        test.done();
+        t.equal(typeof replies, 'object');
+        t.equal(Array.isArray(replies), true);
+        t.equal(replies.length, 8060);
+        t.equal(typeof replies[0], 'string');
+        t.equal(typeof replies.locationSet, 'object');
+        t.done();
     });
 };
 
-exports['Basic Query by Member'] = function(test) {
+exports['Basic Query by Member'] = function(t) {
 
-    test.expect(5);
+    t.expect(5);
 
     geo.nearby('center_0', 50000, function(err, replies) {
 
         if (err) throw err;
-        test.equal(typeof replies, 'object');
-        test.equal(Array.isArray(replies), true);
-        test.equal(replies.length, 8060);
-        test.equal(typeof replies[0], 'string');
-        test.equal(typeof replies.locationSet, 'object');
-        test.done();
+        t.equal(typeof replies, 'object');
+        t.equal(Array.isArray(replies), true);
+        t.equal(replies.length, 8060);
+        t.equal(typeof replies[0], 'string');
+        t.equal(typeof replies.locationSet, 'object');
+        t.done();
     });
 };
 
 
-exports['Basic Query in Order'] = function(test) {
+exports['Basic Query in Order'] = function(t) {
 
-    test.expect(5);
+    t.expect(5);
 
     geo.nearby(testPoint, 50000, {
         order: true
     }, function(err, replies) {
 
         if (err) throw err;
-        test.equal(typeof replies, 'object');
-        test.equal(Array.isArray(replies), true);
-        test.equal(replies.length, 8060);
-        test.equal(typeof replies[0], 'string');
-        test.equal(typeof replies.locationSet, 'object');
-        test.done();
+        t.equal(typeof replies, 'object');
+        t.equal(Array.isArray(replies), true);
+        t.equal(replies.length, 8060);
+        t.equal(typeof replies[0], 'string');
+        t.equal(typeof replies.locationSet, 'object');
+        t.done();
     });
 };
 
 
-exports['Basic Query with Coordinates'] = function(test) {
+exports['Basic Query with Coordinates'] = function(t) {
     var options = {
         withCoordinates: true
     };
 
-    test.expect(9);
+    t.expect(9);
 
     geo.nearby(testPoint, 50000, options, function(err, replies) {
 
         if (err) throw err;
 
-        test.equal(typeof replies, 'object');
-        test.equal(Array.isArray(replies), true);
-        test.equal(replies.length, 8060);
-        test.equal(typeof replies[0], 'object');
-        test.equal(typeof replies[0].distance, 'undefined');
-        test.equal(typeof replies[0].hash, 'undefined');
-        test.equal(typeof replies[0].latitude, 'number');
-        test.equal(typeof replies[0].longitude, 'number');
-        test.equal(typeof replies.locationSet, 'object');
+        t.equal(typeof replies, 'object');
+        t.equal(Array.isArray(replies), true);
+        t.equal(replies.length, 8060);
+        t.equal(typeof replies[0], 'object');
+        t.equal(typeof replies[0].distance, 'undefined');
+        t.equal(typeof replies[0].hash, 'undefined');
+        t.equal(typeof replies[0].latitude, 'number');
+        t.equal(typeof replies[0].longitude, 'number');
+        t.equal(typeof replies.locationSet, 'object');
 
-        test.done();
+        t.done();
     });
 };
 
 
-exports['Basic Query in Order with Coordinates'] = function(test) {
+exports['Basic Query in Order with Coordinates'] = function(t) {
 
-    test.expect(9);
+    t.expect(9);
 
     geo.nearby(testPoint, 50000, {
         order: true,
@@ -365,80 +365,80 @@ exports['Basic Query in Order with Coordinates'] = function(test) {
     }, function(err, replies) {
 
         if (err) throw err;
-        test.equal(typeof replies, 'object');
-        test.equal(Array.isArray(replies), true);
-        test.equal(replies.length, 8060);
-        test.equal(typeof replies[0], 'object');
-        test.equal(typeof replies[0].distance, 'undefined');
-        test.equal(typeof replies[0].hash, 'undefined');
-        test.equal(typeof replies[0].latitude, 'number');
-        test.equal(typeof replies[0].longitude, 'number');
-        test.equal(typeof replies.locationSet, 'object');
-        test.done();
+        t.equal(typeof replies, 'object');
+        t.equal(Array.isArray(replies), true);
+        t.equal(replies.length, 8060);
+        t.equal(typeof replies[0], 'object');
+        t.equal(typeof replies[0].distance, 'undefined');
+        t.equal(typeof replies[0].hash, 'undefined');
+        t.equal(typeof replies[0].latitude, 'number');
+        t.equal(typeof replies[0].longitude, 'number');
+        t.equal(typeof replies.locationSet, 'object');
+        t.done();
     });
 };
 
 
-exports['Basic Query with Hashes'] = function(test) {
+exports['Basic Query with Hashes'] = function(t) {
     var options = {
         withHashes: true
     };
 
-    test.expect(9);
+    t.expect(9);
 
     geo.nearby(testPoint, 50000, options, function(err, replies) {
 
         if (err) throw err;
 
-        test.equal(typeof replies, 'object');
-        test.equal(Array.isArray(replies), true);
-        test.equal(replies.length, 8060);
-        test.equal(typeof replies[0], 'object');
-        test.equal(typeof replies[0].distance, 'undefined');
-        test.equal(typeof replies[0].hash, 'number');
-        test.equal(typeof replies[0].latitude, 'undefined');
-        test.equal(typeof replies[0].longitude, 'undefined');
-        test.equal(typeof replies.locationSet, 'object');
+        t.equal(typeof replies, 'object');
+        t.equal(Array.isArray(replies), true);
+        t.equal(replies.length, 8060);
+        t.equal(typeof replies[0], 'object');
+        t.equal(typeof replies[0].distance, 'undefined');
+        t.equal(typeof replies[0].hash, 'number');
+        t.equal(typeof replies[0].latitude, 'undefined');
+        t.equal(typeof replies[0].longitude, 'undefined');
+        t.equal(typeof replies.locationSet, 'object');
 
-        test.done();
+        t.done();
     });
 };
 
 
-exports['Basic Query with Coordinates and Precision'] = function(test) {
+exports['Basic Query with Coordinates and Precision'] = function(t) {
     var options = {
         withCoordinates: true,
         withDistances: true,
         accurate: true
     };
 
-    test.expect(9 + 8060);
+    t.expect(9 + 8060);
 
     geo.nearby(testPoint, 50000, options, function(err, replies) {
 
         if (err) throw err;
 
         for (var i = 0; i < replies.length; i++) {
-            test.equal((replies[i].distance <= 50000), true);
+            t.equal((replies[i].distance <= 50000), true);
         }
 
-        test.equal(typeof replies, 'object');
-        test.equal(Array.isArray(replies), true);
-        test.equal(replies.length, 8060);
-        test.equal(typeof replies[0], 'object');
-        test.equal(typeof replies[0].distance, 'number');
-        test.equal(typeof replies[0].latitude, 'number');
-        test.equal(typeof replies[0].longitude, 'number');
-        test.equal(typeof replies[0].hash, 'undefined');
-        test.equal(typeof replies.locationSet, 'object');
-        test.done();
+        t.equal(typeof replies, 'object');
+        t.equal(Array.isArray(replies), true);
+        t.equal(replies.length, 8060);
+        t.equal(typeof replies[0], 'object');
+        t.equal(typeof replies[0].distance, 'number');
+        t.equal(typeof replies[0].latitude, 'number');
+        t.equal(typeof replies[0].longitude, 'number');
+        t.equal(typeof replies[0].hash, 'undefined');
+        t.equal(typeof replies.locationSet, 'object');
+        t.done();
     });
 };
 
 
-exports['Remove Location'] = function(test) {
+exports['Remove Location'] = function(t) {
 
-    test.expect(1);
+    t.expect(1);
 
     var oneToDelete = '';
 
@@ -451,16 +451,16 @@ exports['Remove Location'] = function(test) {
         geo.removeLocation(oneToDelete, function(err, numberRemoved) {
 
             if (err) throw err;
-            test.equal(numberRemoved, 1);
-            test.done();
+            t.equal(numberRemoved, 1);
+            t.done();
         });
     });
 };
 
 
-exports['Remove Locations'] = function(test) {
+exports['Remove Locations'] = function(t) {
 
-    test.expect(1);
+    t.expect(1);
 
     var arrayToDelete = [];
 
@@ -473,18 +473,18 @@ exports['Remove Locations'] = function(test) {
         geo.removeLocations(arrayToDelete, function(err, numberRemoved) {
 
             if (err) throw err;
-            test.equal(numberRemoved, 8059);
-            test.done();
+            t.equal(numberRemoved, 8059);
+            t.done();
         });
     });
 };
 
 
-exports['Large Radius'] = function(test) {
+exports['Large Radius'] = function(t) {
 
     client.flushall();
 
-    test.expect(1);
+    t.expect(1);
 
     geo.addLocation('debugger', {
         latitude: 1,
@@ -502,13 +502,13 @@ exports['Large Radius'] = function(test) {
     }, 100000000, function(err, replies) {
 
 
-        test.equal(replies[2], null);
-        test.done();
+        t.equal(replies[2], null);
+        t.done();
     });
 };
 
 
-exports['Add Nearby Ranges'] = function(test) {
+exports['Add Nearby Ranges'] = function(t) {
 
     var locationRange;
     var distance = 0;
@@ -516,7 +516,7 @@ exports['Add Nearby Ranges'] = function(test) {
 
     client.flushall();
 
-    test.expect(2);
+    t.expect(2);
 
     locationSet = {};
     locationSet['center_0'] = testPoint;
@@ -550,23 +550,23 @@ exports['Add Nearby Ranges'] = function(test) {
     geo.addLocations(locationSet, function(err, reply) {
 
         if (err) throw err;
-        test.equal(err, null);
-        test.equal(count, reply);
-        test.done();
+        t.equal(err, null);
+        t.equal(count, reply);
+        t.done();
     });
 };
 
 
-exports['Radii Ranges'] = function(test) {
+exports['Radii Ranges'] = function(t) {
 
-    test.expect(22);
+    t.expect(22);
 
-    queryRadius(startRadius, test, function() {
-        test.done();
+    queryRadius(startRadius, t, function() {
+        t.done();
     });
 };
 
-function queryRadius(radius, test, next) {
+function queryRadius(radius, t, next) {
 
     geo.nearby({
         latitude: lat,
@@ -586,12 +586,12 @@ function queryRadius(radius, test, next) {
             }
         }
 
-        test.equal((max > radius - (radius / 2) || max < radius + (radius / 2)), true);
+        t.equal((max > radius - (radius / 2) || max < radius + (radius / 2)), true);
 
         startRadius *= 2;
 
         if (startRadius < 1000000) {
-            queryRadius(startRadius, test, next);
+            queryRadius(startRadius, t, next);
         } else {
             next();
         }
@@ -599,9 +599,9 @@ function queryRadius(radius, test, next) {
 }
 
 
-exports['Multiple Sets'] = function(test) {
+exports['Multiple Sets'] = function(t) {
 
-    test.expect(2);
+    t.expect(2);
 
     var peopleLocations = {
         'John': {
@@ -662,15 +662,15 @@ exports['Multiple Sets'] = function(test) {
             }, 5000, function(err, people) {
                 if (err) throw err;
 
-                test.equal(people[0], 'Shankar');
+                t.equal(people[0], 'Shankar');
 
                 places.nearby({
                     latitude: 39.9523,
                     longitude: -75.1638
                 }, 5000, function(err, places) {
                     if (err) throw err;
-                    test.equal(places[0], 'Philadelphia');
-                    test.done();
+                    t.equal(places[0], 'Philadelphia');
+                    t.done();
                 });
             });
         });
@@ -678,9 +678,9 @@ exports['Multiple Sets'] = function(test) {
 };
 
 
-exports['Multiple Sets With Values'] = function(test) {
+exports['Multiple Sets With Values'] = function(t) {
 
-    test.expect(6);
+    t.expect(6);
 
     people.nearby({
         latitude: 39.9523,
@@ -696,9 +696,9 @@ exports['Multiple Sets With Values'] = function(test) {
         var inlatRange = (cynthia.latitude > 37.4688 - 0.005 && cynthia.latitude < 37.4688 + 0.005) ? true : false;
         var inlonRange = (cynthia.longitude > -122.1411 - 0.005 && cynthia.longitude < -122.1411 + 0.005) ? true : false;
 
-        test.equal(typeof cynthia, 'object');
-        test.equal(inlatRange, true);
-        test.equal(inlonRange, true);
+        t.equal(typeof cynthia, 'object');
+        t.equal(inlatRange, true);
+        t.equal(inlonRange, true);
 
         places.nearby({
             latitude: 39.9523,
@@ -715,19 +715,19 @@ exports['Multiple Sets With Values'] = function(test) {
             inlatRange = (philadelphia.latitude > 39.9523 - 0.005 && philadelphia.latitude < 39.9523 + 0.005) ? true : false;
             inlonRange = (philadelphia.longitude > -75.1638 - 0.005 && philadelphia.longitude < -75.1638 + 0.005) ? true : false;
 
-            test.equal(typeof philadelphia, 'object');
-            test.equal(inlatRange, true);
-            test.equal(inlonRange, true);
+            t.equal(typeof philadelphia, 'object');
+            t.equal(inlatRange, true);
+            t.equal(inlonRange, true);
 
-            test.done();
+            t.done();
         });
     });
 };
 
 
-exports['Deleting Set'] = function(test) {
+exports['Deleting Set'] = function(t) {
 
-    test.expect(2);
+    t.expect(2);
 
     geo.deleteSet('people', function(err, res) {
 
@@ -738,7 +738,7 @@ exports['Deleting Set'] = function(test) {
         }, 5000000, {
             withCoordinates: true
         }, function(err, people) {
-            test.equal(people.length, 0);
+            t.equal(people.length, 0);
         });
     });
 
@@ -750,16 +750,16 @@ exports['Deleting Set'] = function(test) {
         }, 5000000, {
             withCoordinates: true
         }, function(err, places) {
-            test.equal(places.length, 0);
-            test.done();
+            t.equal(places.length, 0);
+            t.done();
         });
     });
 };
 
 
-exports['Quitting Client'] = function(test) {
+exports['Quitting Client'] = function(t) {
     client.quit();
-    test.done();
+    t.done();
 };
 
 
