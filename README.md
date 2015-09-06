@@ -19,7 +19,10 @@ This Node module provides comprehensive location management and queries to all y
 Other bonuses:
 - **Supports node-redis, ioredis and fakeredis node modules**.
 - **Compatible input/output with the popular [GeoLib](https://github.com/manuelbieh/Geolib) module for further manipulation.**
-<!-- - **Distributable methods (for browser based clients) alleviate computational load on server.** -->
+
+<!-- 
+- **Distributable methods (for browser based clients) alleviate computational load on server.** 
+-->
 
 [Read more about how this module works](http://gis.stackexchange.com/questions/18330/would-it-be-possible-to-use-geohash-for-proximity-searches/92331#92331).
 
