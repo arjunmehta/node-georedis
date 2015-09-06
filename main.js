@@ -101,7 +101,7 @@ Set.prototype.location = function(locationName, callBack) {
 };
 
 Set.prototype.locations = function(locationNameArray, callBack) {
-    this.clientInterface.geopos(locationNameArray, this.zset, callBack);
+    this.clientInterface.geopos_multi(locationNameArray, this.zset, callBack);
 };
 
 
