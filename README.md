@@ -165,15 +165,15 @@ geo.removeLocations(['New York', 'St. John\'s', 'San Francisco'], function(err, 
 
 ### Initializing with Options
 
-You can initialize `georedis` with a specific redis client instance, but you can also specify a ZSET name to use when storing/querying locations instead of the default `geo:locations`. You may also enable an experimental caching feature that should help with performance, but will use additional memory.
+You can initialize `georedis` with a specific redis client instance, but you can also specify a ZSET name to use when storing/querying locations instead of the default `geo:locations`. If you want to force using emulated mode even if your redis server supports native geo commands, just set `nativeGeo` to `false`.
 
 ```javascript
 var redis = require('redis'),
     client = redis.createClient()
 
-var proximity = require('georedis').initialize(client, {
+var geo = require('georedis').initialize(client, {
   zset: 'mySpecialLocationsSet',
-  cache: true
+  nativeGeo: false
 })
 ```
 
@@ -283,7 +283,7 @@ Initialize the module with a redis client.
 
 
 ```javascript
-var proximity = require('georedis').initialize(client, {
+var geo = require('georedis').initialize(client, {
   zset: 'locations',
   nativeGeo: false
 })
