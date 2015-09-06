@@ -196,6 +196,25 @@ exports['Get Locations'] = function(t) {
 };
 
 
+exports['Get Distance'] = function(t) {
+
+    t.expect(2);
+
+    geo.distance('sw_616696.09', 'center_0', function(err, distance) {
+        if (err) throw err;
+        t.equal(distance, 790384);
+    });
+
+    geo.distance('sw_616696.09', 'center_0', {
+        units: 'ft'
+    }, function(err, distance) {
+        if (err) throw err;
+        t.equal(distance, 790384*3.28084);
+        t.done();
+    });
+};
+
+
 exports['Locations Null'] = function(t) {
 
     t.expect(6);

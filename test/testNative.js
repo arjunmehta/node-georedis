@@ -3,9 +3,6 @@ var redis = require('redis');
 var client = redis.createClient();
 
 var geo = require('../main.js').initialize(client);
-// var geo = require('../main.js').initialize(client, {
-//     nativeGeo: false
-// });
 
 var people;
 var places;
@@ -143,6 +140,25 @@ exports['Add Locations'] = function(t) {
         if (err) throw err;
         t.equal(err, null);
         t.equal(count, reply);
+        t.done();
+    });
+};
+
+
+exports['Get Distance'] = function(t) {
+
+    t.expect(2);
+
+    geo.distance('sw_616696.09', 'center_0', function(err, distance) {
+        if (err) throw err;
+        t.equal(~~distance, ~~(790439.42387480533));
+    });
+
+    geo.distance('sw_616696.09', 'center_0', {
+        units: 'ft'
+    }, function(err, distance) {
+        if (err) throw err;
+        t.equal(~~distance, ~~(2593305));
         t.done();
     });
 };
