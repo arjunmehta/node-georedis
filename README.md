@@ -12,9 +12,9 @@ GeoRedis
 This Node module provides comprehensive location management and queries to all your special projects. More specifically:
 
 - **Basic management (addition, querying and removal) of sets of named geo locations.**
-- **Fast querying of nearby locations to a point within a set. Fast like redis is fast.**
+- **Fast querying of nearby locations to a point/member within a set. Fast like redis is fast.**
 - **Sort, limit, and get location and distance information of nearby query results.**
-- **Defaults to use native [Redis geo commands](http://redis.io/commands#geo) if available (means extra performance!), but falls back to emulation otherwise**
+- **Defaults to use native [Redis geo commands](http://redis.io/commands#geo) if available (means extra performance!), but falls back to emulation otherwise.**
 - **A simple, easy to use, scalable interface.**
 
 Other bonuses:
@@ -142,7 +142,7 @@ geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, loc
 ```
 
 
-Or, if you're more particular about how you'd like your results returned, pass in some `options`. Note that by passing in options, the method will return an `Array` of `location` objects of the form `[key: locationName, latitude: 47.6838, longitude: -79.403, distance: 287.22 ... etc]` etc.
+Or, if you're more particular about how you'd like your results returned, pass in some `options`. Note that by passing in options, the method will return an `Array` of `location` objects of the form `{key: locationName, latitude: 47.6838, longitude: -79.403, distance: 287.22 ... etc}` etc.
 
 ```javascript
 var options = {
