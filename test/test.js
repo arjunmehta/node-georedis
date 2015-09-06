@@ -209,7 +209,7 @@ exports['Get Distance'] = function(t) {
         units: 'ft'
     }, function(err, distance) {
         if (err) throw err;
-        t.equal(distance, 790384*3.28084);
+        t.equal(distance, 790384 * 3.28084);
         t.done();
     });
 };
@@ -320,6 +320,18 @@ exports['Basic Query by Member'] = function(t) {
         t.equal(replies.length, 6902);
         t.equal(typeof replies[0], 'string');
         t.equal(typeof replies.locationSet, 'object');
+        t.done();
+    });
+};
+
+exports['Basic Query by Null Member'] = function(t) {
+
+    t.expect(3);
+
+    geo.nearby('non-existent', 50000, function(err, replies) {
+        t.equal((err === null), false);
+        t.equal(Array.isArray(replies), false);
+        t.equal(replies, null);
         t.done();
     });
 };
