@@ -4,6 +4,11 @@ var client = redis.createClient();
 var geo = require('../main.js').initialize(client, {
     nativeGeo: false
 });
+
+var geoNative = require('../main.js').initialize(client, {
+    nativeGeo: true
+});
+
 var old = require('geo-proximity').initialize(client);
 
 var Benchmark = require('benchmark');
