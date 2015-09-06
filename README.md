@@ -135,14 +135,14 @@ Now you can look for locations that exist approximately within a certain distanc
 
 ```javascript
 // look for all points within ~5000m of Toronto.
-geo.radius({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, locations){
+geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, locations){
   if(err) console.error(err)
   else console.log('nearby locations:', locations)
 })
 ```
 
 
-Or, if you're more particular about how you'd like your results returned, pass in some `options`. Note that by passing in options, the method will return an `Array` of `locations`.
+Or, if you're more particular about how you'd like your results returned, pass in some `options`. Note that by passing in options, the method will return an `Array` of `location` objects of the form `[key: locationName, latitude: 47.6838, longitude: -79.403, distance: 287.22 ... etc]` etc.
 
 ```javascript
 var options = {
@@ -152,11 +152,11 @@ var options = {
   sort: 'ASC', // or 'DESC' or true (same as 'ASC'), false (default)
   units: 'm', // or 'km', 'mi', 'ft'
   count: 100, // Number of results to return
-  accurate: true // Useful if in emulated mode and precision is important
+  accurate: true // Useful if in emulated mode and accuracy is important
 }
 
-// look for all points within ~5000m of Toronto.
-geo.radius({latitude: 43.646838, longitude: -79.403723}, 5000, options, function(err, locations){
+// look for all points within ~5000m of Toronto with the options.
+geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, options, function(err, locations){
   if(err) console.error(err)
   else console.log('nearby locations:', locations)
 })
@@ -166,7 +166,7 @@ geo.radius({latitude: 43.646838, longitude: -79.403723}, 5000, options, function
 If you know the name of a location that you'd like to do a nearby search within, instead of passing in location defition, just pass in a `locationName` as the first argument:
 
 ```javascript
-geo.radius('Toronto', 5000, options, function(err, locations){
+geo.nearby('Toronto', 5000, options, function(err, locations){
   if(err) console.error(err)
   else console.log('nearby locations:', locations)
 })
@@ -373,11 +373,11 @@ Use this function for a basic search by proximity within the given latitude and 
 - `withDistances` **Boolean**: Default `false`. Will provide `distance` property with the distance this point is from the queried point.
 - `withHashes` **Boolean**: Default `false`. Will provide a `hash` property containing a base32 geohash to the returned `locations`.
 - `order` **String|Boolean**: Default `false`. Will sort the nearby locations `Array` by distance from the queried point. `true|'ASC'` or `'DESC'`.
-- `precise` **Boolean**: Default `false`. If your Redis server doesn't have native geo commands, you can enable this option to ensure that results are within the queried `distance`.
+- `accurate` **Boolean**: Default `false`. If your Redis server doesn't have native geo commands, you can enable this option to ensure that results are within the queried `distance`.
 - `count` **Number**: Default `unlimited`. If you'd like to limit the results to a certain number, you can. Note that this is not guaranteed to necessarily reduce compulational load at all.
 
 ### geo.radius(point|locationName, radius, {options}, callBack)
-The same as **geo.nearby** except that the `precise` is always `true`.
+The same as **geo.nearby** except that the `accurate` option is always `true`.
 
 
 <!-- ### geo.getQueryCache(lat, lon, distance)
