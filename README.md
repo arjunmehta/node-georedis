@@ -30,7 +30,7 @@ Other bonuses:
 ## Installation
 
 ```bash
-npm install geo-proximity
+npm install georedis
 ```
 
 ## Basic Usage
@@ -69,7 +69,7 @@ Include and initialize this module with a redis client instance.
 var redis = require('redis'),
     client = redis.createClient()
 
-var geo = require('geo-proximity').initialize(client)
+var geo = require('georedis').initialize(client)
 ```
 
 ### Add Locations
@@ -194,13 +194,13 @@ geo.removeLocations(['New York', 'St. John\'s', 'San Francisco'], function(err, 
 
 ### Initializing with Options
 
-You can initialize `geo-proximity` with a specific redis client instance, but you can also specify a ZSET name to use when storing/querying locations instead of the default `geo:locations`. You may also enable an experimental caching feature that should help with performance, but will use additional memory.
+You can initialize `georedis` with a specific redis client instance, but you can also specify a ZSET name to use when storing/querying locations instead of the default `geo:locations`. You may also enable an experimental caching feature that should help with performance, but will use additional memory.
 
 ```javascript
 var redis = require('redis'),
     client = redis.createClient()
 
-var proximity = require('geo-proximity').initialize(client, {
+var proximity = require('georedis').initialize(client, {
   zset: 'mySpecialLocationsSet',
   cache: true
 })
@@ -306,7 +306,7 @@ Initialize the module with a redis client.
 - `cache` **Boolean**: Default `false`. The module can cache queries to increase the speed of future queries that are similar. However, this can end up taking a bit of memory, and might not be necessary if you don't need to repeat queries.
 
 ```javascript
-var proximity = require('geo-proximity').initialize(client, {
+var proximity = require('georedis').initialize(client, {
   zset: 'locations',
   cache: false
 })
