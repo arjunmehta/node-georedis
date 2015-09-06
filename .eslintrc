@@ -59,6 +59,7 @@
     "no-sparse-arrays": 2,
     "no-unreachable": 2,
     "use-isnan": 2,
+    "no-process-exit": 0,
 
     // best practices
     "consistent-return": 2,
