@@ -176,9 +176,15 @@ function checkNativeInterface(set, client, nativeGeo) {
 
             client.send_command('command', native_commands, function(err, response) {
 
-                if (!err && response && response.length > 0 &&
-                    response[0] && response[0].length > 0 && response[0][0] === 'geoadd') {
-                    set.clientInterface = new NativeInterface(client);
+                if (!err) {
+                    if (Array.isArray(response) &&
+                        response.length > 0 &&
+                        Array.isArray(response[0]) &&
+                        response[0].length > 0 &&
+                        response[0][0] === 'geoadd'
+                    ) {
+                        set.clientInterface = new NativeInterface(client);
+                    }
                 }
             });
 
