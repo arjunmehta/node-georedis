@@ -329,11 +329,10 @@ exports['Basic Query by Member'] = function(t) {
 
 exports['Basic Query by Null Member'] = function(t) {
 
-    t.expect(3);
+    t.expect(4);
 
     geo.nearby('non-existent', 50000, function(err, replies) {
-
-        console.log('NATIVE non-existent', err, replies);
+        t.equal(err.message, 'ERR could not decode requested zset member');
         t.equal((err === null), false);
         t.equal(Array.isArray(replies), false);
         t.equal(replies, null);
