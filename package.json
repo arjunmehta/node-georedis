@@ -30,7 +30,7 @@
     "geolib"
   ],
   "repository": {
-    "url": "https://github.com/arjunmehta/node-geo-proximity/tree/3.0.0"
+    "url": "https://github.com/arjunmehta/node-georedis"
   },
   "dependencies": {
     "geolib": "~2.0.18",
@@ -50,7 +50,7 @@
   "main": "./main",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/arjunmehta/node-geo-proximity/issues"
+    "url": "https://github.com/arjunmehta/node-georedis/issues"
   },
-  "homepage": "https://github.com/arjunmehta/node-geo-proximity/tree/3.0.0"
+  "homepage": "https://github.com/arjunmehta/node-georedis"
 }
