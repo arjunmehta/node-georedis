@@ -178,7 +178,7 @@ var geo = require('georedis').initialize(client, {
 ```
 
 ### Multiple Sets
-If you have different sets of coordinates, you can store and query them separately by creating adding a new set.
+If you have different sets of coordinates, you can store and query them separately by adding a new set.
 
 #### Create Sets
 ```javascript
