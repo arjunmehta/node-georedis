@@ -70,7 +70,6 @@ exports['Location Null'] = function(t) {
 
     t.expect(1);
 
-
     geo.location('Toronto', function(err, reply) {
         if (err) throw err;
         t.equal(reply, null);
