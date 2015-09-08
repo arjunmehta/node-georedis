@@ -26,7 +26,7 @@ Other bonuses:
 ## Installation
 
 ```bash
-npm install georedis
+npm install --save georedis
 ```
 
 ## Basic Usage
@@ -232,7 +232,7 @@ places.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, 
 
 
 #### The `locationSet` Property
-Because javascript doesn't guarantee sorted sets, it makes more sense for the `nearby` method to by default be an `Array`. But you can convert this array to an object by simple using the `locationSet` property on the returned `Array`.
+Because javascript doesn't guarantee sorted sets, it makes more sense for the `nearby` method to by default be an `Array`. But you can convert this array to an object by simply using the `locationSet` property on the returned `Array`.
 
 ```javascript
 geo.nearby('Toronto', 5000, options, function(err, locations){
