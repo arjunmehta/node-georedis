@@ -337,9 +337,7 @@ Get the distance between two locations. Takes two `locationName`s, and returns t
 Removes all locations and deletes the zSet from Redis. You should use the callBack to check for errors or to wait for confirmation that the set is deleted, but this is probably not necessary.
 
 ### geo.nearby(point|locationName, distance, {options}, callBack)
-First argument can either be an object with `latitude` and `longitude`, or a `locationName` as a **String**
-
-Returns an `Array` of either `locationName`s or `locations`.
+First argument can either be an object with `latitude` and `longitude`, or a `locationName` as a **String**. Returns an `Array` of either `locationName`s or `locations`.
 
 Use this function for a basic search by proximity within the given latitude and longitude and distance.
 
