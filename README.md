@@ -331,7 +331,7 @@ Remove a set of coordinates by name. `locationNameArray` must be of the form `[n
 Get the distance between two locations. Takes two `locationName`s, and returns the distance between.
 
 #### Options
-- `units` **String**: Default `'m'`. Instead of returning distance in meters, return the distance in a unit of your choice: `['m', km', 'mi', 'ft']`
+- `units` **String**: Default `'m'`. Instead of returning distance in meters, return the distance in a unit of your choice: `['m', km', 'mi', 'ft']`.
 
 ### geo.delete(callBack)
 Removes all locations and deletes the zSet from Redis. You should use the callBack to check for errors or to wait for confirmation that the set is deleted, but this is probably not necessary.
