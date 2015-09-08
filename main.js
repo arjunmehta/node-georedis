@@ -3,7 +3,7 @@ var EmulatedInterface = require('./lib/interfaceEmulated');
 
 var randomId = require('./lib/util/helper').randomId;
 
-var native_commands = ['info', 'geoadd', 'geohash', 'geopos', 'geodist', 'georadius', 'georadiusbymember'];
+var nativeCommands = ['info', 'geoadd', 'geohash', 'geopos', 'geodist', 'georadius', 'georadiusbymember'];
 
 
 // main constructor
@@ -17,13 +17,13 @@ function Set(options) {
 
 // initialization
 
-Set.prototype.initialize = function(redis_client, options) {
+Set.prototype.initialize = function(redisClient, options) {
     options = options || {};
 
-    this.clientInterface = new EmulatedInterface(redis_client);
+    this.clientInterface = new EmulatedInterface(redisClient);
     this.zset = options.zset ? options.zset : 'geo:locations';
 
-    checkNativeInterface(this, redis_client, options.nativeGeo);
+    checkNativeInterface(this, redisClient, options.nativeGeo);
 
     return this;
 };
@@ -31,15 +31,15 @@ Set.prototype.initialize = function(redis_client, options) {
 
 // managing sets
 
-Set.prototype.addSet = function(set_name) {
+Set.prototype.addSet = function(setName) {
     return new Set({
-        zset: this.zset + ':' + (set_name || 'subset_' + randomId()),
+        zset: this.zset + ':' + (setName || 'subset_' + randomId()),
         clientInterface: this.clientInterface
     });
 };
 
-Set.prototype.deleteSet = function(set_name, callBack) {
-    this.clientInterface.del(this.zset + ':' + set_name, callBack);
+Set.prototype.deleteSet = function(setName, callBack) {
+    this.clientInterface.del(this.zset + ':' + setName, callBack);
 };
 
 Set.prototype.delete = function(callBack) {
@@ -149,23 +149,6 @@ Set.prototype.nearby = function(location, distance, options, callBack) {
 };
 
 
-// Query Range Methods
-
-// Set.prototype.getQueryCache = function(lat, lon, distance) {
-//     return range(lat, lon, distance);
-// };
-
-// Set.prototype.nearbyWithQueryCache = function(ranges, options, callBack) {
-
-//     if (typeof options === 'function' && callBack === undefined) {
-//         callBack = options;
-//         options = {};
-//     }
-
-//     query(this, this.zset, ranges, options.withCoordinates, callBack);
-// };
-
-
 // helpers
 
 function checkNativeInterface(set, client, nativeGeo) {
@@ -174,7 +157,7 @@ function checkNativeInterface(set, client, nativeGeo) {
 
         if (nativeGeo === undefined) {
 
-            client.send_command('command', native_commands, function(err, response) {
+            client.send_command('command', nativeCommands, function(err, response) {
 
                 if (!err) {
                     if (Array.isArray(response) && Array.isArray(response[0]) && response[0][0] === 'geoadd') {
