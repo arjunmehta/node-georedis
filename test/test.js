@@ -1,10 +1,11 @@
 var geohash = require('ngeohash');
 var redis = require('redis');
 var client = redis.createClient();
+// var client = require('fakeredis').createClient();
 
 var geo = require('../main.js').initialize(client, {
-    nativeGeo: false,
-    zset: 'geo:emulated'
+    zset: 'geo:emulated',
+    nativeGeo: false
 });
 
 var people;
