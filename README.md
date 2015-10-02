@@ -134,7 +134,7 @@ geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, options, function
 ```
 
 
-If you know the name of a location that you'd like to do a nearby search within, instead of passing in location defition, just pass in a `locationName` as the first argument:
+If you know the name of a location that you'd like to do a nearby search within, instead of passing in a point, just pass in a `locationName` as the first argument:
 
 ```javascript
 geo.nearby('Toronto', 5000, options, function(err, locations){
