@@ -301,7 +301,7 @@ Add a new coordinate to your set.
 ### geo.addLocations(locationSet, callBack)
 Adds a set of new coordinates to your set. Use this method for bulk additions, as it is much faster than individual adds. The `locationSet` must be in the form:
 
-```
+```javascript
 var locationSet = {
   'locationA': {latitude: locationA_latitude, longitude: locationA_lattude},
   'locationB': {latitude: locationB_latitude, longitude: locationB_lattude},
