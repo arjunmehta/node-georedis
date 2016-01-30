@@ -347,6 +347,7 @@ First argument can either be an **Object** with `latitude` and `longitude`, or a
 - `order` **String|Boolean**: Default `false`. Will order the nearby locations `Array` by distance from the queried point. `true|'ASC'` or `'DESC'`.
 - `accurate` **Boolean**: Default `false`. If your Redis server doesn't have native geo commands, you can enable this option to ensure that results are within the queried `distance`.
 - `count` **Number**: Default `unlimited`. If you'd like to limit the results to a certain number, you can. Note that this is not guaranteed to necessarily reduce compulational load at all.
+- `transactionsUnsupported` **Boolean**: Default `false`. If you would like to disable transaction operations, partiularlily the use of multi/exec, providing true will use redis client.batch() instead.
 
 ### geo.radius(point|locationName, radius, {options}, callBack)
 The same as **geo.nearby** except that the `accurate` option is always `true`.
