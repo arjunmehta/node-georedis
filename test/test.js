@@ -486,32 +486,6 @@ exports['Basic Query with Coordinates and Precision'] = function(t) {
     });
 };
 
-exports['Basic Query with Coordinates and Count Without Transactions Support'] = function(t) {
-    var options = {
-        withCoordinates: true,
-        transactionsUnsupported: true,
-        count: 10
-    };
-
-    t.expect(9);
-
-    geo.nearby(testPoint, 50000, options, function(err, replies) {
-
-        if (err) throw err;
-
-        t.equal(typeof replies, 'object');
-        t.equal(Array.isArray(replies), true);
-        t.equal(replies.length, 10);
-        t.equal(typeof replies[0], 'object');
-        t.equal(typeof replies[0].distance, 'undefined');
-        t.equal(typeof replies[0].hash, 'undefined');
-        t.equal(typeof replies[0].latitude, 'number');
-        t.equal(typeof replies[0].longitude, 'number');
-        t.equal(typeof replies.locationSet, 'object');
-
-        t.done();
-    });
-};
 
 exports['Remove Location'] = function(t) {
 
