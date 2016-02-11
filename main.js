@@ -158,14 +158,7 @@ function checkNativeInterface(set, client, nativeGeo) {
         if (nativeGeo === undefined) {
 
             try {
-                client.send_command('command', nativeCommands, function(err, response) {
-
-                    if (!err) {
-                        if (Array.isArray(response) && Array.isArray(response[0]) && response[0][0] === 'geoadd') {
-                            set.clientInterface = new NativeInterface(client);
-                        }
-                    }
-                });
+              throw "Using twemprxy";
             } catch (err) {
                 // silent handling of error if there is one.
             }
