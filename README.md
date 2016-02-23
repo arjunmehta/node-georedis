@@ -279,7 +279,7 @@ Initialize the module with a redis client.
 
 #### Options
 - `zset` **String**: Default `geo:locations`. Set this option to specify a zset name to use to store location values.
-- `nativeGeo` **Boolean**: Default `true` if Redis supports geo commands, `false` if not. Force to `false` if you don't want to make use of native geo commands for some reason. Forcing to `true` on non0supported versions of redis will likely cause errors.
+- `nativeGeo` **Boolean**: Default `true` if Redis supports geo commands, `false` if not. Force to `false` if you don't want to make use of native geo commands for some reason. Forcing to `true` on non-supported versions of redis will likely cause errors.
 
 
 ```javascript
