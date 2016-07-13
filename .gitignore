@@ -25,9 +25,3 @@ build/Release
 node_modules
 
 dump.rdb
-
-.vs
-bin
-obj
-node-georedis.njsproj
-node-georedis.sln
