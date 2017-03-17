@@ -232,8 +232,6 @@ exports['Locations Null'] = function(t) {
 
     geo.locations(locationQuery, function(err, points) {
 
-        console.log('Null?', points['non-existent']);
-
         if (err) throw err;
         t.equal(err, null);
         t.equal(Object.keys(points).length, 10);
@@ -245,51 +243,6 @@ exports['Locations Null'] = function(t) {
         t.done();
     });
 };
-
-
-// exports['Generate Cache'] = function(t) {
-
-//     var expected = [
-//         [1785293350895616, 1785297645862912],
-//         [1785319120699392, 1785323415666688],
-//         [1785327710633984, 1785332005601280],
-//         [1785478034489344, 1785486624423936],
-//         [1785503804293120, 1785520984162304]
-//     ];
-
-//     t.expect(expected.length * 2);
-
-//     var cachedQuery = geo.getQueryCache(lat, lon, 50000);
-
-//     for (var i = 0; i < expected.length; i++) {
-//         t.equal(cachedQuery[i][0], expected[i][0]);
-//         t.equal(cachedQuery[i][1], expected[i][1]);
-//     }
-
-//     t.done();
-// };
-
-
-// exports['Performant Query'] = function(t) {
-
-//     var expected = [
-//         [1785293350895616, 1785297645862912],
-//         [1785319120699392, 1785323415666688],
-//         [1785327710633984, 1785332005601280],
-//         [1785478034489344, 1785486624423936],
-//         [1785503804293120, 1785520984162304]
-//     ];
-
-//     t.expect(1);
-
-//     var cachedQuery = geo.getQueryCache(lat, lon, 50000);
-
-//     geo.nearbyWithQueryCache(cachedQuery, function(err, replies) {
-//         t.equal(replies.length, 6902);
-//         t.done();
-//     });
-// };
-
 
 exports['Basic Query'] = function(t) {
 
@@ -365,8 +318,6 @@ exports['Basic Query in Order'] = function(t) {
     geo.nearby(testPoint, 50000, {
         order: true
     }, function(err, replies) {
-
-        // console.log('Replies', replies);
 
         if (err) throw err;
         t.equal(typeof replies, 'object');
