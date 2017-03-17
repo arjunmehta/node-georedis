@@ -38,17 +38,19 @@
   },
   "devDependencies": {
     "benchmark": "1.0.0",
+    "fakeredis": "2.0.0",
     "geo-proximity": "2.3.1",
     "ioredis": "2.5.0",
     "nodeunit": "0.9.0",
     "redis": "2.7.1"
   },
   "scripts": {
-    "test": "nodeunit test/testEmulated.js && nodeunit test/testNative.js && nodeunit test/testIORedis.js  && nodeunit test/testIORedisNative.js",
+    "test": "nodeunit test/testEmulated.js && nodeunit test/testNative.js && nodeunit test/testIORedis.js  && nodeunit test/testIORedisNative.js && nodeunit test/tesFakeRedistEmulated.js",
     "testEmulated": "nodeunit test/testEmulated.js",
     "testNative": "nodeunit test/testNative.js",
     "testIORedis": "nodeunit test/testIORedis.js",
     "testIORedisNative": "nodeunit test/testIORedisNative.js",
+    "testFakeRedisEmulated": "nodeunit test/testFakeRedisEmulated.js",
     "benchmark": "node ./test/benchmark.js"
   },
   "main": "./main",
