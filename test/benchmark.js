@@ -42,7 +42,7 @@ client.del('geo:old');
 
 locationSet.center_0 = testPoint;
 
-for (i = 0; i < 50000; i++) {
+for (i = 0; i < 10000; i++) {
     distance = i * (i / 100);
     locationRange = getMinMaxs(lat, lon, distance);
 
