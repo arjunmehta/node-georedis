@@ -3,7 +3,6 @@ GeoRedis
 
 [![Build Status](https://travis-ci.org/arjunmehta/node-georedis.svg)](https://travis-ci.org/arjunmehta/node-georedis)
 
-**Note:** *node-geo-proximity is now node-georedis*<br>
 **Note:** *Requires a [Redis](http://redis.io) server to be accessible to your Node environment.*<br>
 **Note:** *Will use native [Redis geo commands](http://redis.io/commands#geo) if they are available, and fallback to an emulation if not available.*<br>
 
@@ -18,7 +17,7 @@ This Node module provides comprehensive location management and queries to all y
 - **A simple, easy to use, scalable interface.**
 
 Other bonuses:
-- **Supports node-redis, ioredis and fakeredis node modules**.
+- **Supports node-redis and ioredis modules. fakeredis is unofficially supported**.
 - **Compatible input/output with the popular [GeoLib](https://github.com/manuelbieh/Geolib) module for further manipulation.**
 
 [Read more about how this module works](http://gis.stackexchange.com/questions/18330/would-it-be-possible-to-use-geohash-for-proximity-searches/92331#92331).
