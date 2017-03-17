@@ -44,9 +44,11 @@
     "redis": "2.7.1"
   },
   "scripts": {
-    "test": "nodeunit test/testEmulated.js && nodeunit test/testNative.js",
+    "test": "nodeunit test/testEmulated.js && nodeunit test/testNative.js && nodeunit test/testIORedis.js  && nodeunit test/testIORedisNative.js",
+    "testEmulated": "nodeunit test/testEmulated.js",
     "testNative": "nodeunit test/testNative.js",
     "testIORedis": "nodeunit test/testIORedis.js",
+    "testIORedisNative": "nodeunit test/testIORedisNative.js",
     "benchmark": "node ./test/benchmark.js"
   },
   "main": "./main",
