@@ -109,7 +109,7 @@ exports['Add Locations'] = function(t) {
     locationSet = {};
     locationSet['center_0'] = testPoint;
 
-    for (var i = 0; i < 50000; i++) {
+    for (var i = 0; i < 10000; i++) {
         distance = i * (i / 100);
         locationRange = getMinMaxs(lat, lon, distance);
 
@@ -301,7 +301,7 @@ exports['Basic Query'] = function(t) {
         if (err) throw err;
         t.equal(typeof replies, 'object');
         t.equal(Array.isArray(replies), true);
-        t.equal(replies.length, 8060);
+        t.equal(replies.length, 7969);
         t.equal(typeof replies[0], 'string');
         t.equal(typeof replies.locationSet, 'object');
         t.done();
@@ -318,7 +318,7 @@ exports['Basic Query by Member'] = function(t) {
         if (err) throw err;
         t.equal(typeof replies, 'object');
         t.equal(Array.isArray(replies), true);
-        t.equal(replies.length, 8060);
+        t.equal(replies.length, 7969);
         t.equal(typeof replies[0], 'string');
         t.equal(typeof replies.locationSet, 'object');
         t.done();
@@ -351,7 +351,7 @@ exports['Basic Query in Order'] = function(t) {
         if (err) throw err;
         t.equal(typeof replies, 'object');
         t.equal(Array.isArray(replies), true);
-        t.equal(replies.length, 8060);
+        t.equal(replies.length, 7969);
         t.equal(typeof replies[0], 'string');
         t.equal(typeof replies.locationSet, 'object');
         t.done();
@@ -372,7 +372,7 @@ exports['Basic Query with Coordinates'] = function(t) {
 
         t.equal(typeof replies, 'object');
         t.equal(Array.isArray(replies), true);
-        t.equal(replies.length, 8060);
+        t.equal(replies.length, 7969);
         t.equal(typeof replies[0], 'object');
         t.equal(typeof replies[0].distance, 'undefined');
         t.equal(typeof replies[0].hash, 'undefined');
@@ -397,7 +397,7 @@ exports['Basic Query in Order with Coordinates'] = function(t) {
         if (err) throw err;
         t.equal(typeof replies, 'object');
         t.equal(Array.isArray(replies), true);
-        t.equal(replies.length, 8060);
+        t.equal(replies.length, 7969);
         t.equal(typeof replies[0], 'object');
         t.equal(typeof replies[0].distance, 'undefined');
         t.equal(typeof replies[0].hash, 'undefined');
@@ -422,7 +422,7 @@ exports['Basic Query with Hashes'] = function(t) {
 
         t.equal(typeof replies, 'object');
         t.equal(Array.isArray(replies), true);
-        t.equal(replies.length, 8060);
+        t.equal(replies.length, 7969);
         t.equal(typeof replies[0], 'object');
         t.equal(typeof replies[0].distance, 'undefined');
         t.equal(typeof replies[0].hash, 'number');
@@ -442,7 +442,7 @@ exports['Basic Query with Coordinates and Precision'] = function(t) {
         accurate: true
     };
 
-    t.expect(9 + 8060);
+    t.expect(9 + 7969);
 
     geo.nearby(testPoint, 50000, options, function(err, replies) {
 
@@ -454,7 +454,7 @@ exports['Basic Query with Coordinates and Precision'] = function(t) {
 
         t.equal(typeof replies, 'object');
         t.equal(Array.isArray(replies), true);
-        t.equal(replies.length, 8060);
+        t.equal(replies.length, 7969);
         t.equal(typeof replies[0], 'object');
         t.equal(typeof replies[0].distance, 'number');
         t.equal(typeof replies[0].latitude, 'number');
@@ -503,7 +503,7 @@ exports['Remove Locations'] = function(t) {
         geo.removeLocations(arrayToDelete, function(err, numberRemoved) {
 
             if (err) throw err;
-            t.equal(numberRemoved, 8059);
+            t.equal(numberRemoved, 7968);
             t.done();
         });
     });
@@ -551,7 +551,7 @@ exports['Add Nearby Ranges'] = function(t) {
     locationSet = {};
     locationSet['center_0'] = testPoint;
 
-    for (var i = 0; i < 50000; i++) {
+    for (var i = 0; i < 10000; i++) {
         distance = i * (i / 100);
         locationRange = getMinMaxs(lat, lon, distance);
 

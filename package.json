@@ -33,18 +33,20 @@
     "url": "https://github.com/arjunmehta/node-georedis"
   },
   "dependencies": {
-    "geolib": "~2.0.18",
-    "ngeohash": "~0.6.0"
+    "geolib": "2.0.18",
+    "ngeohash": "0.6.0"
   },
   "devDependencies": {
     "benchmark": "1.0.0",
     "geo-proximity": "2.3.1",
-    "nodeunit": "~0.9.0",
-    "redis": "~2.3.0"
+    "ioredis": "2.5.0",
+    "nodeunit": "0.9.0",
+    "redis": "2.7.1"
   },
   "scripts": {
-    "test": "nodeunit test/test.js",
+    "test": "nodeunit test/testEmulated.js && nodeunit test/testNative.js",
     "testNative": "nodeunit test/testNative.js",
+    "testIORedis": "nodeunit test/testIORedis.js",
     "benchmark": "node ./test/benchmark.js"
   },
   "main": "./main",
