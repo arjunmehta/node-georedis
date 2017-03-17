@@ -45,7 +45,7 @@
     "redis": "2.7.1"
   },
   "scripts": {
-    "test": "nodeunit test/testEmulated.js && nodeunit test/testNative.js && nodeunit test/testIORedis.js  && nodeunit test/testIORedisNative.js && nodeunit test/tesFakeRedistEmulated.js",
+    "test": "nodeunit test/testEmulated.js && nodeunit test/testNative.js && nodeunit test/testIORedis.js && nodeunit test/testIORedisNative.js && nodeunit test/testFakeRedisEmulated.js",
     "testEmulated": "nodeunit test/testEmulated.js",
     "testNative": "nodeunit test/testNative.js",
     "testIORedis": "nodeunit test/testIORedis.js",
