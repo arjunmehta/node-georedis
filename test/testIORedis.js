@@ -3,8 +3,8 @@ var testComponents = require('./testComponents');
 var client = new IORedis();
 
 var geo = require('../main.js').initialize(client, {
-    zset: 'geo:emulated',
-    nativeGeo: false
+  zset: 'geo:emulated',
+  nativeGeo: false
 });
 
 testComponents.setGeo(geo, client, 'geo:emulated', 'Redis');

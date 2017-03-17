@@ -13,738 +13,708 @@ var lon = -79.403723;
 var startRadius = 0.4;
 
 var testPoint = {
-    latitude: lat,
-    longitude: lon
+  latitude: lat,
+  longitude: lon
 };
 
 var setLength;
 
 module.exports = {
 
-    setGeo: function(testingGeo, testingClient, testingGeoSet, testingInterface) {
-        geo = testingGeo;
-        client = testingClient;
-        geoSet = testingGeoSet;
-        interfce = testingInterface;
-    },
+  setGeo: function(testingGeo, testingClient, testingGeoSet, testingInterface) {
+    geo = testingGeo;
+    client = testingClient;
+    geoSet = testingGeoSet;
+    interfce = testingInterface;
+  },
 
-    'Exporting OK': function(t) {
-        client.del(geoSet);
+  'Exporting OK': function(t) {
+    client.del(geoSet);
 
-        t.expect(4);
+    t.expect(4);
 
-        t.equal(typeof geo === 'object', true);
-        t.equal(typeof geo.initialize === 'function', true);
-        t.equal(geo.clientInterface.client.constructor.name, interfce);
-        t.equal(geo.zset, geoSet);
+    t.equal(typeof geo === 'object', true);
+    t.equal(typeof geo.initialize === 'function', true);
+    t.equal(geo.clientInterface.client.constructor.name, interfce);
+    t.equal(geo.zset, geoSet);
+    t.done();
+  },
+
+  'Location Null': function(t) {
+    client.del(geoSet);
+
+    t.expect(1);
+
+    geo.location('Toronto', function(err, reply) {
+      t.equal(reply, null);
+      t.done();
+    });
+  },
+
+  'Add Location': function(t) {
+    client.del(geoSet);
+
+    t.expect(1);
+
+    geo.addLocation('Toronto', {
+      latitude: 43.6667,
+      longitude: -79.4167
+    }, function(err, reply) {
+      t.equal(reply, 1);
+      t.done();
+    });
+  },
+
+
+  'Add Locations': function(t) {
+    var locationRange;
+    var distance = 0;
+    var count = 1;
+
+    client.del(geoSet);
+
+    t.expect(2);
+
+    locationSet = {};
+    locationSet['center_0'] = testPoint;
+
+    for (var i = 0; i < 10000; i++) {
+      distance = i * (i / 100);
+      locationRange = getMinMaxs(lat, lon, distance);
+
+      locationSet['sw_' + distance] = {
+        latitude: locationRange.latmin % 85,
+        longitude: locationRange.lonmin % 180
+      };
+      locationSet['nw_' + distance] = {
+        latitude: locationRange.latmax % 85,
+        longitude: locationRange.lonmin % 180
+      };
+      locationSet['se_' + distance] = {
+        latitude: locationRange.latmin % 85,
+        longitude: locationRange.lonmax % 180
+      };
+      locationSet['ne_' + distance] = {
+        latitude: locationRange.latmax % 85,
+        longitude: locationRange.lonmax % 180
+      };
+
+      count += 4;
+    }
+
+    geo.addLocations(locationSet, function(err, reply) {
+      t.equal(err, null);
+      t.equal(count, reply);
+      t.done();
+    });
+  },
+
+
+  'Get Location': function(t) {
+    t.expect(3);
+
+    geo.location('sw_616696.09', function(err, point) {
+
+      if (err) throw err;
+      t.equal(err, null);
+      t.equal(Math.round(point.latitude * 100), Math.round(locationSet['sw_616696.09'].latitude * 100));
+      t.equal(Math.round(point.longitude * 100), Math.round(locationSet['sw_616696.09'].longitude * 100));
+      t.done();
+    });
+  },
+
+  'Get Locations': function(t) {
+    var locationQuery = [];
+    var point;
+    var i = 0;
+    var latlon;
+
+    for (var locationName in locationSet) {
+      if (i++ % 100 === 0) {
+        locationQuery.push(locationName);
+      }
+    }
+
+    t.expect((locationQuery.length * 3) + 2);
+
+    i = 0;
+
+    geo.locations(locationQuery, function(err, points) {
+      if (err) throw err;
+      t.equal(err, null);
+      t.equal(Object.keys(points).length, locationQuery.length);
+
+      for (var pointName in points) {
+        latlon = geohash.decode_int(geohash.encode_int(locationSet[locationQuery[i]].latitude, locationSet[locationQuery[i]].longitude));
+        point = points[pointName];
+        t.equal(pointName, locationQuery[i]);
+        t.equal(Math.round(point.latitude), Math.round(latlon.latitude));
+        t.equal(Math.round(point.longitude), Math.round(latlon.longitude));
+        i++;
+      }
+
+      t.done();
+    });
+  },
+
+  'Get Distance': function(t) {
+    t.expect(2);
+
+    geo.distance('sw_616696.09', 'center_0', function(err, distance) {
+      if (err) throw err;
+      t.ok(isBetween(distance, 790384 - 200, 790384 + 200));
+    });
+
+    geo.distance('sw_616696.09', 'center_0', {
+      units: 'ft'
+    }, function(err, distance) {
+      if (err) throw err;
+      t.ok(isBetween(distance, (790384 * 3.28084) - 200, (790384 * 3.28084) + 200));
+      t.done();
+    });
+  },
+
+  'Locations Null': function(t) {
+    t.expect(6);
+
+    var locationQuery = [
+      'sw_4682463.21',
+      'nw_4693288.96',
+      'se_4704127.21',
+      'non-existent',
+      'ne_4714977.96',
+      'sw_4726276',
+      'nw_4737152.25',
+      'se_4748041',
+      'ne_4758942.25',
+      'sw_4770292.81'
+    ];
+
+    geo.locations(locationQuery, function(err, points) {
+      if (err) throw err;
+      
+      t.equal(err, null);
+      t.equal(Object.keys(points).length, 10);
+      t.equal(typeof points['non-existent'], 'object');
+      t.equal(typeof points['sw_4682463.21'], 'object');
+      t.equal(typeof points['nw_4737152.25'], 'object');
+      t.equal(points['non-existent'], null);
+
+      t.done();
+    });
+  },
+
+  'Basic Query': function(t) {
+    t.expect(5);
+
+    geo.nearby(testPoint, 50000, function(err, replies) {
+
+      if (err) throw err;
+
+      setLength = replies.length;
+
+      t.equal(typeof replies, 'object');
+      t.equal(Array.isArray(replies), true);
+      t.ok(isBetween(replies.length, 5000, 9000));
+      t.equal(typeof replies[0], 'string');
+      t.equal(typeof replies.locationSet, 'object');
+      t.done();
+    });
+  },
+
+  'Basic Query by Member': function(t) {
+    t.expect(5);
+
+    geo.nearby('center_0', 50000, function(err, replies) {
+
+      if (err) throw err;
+      t.equal(typeof replies, 'object');
+      t.equal(Array.isArray(replies), true);
+      t.equal(replies.length, setLength);
+      t.equal(typeof replies[0], 'string');
+      t.equal(typeof replies.locationSet, 'object');
+      t.done();
+    });
+  },
+
+  'Basic Query by Null Member': function(t) {
+    t.expect(4);
+
+    geo.nearby('non-existent', 50000, function(err, replies) {
+      t.equal(err.message, 'ERR could not decode requested zset member');
+      t.equal((err === null), false);
+      t.equal(Array.isArray(replies), false);
+      t.equal(replies, null);
+      t.done();
+    });
+  },
+
+  'Basic Query with Count': function(t) {
+    t.expect(5);
+
+    geo.nearby(testPoint, 50000, {
+      count: 10
+    }, function(err, replies) {
+
+      if (err) throw err;
+      t.equal(typeof replies, 'object');
+      t.equal(Array.isArray(replies), true);
+      t.equal(replies.length, 10);
+      t.equal(typeof replies[0], 'string');
+      t.equal(typeof replies.locationSet, 'object');
+      t.done();
+    });
+  },
+
+  'Basic Query in Order': function(t) {
+    t.expect(5);
+
+    geo.nearby(testPoint, 50000, {
+      order: true
+    }, function(err, replies) {
+
+      if (err) throw err;
+      t.equal(typeof replies, 'object');
+      t.equal(Array.isArray(replies), true);
+      t.equal(replies.length, setLength);
+      t.ok(typeof replies[0] === 'object' || typeof replies[0] === 'string');
+      t.equal(typeof replies.locationSet, 'object');
+      t.done();
+    });
+  },
+
+  'Basic Query with Coordinates': function(t) {
+    var options = {
+      withCoordinates: true
+    };
+
+    t.expect(9);
+
+    geo.nearby(testPoint, 50000, options, function(err, replies) {
+
+      if (err) throw err;
+
+      t.equal(typeof replies, 'object');
+      t.equal(Array.isArray(replies), true);
+      t.equal(replies.length, setLength);
+      t.equal(typeof replies[0], 'object');
+      t.equal(typeof replies[0].distance, 'undefined');
+      t.equal(typeof replies[0].hash, 'undefined');
+      t.equal(typeof replies[0].latitude, 'number');
+      t.equal(typeof replies[0].longitude, 'number');
+      t.equal(typeof replies.locationSet, 'object');
+
+      t.done();
+    });
+  },
+
+
+  'Basic Query with Coordinates and Count': function(t) {
+    var options = {
+      withCoordinates: true,
+      count: 10
+    };
+
+    t.expect(9);
+
+    geo.nearby(testPoint, 50000, options, function(err, replies) {
+
+      if (err) throw err;
+
+      t.equal(typeof replies, 'object');
+      t.equal(Array.isArray(replies), true);
+      t.equal(replies.length, 10);
+      t.equal(typeof replies[0], 'object');
+      t.equal(typeof replies[0].distance, 'undefined');
+      t.equal(typeof replies[0].hash, 'undefined');
+      t.equal(typeof replies[0].latitude, 'number');
+      t.equal(typeof replies[0].longitude, 'number');
+      t.equal(typeof replies.locationSet, 'object');
+
+      t.done();
+    });
+  },
+
+  'Basic Query with Hashes': function(t) {
+    var options = {
+      withCoordinates: true,
+      withHashes: true
+    };
+
+    t.expect(9);
+
+    geo.nearby(testPoint, 50000, options, function(err, replies) {
+
+      if (err) throw err;
+
+      t.equal(typeof replies, 'object');
+      t.equal(Array.isArray(replies), true);
+      t.equal(replies.length, setLength);
+      t.equal(typeof replies[0], 'object');
+      t.equal(typeof replies[0].distance, 'undefined');
+      t.equal(typeof replies[0].hash, 'number');
+      t.equal(typeof replies[0].latitude, 'number');
+      t.equal(typeof replies[0].longitude, 'number');
+      t.equal(typeof replies.locationSet, 'object');
+
+      t.done();
+    });
+  },
+
+  'Basic Query with Coordinates and Precision': function(t) {
+    var options = {
+      withCoordinates: true,
+      withDistances: true,
+      accurate: true
+    };
+
+    geo.nearby(testPoint, 50000, options, function(err, replies) {
+      if (err) throw err;
+
+      t.expect(9 + replies.length);
+
+      for (var i = 0; i < replies.length; i++) {
+        t.equal((replies[i].distance <= 50000), true);
+      }
+
+      t.equal(typeof replies, 'object');
+      t.equal(Array.isArray(replies), true);
+      t.ok(isBetween(replies.length, setLength - 2000, setLength + 2000));
+      t.equal(typeof replies[0], 'object');
+      t.equal(typeof replies[0].distance, 'number');
+      t.equal(typeof replies[0].latitude, 'number');
+      t.equal(typeof replies[0].longitude, 'number');
+      t.equal(typeof replies[0].hash, 'undefined');
+      t.equal(typeof replies.locationSet, 'object');
+      t.done();
+    });
+  },
+
+  'Remove Location': function(t) {
+    t.expect(1);
+
+    var oneToDelete = '';
+
+    geo.nearby(testPoint, 50000, function(err, replies) {
+      if (err) throw err;
+
+      oneToDelete = replies[replies.length - 1];
+
+      geo.removeLocation(oneToDelete, function(err, numberRemoved) {
+
+        if (err) throw err;
+        t.equal(numberRemoved, 1);
         t.done();
-
-    },
-
-    'Location Null': function(t) {
-        client.del(geoSet);
-
-        t.expect(1);
-
-        geo.location('Toronto', function(err, reply) {
-            t.equal(reply, null);
-            t.done();
-        });
-    },
-
-    'Add Location': function(t) {
-
-        client.del(geoSet);
-
-        t.expect(1);
-
-        geo.addLocation('Toronto', {
-            latitude: 43.6667,
-            longitude: -79.4167
-        }, function(err, reply) {
-            t.equal(reply, 1);
-            t.done();
-        });
-    },
-
-
-    'Add Locations': function(t) {
-
-        var locationRange;
-        var distance = 0;
-        var count = 1;
-
-        client.del(geoSet);
-
-        t.expect(2);
-
-        locationSet = {};
-        locationSet['center_0'] = testPoint;
-
-        for (var i = 0; i < 10000; i++) {
-            distance = i * (i / 100);
-            locationRange = getMinMaxs(lat, lon, distance);
-
-            locationSet['sw_' + distance] = {
-                latitude: locationRange.latmin % 85,
-                longitude: locationRange.lonmin % 180
-            };
-            locationSet['nw_' + distance] = {
-                latitude: locationRange.latmax % 85,
-                longitude: locationRange.lonmin % 180
-            };
-            locationSet['se_' + distance] = {
-                latitude: locationRange.latmin % 85,
-                longitude: locationRange.lonmax % 180
-            };
-            locationSet['ne_' + distance] = {
-                latitude: locationRange.latmax % 85,
-                longitude: locationRange.lonmax % 180
-            };
-
-            count += 4;
-        }
-
-        geo.addLocations(locationSet, function(err, reply) {
-            t.equal(err, null);
-            t.equal(count, reply);
-            t.done();
-        });
-    },
-
-
-    'Get Location': function(t) {
-
-        t.expect(3);
-
-        geo.location('sw_616696.09', function(err, point) {
-
-            if (err) throw err;
-            t.equal(err, null);
-            t.equal(Math.round(point.latitude * 100), Math.round(locationSet['sw_616696.09'].latitude * 100));
-            t.equal(Math.round(point.longitude * 100), Math.round(locationSet['sw_616696.09'].longitude * 100));
-            t.done();
-        });
-    },
-
-    'Get Locations': function(t) {
-
-        var locationQuery = [];
-        var point;
-        var i = 0;
-        var latlon;
-
-        for (var locationName in locationSet) {
-            if (i++ % 100 === 0) {
-                locationQuery.push(locationName);
-            }
-        }
-
-        t.expect((locationQuery.length * 3) + 2);
-
-        i = 0;
-
-        geo.locations(locationQuery, function(err, points) {
-
-            if (err) throw err;
-            t.equal(err, null);
-            t.equal(Object.keys(points).length, locationQuery.length);
-
-            for (var pointName in points) {
-                latlon = geohash.decode_int(geohash.encode_int(locationSet[locationQuery[i]].latitude, locationSet[locationQuery[i]].longitude));
-                point = points[pointName];
-                t.equal(pointName, locationQuery[i]);
-                t.equal(Math.round(point.latitude), Math.round(latlon.latitude));
-                t.equal(Math.round(point.longitude), Math.round(latlon.longitude));
-                i++;
-            }
-
-            t.done();
-        });
-    },
-
-    'Get Distance': function(t) {
-
-        t.expect(2);
-
-        geo.distance('sw_616696.09', 'center_0', function(err, distance) {
-            if (err) throw err;
-            t.ok(isBetween(distance, 790384 - 200, 790384 + 200));
-        });
-
-        geo.distance('sw_616696.09', 'center_0', {
-            units: 'ft'
-        }, function(err, distance) {
-            if (err) throw err;
-            t.ok(isBetween(distance, (790384 * 3.28084) - 200, (790384 * 3.28084) + 200));
-            t.done();
-        });
-    },
-
-    'Locations Null': function(t) {
-
-        t.expect(6);
-
-        var locationQuery = [
-            'sw_4682463.21',
-            'nw_4693288.96',
-            'se_4704127.21',
-            'non-existent',
-            'ne_4714977.96',
-            'sw_4726276',
-            'nw_4737152.25',
-            'se_4748041',
-            'ne_4758942.25',
-            'sw_4770292.81'
-        ];
-
-        geo.locations(locationQuery, function(err, points) {
-
-            if (err) throw err;
-            t.equal(err, null);
-            t.equal(Object.keys(points).length, 10);
-            t.equal(typeof points['non-existent'], 'object');
-            t.equal(typeof points['sw_4682463.21'], 'object');
-            t.equal(typeof points['nw_4737152.25'], 'object');
-            t.equal(points['non-existent'], null);
-
-            t.done();
-        });
-    },
-
-    'Basic Query': function(t) {
-
-        t.expect(5);
-
-        geo.nearby(testPoint, 50000, function(err, replies) {
-
-            if (err) throw err;
-
-            setLength = replies.length;
-
-            t.equal(typeof replies, 'object');
-            t.equal(Array.isArray(replies), true);
-            t.ok(isBetween(replies.length, 5000, 9000));
-            t.equal(typeof replies[0], 'string');
-            t.equal(typeof replies.locationSet, 'object');
-            t.done();
-        });
-    },
-
-    'Basic Query by Member': function(t) {
-
-        t.expect(5);
-
-        geo.nearby('center_0', 50000, function(err, replies) {
-
-            if (err) throw err;
-            t.equal(typeof replies, 'object');
-            t.equal(Array.isArray(replies), true);
-            t.equal(replies.length, setLength);
-            t.equal(typeof replies[0], 'string');
-            t.equal(typeof replies.locationSet, 'object');
-            t.done();
-        });
-    },
-
-    'Basic Query by Null Member': function(t) {
-
-        t.expect(4);
-
-        geo.nearby('non-existent', 50000, function(err, replies) {
-            t.equal(err.message, 'ERR could not decode requested zset member');
-            t.equal((err === null), false);
-            t.equal(Array.isArray(replies), false);
-            t.equal(replies, null);
-            t.done();
-        });
-    },
-
-    'Basic Query with Count': function(t) {
-
-        t.expect(5);
-
-        geo.nearby(testPoint, 50000, {
-            count: 10
-        }, function(err, replies) {
-
-            if (err) throw err;
-            t.equal(typeof replies, 'object');
-            t.equal(Array.isArray(replies), true);
-            t.equal(replies.length, 10);
-            t.equal(typeof replies[0], 'string');
-            t.equal(typeof replies.locationSet, 'object');
-            t.done();
-        });
-    },
-
-    'Basic Query in Order': function(t) {
-
-        t.expect(5);
-
-        geo.nearby(testPoint, 50000, {
-            order: true
-        }, function(err, replies) {
-
-            if (err) throw err;
-            t.equal(typeof replies, 'object');
-            t.equal(Array.isArray(replies), true);
-            t.equal(replies.length, setLength);
-            t.ok(typeof replies[0] === 'object' || typeof replies[0] === 'string');
-            t.equal(typeof replies.locationSet, 'object');
-            t.done();
-        });
-    },
-
-    'Basic Query with Coordinates': function(t) {
-        var options = {
-            withCoordinates: true
-        };
-
-        t.expect(9);
-
-        geo.nearby(testPoint, 50000, options, function(err, replies) {
-
-            if (err) throw err;
-
-            t.equal(typeof replies, 'object');
-            t.equal(Array.isArray(replies), true);
-            t.equal(replies.length, setLength);
-            t.equal(typeof replies[0], 'object');
-            t.equal(typeof replies[0].distance, 'undefined');
-            t.equal(typeof replies[0].hash, 'undefined');
-            t.equal(typeof replies[0].latitude, 'number');
-            t.equal(typeof replies[0].longitude, 'number');
-            t.equal(typeof replies.locationSet, 'object');
-
-            t.done();
-        });
-    },
-
-
-    'Basic Query with Coordinates and Count': function(t) {
-        var options = {
-            withCoordinates: true,
-            count: 10
-        };
-
-        t.expect(9);
-
-        geo.nearby(testPoint, 50000, options, function(err, replies) {
-
-            if (err) throw err;
-
-            t.equal(typeof replies, 'object');
-            t.equal(Array.isArray(replies), true);
-            t.equal(replies.length, 10);
-            t.equal(typeof replies[0], 'object');
-            t.equal(typeof replies[0].distance, 'undefined');
-            t.equal(typeof replies[0].hash, 'undefined');
-            t.equal(typeof replies[0].latitude, 'number');
-            t.equal(typeof replies[0].longitude, 'number');
-            t.equal(typeof replies.locationSet, 'object');
-
-            t.done();
-        });
-    },
-
-    'Basic Query with Hashes': function(t) {
-        var options = {
-            withCoordinates: true,
-            withHashes: true
-        };
-
-        t.expect(9);
-
-        geo.nearby(testPoint, 50000, options, function(err, replies) {
-
-            if (err) throw err;
-
-            t.equal(typeof replies, 'object');
-            t.equal(Array.isArray(replies), true);
-            t.equal(replies.length, setLength);
-            t.equal(typeof replies[0], 'object');
-            t.equal(typeof replies[0].distance, 'undefined');
-            t.equal(typeof replies[0].hash, 'number');
-            t.equal(typeof replies[0].latitude, 'number');
-            t.equal(typeof replies[0].longitude, 'number');
-            t.equal(typeof replies.locationSet, 'object');
-
-            t.done();
-        });
-    },
-
-    'Basic Query with Coordinates and Precision': function(t) {
-        var options = {
-            withCoordinates: true,
-            withDistances: true,
-            accurate: true
-        };
-
-
-        geo.nearby(testPoint, 50000, options, function(err, replies) {
-
-            if (err) throw err;
-
-            t.expect(9 + replies.length);
-
-            for (var i = 0; i < replies.length; i++) {
-                t.equal((replies[i].distance <= 50000), true);
-            }
-
-            t.equal(typeof replies, 'object');
-            t.equal(Array.isArray(replies), true);
-            t.ok(isBetween(replies.length, setLength - 2000, setLength + 2000));
-            t.equal(typeof replies[0], 'object');
-            t.equal(typeof replies[0].distance, 'number');
-            t.equal(typeof replies[0].latitude, 'number');
-            t.equal(typeof replies[0].longitude, 'number');
-            t.equal(typeof replies[0].hash, 'undefined');
-            t.equal(typeof replies.locationSet, 'object');
-            t.done();
-        });
-    },
-
-    'Remove Location': function(t) {
-
-        t.expect(1);
-
-        var oneToDelete = '';
-
-        geo.nearby(testPoint, 50000, function(err, replies) {
-
-            if (err) throw err;
-
-            oneToDelete = replies[replies.length - 1];
-
-            geo.removeLocation(oneToDelete, function(err, numberRemoved) {
-
-                if (err) throw err;
-                t.equal(numberRemoved, 1);
-                t.done();
-            });
-        });
-    },
-
-    'Remove Locations': function(t) {
-
-        t.expect(1);
-
-        var arrayToDelete = [];
-
-        geo.nearby(testPoint, 50000, function(err, replies) {
-
-            if (err) throw err;
-
-            arrayToDelete = replies;
-
-            geo.removeLocations(arrayToDelete, function(err, numberRemoved) {
-
-                if (err) throw err;
-                t.equal(numberRemoved, setLength - 1);
-                t.done();
-            });
-        });
-    },
-
-    'Large Radius': function(t) {
-
-        client.del(geoSet);
-
-        t.expect(1);
-
-        geo.addLocation('debugger', {
-            latitude: 1,
-            longitude: 2
-        }, function(err, reply) {});
-
-        geo.addLocation('boostbob', {
-            latitude: 2,
-            longitude: 3
-        }, function(err, reply) {});
-
-        geo.nearby({
-            latitude: 2,
-            longitude: 2
-        }, 100000000, function(err, replies) {
-            t.equal(replies[2], null);
-            t.done();
-        });
-    },
-
-    'Add Nearby Ranges': function(t) {
-
-        var locationRange;
-        var distance = 0;
-        var count = 1;
-
-        client.del(geoSet);
-
-        t.expect(2);
-
-        locationSet = {};
-        locationSet['center_0'] = testPoint;
-
-        for (var i = 0; i < 10000; i++) {
-            distance = i * (i / 100);
-            locationRange = getMinMaxs(lat, lon, distance);
-
-            locationSet['sw_' + distance] = {
-                latitude: locationRange.latmin % 85,
-                longitude: locationRange.lonmin % 180
-            };
-            locationSet['nw_' + distance] = {
-                latitude: locationRange.latmax % 85,
-                longitude: locationRange.lonmin % 180
-            };
-            locationSet['se_' + distance] = {
-                latitude: locationRange.latmin % 85,
-                longitude: locationRange.lonmax % 180
-            };
-            locationSet['ne_' + distance] = {
-                latitude: locationRange.latmax % 85,
-                longitude: locationRange.lonmax % 180
-            };
-
-            count += 4;
-        }
-
-        geo.addLocations(locationSet, function(err, reply) {
-
-            if (err) throw err;
-            t.equal(err, null);
-            t.equal(count, reply);
-            t.done();
-        });
-    },
-
-    'Radii Ranges': function(t) {
-
-        t.expect(22);
-
-        queryRadius(startRadius, t, function() {
-            t.done();
-        });
-    },
-
-    'Multiple Sets': function(t) {
-        var peopleLocations = {
-            'John': {
-                latitude: 43.6667,
-                longitude: -79.4167
-            },
-            'Shankar': {
-                latitude: 39.9523,
-                longitude: -75.1638
-            },
-            'Cynthia': {
-                latitude: 37.4688,
-                longitude: -122.1411
-            },
-            'Chen': {
-                latitude: 37.7691,
-                longitude: -122.4449
-            }
-        };
-
-        var placesLocations = {
-            'Toronto': {
-                latitude: 43.6667,
-                longitude: -79.4167
-            },
-            'Philadelphia': {
-                latitude: 39.9523,
-                longitude: -75.1638
-            },
-            'Palo Alto': {
-                latitude: 37.4688,
-                longitude: -122.1411
-            },
-            'San Francisco': {
-                latitude: 37.7691,
-                longitude: -122.4449
-            },
-            'St. John\'s': {
-                latitude: 47.5500,
-                longitude: -52.6667
-            }
-        };
-
-        t.expect(2);
-
-        places = geo.addSet();
-        people = geo.addSet('people');
-
-        people.addLocations(peopleLocations, function(err, reply) {
-
-            if (err) throw err;
-
-            places.addLocations(placesLocations, function(err, reply) {
-
-                if (err) throw err;
-
-                people.nearby({
-                    latitude: 39.9523,
-                    longitude: -75.1638
-                }, 5000, function(err, people) {
-                    if (err) throw err;
-
-                    t.equal(people[0], 'Shankar');
-
-                    places.nearby({
-                        latitude: 39.9523,
-                        longitude: -75.1638
-                    }, 5000, function(err, places) {
-                        if (err) throw err;
-                        t.equal(places[0], 'Philadelphia');
-                        t.done();
-                    });
-                });
-            });
-        });
-    },
-
-    'Multiple Sets With Values': function(t) {
-
-        t.expect(6);
+      });
+    });
+  },
+
+  'Remove Locations': function(t) {
+    t.expect(1);
+
+    var arrayToDelete = [];
+
+    geo.nearby(testPoint, 50000, function(err, replies) {
+
+      if (err) throw err;
+
+      arrayToDelete = replies;
+
+      geo.removeLocations(arrayToDelete, function(err, numberRemoved) {
+
+        if (err) throw err;
+        t.equal(numberRemoved, setLength - 1);
+        t.done();
+      });
+    });
+  },
+
+  'Large Radius': function(t) {
+    client.del(geoSet);
+
+    t.expect(1);
+
+    geo.addLocation('debugger', {
+      latitude: 1,
+      longitude: 2
+    }, function(err, reply) {});
+
+    geo.addLocation('boostbob', {
+      latitude: 2,
+      longitude: 3
+    }, function(err, reply) {});
+
+    geo.nearby({
+      latitude: 2,
+      longitude: 2
+    }, 100000000, function(err, replies) {
+      t.equal(replies[2], null);
+      t.done();
+    });
+  },
+
+  'Add Nearby Ranges': function(t) {
+    var locationRange;
+    var distance = 0;
+    var count = 1;
+
+    client.del(geoSet);
+
+    t.expect(2);
+
+    locationSet = {};
+    locationSet['center_0'] = testPoint;
+
+    for (var i = 0; i < 10000; i++) {
+      distance = i * (i / 100);
+      locationRange = getMinMaxs(lat, lon, distance);
+
+      locationSet['sw_' + distance] = {
+        latitude: locationRange.latmin % 85,
+        longitude: locationRange.lonmin % 180
+      };
+      locationSet['nw_' + distance] = {
+        latitude: locationRange.latmax % 85,
+        longitude: locationRange.lonmin % 180
+      };
+      locationSet['se_' + distance] = {
+        latitude: locationRange.latmin % 85,
+        longitude: locationRange.lonmax % 180
+      };
+      locationSet['ne_' + distance] = {
+        latitude: locationRange.latmax % 85,
+        longitude: locationRange.lonmax % 180
+      };
+
+      count += 4;
+    }
+
+    geo.addLocations(locationSet, function(err, reply) {
+      if (err) throw err;
+      t.equal(err, null);
+      t.equal(count, reply);
+      t.done();
+    });
+  },
+
+  'Radii Ranges': function(t) {
+    t.expect(22);
+
+    queryRadius(startRadius, t, function() {
+      t.done();
+    });
+  },
+
+  'Multiple Sets': function(t) {
+    var peopleLocations = {
+      'John': {
+        latitude: 43.6667,
+        longitude: -79.4167
+      },
+      'Shankar': {
+        latitude: 39.9523,
+        longitude: -75.1638
+      },
+      'Cynthia': {
+        latitude: 37.4688,
+        longitude: -122.1411
+      },
+      'Chen': {
+        latitude: 37.7691,
+        longitude: -122.4449
+      }
+    };
+
+    var placesLocations = {
+      'Toronto': {
+        latitude: 43.6667,
+        longitude: -79.4167
+      },
+      'Philadelphia': {
+        latitude: 39.9523,
+        longitude: -75.1638
+      },
+      'Palo Alto': {
+        latitude: 37.4688,
+        longitude: -122.1411
+      },
+      'San Francisco': {
+        latitude: 37.7691,
+        longitude: -122.4449
+      },
+      'St. John\'s': {
+        latitude: 47.5500,
+        longitude: -52.6667
+      }
+    };
+
+    t.expect(2);
+
+    places = geo.addSet();
+    people = geo.addSet('people');
+
+    people.addLocations(peopleLocations, function(err, reply) {
+      if (err) throw err;
+
+      places.addLocations(placesLocations, function(err, reply) {
+
+        if (err) throw err;
 
         people.nearby({
+          latitude: 39.9523,
+          longitude: -75.1638
+        }, 5000, function(err, people) {
+          if (err) throw err;
+
+          t.equal(people[0], 'Shankar');
+
+          places.nearby({
             latitude: 39.9523,
             longitude: -75.1638
-        }, 5000000, {
-            withCoordinates: true
-        }, function(err, people) {
+          }, 5000, function(err, places) {
             if (err) throw err;
-
-            people = people.locationSet;
-
-            var cynthia = people['Cynthia'];
-            var inlatRange = (cynthia.latitude > 37.4688 - 0.005 && cynthia.latitude < 37.4688 + 0.005) ? true : false;
-            var inlonRange = (cynthia.longitude > -122.1411 - 0.005 && cynthia.longitude < -122.1411 + 0.005) ? true : false;
-
-            t.equal(typeof cynthia, 'object');
-            t.equal(inlatRange, true);
-            t.equal(inlonRange, true);
-
-            places.nearby({
-                latitude: 39.9523,
-                longitude: -75.1638
-            }, 5000000, {
-                withCoordinates: true
-            }, function(err, places) {
-                if (err) throw err;
-
-                places = places.locationSet;
-
-                var philadelphia = places['Philadelphia'];
-
-                inlatRange = (philadelphia.latitude > 39.9523 - 0.005 && philadelphia.latitude < 39.9523 + 0.005) ? true : false;
-                inlonRange = (philadelphia.longitude > -75.1638 - 0.005 && philadelphia.longitude < -75.1638 + 0.005) ? true : false;
-
-                t.equal(typeof philadelphia, 'object');
-                t.equal(inlatRange, true);
-                t.equal(inlonRange, true);
-
-                t.done();
-            });
+            t.equal(places[0], 'Philadelphia');
+            t.done();
+          });
         });
-    },
+      });
+    });
+  },
 
-    'Deleting Set': function(t) {
+  'Multiple Sets With Values': function(t) {
+    t.expect(6);
 
-        t.expect(2);
+    people.nearby({
+      latitude: 39.9523,
+      longitude: -75.1638
+    }, 5000000, {
+      withCoordinates: true
+    }, function(err, people) {
+      if (err) throw err;
 
-        geo.deleteSet('people', function(err, res) {
+      people = people.locationSet;
 
-            people.nearby({
-                latitude: 39.9523,
-                longitude: -75.1638
-            }, 5000000, {
-                withCoordinates: true
-            }, function(err, people) {
-                t.equal(people.length, 0);
-            });
-        });
+      var cynthia = people['Cynthia'];
+      var inlatRange = (cynthia.latitude > 37.4688 - 0.005 && cynthia.latitude < 37.4688 + 0.005) ? true : false;
+      var inlonRange = (cynthia.longitude > -122.1411 - 0.005 && cynthia.longitude < -122.1411 + 0.005) ? true : false;
 
-        places.delete(function(err, res) {
+      t.equal(typeof cynthia, 'object');
+      t.equal(inlatRange, true);
+      t.equal(inlonRange, true);
 
-            places.nearby({
-                latitude: 39.9523,
-                longitude: -75.1638
-            }, 5000000, {
-                withCoordinates: true
-            }, function(err, places) {
-                t.equal(places.length, 0);
-                t.done();
-            });
-        });
-    },
+      places.nearby({
+        latitude: 39.9523,
+        longitude: -75.1638
+      }, 5000000, {
+        withCoordinates: true
+      }, function(err, places) {
+        if (err) throw err;
 
-    'Quitting Client': function(t) {
-        client.quit();
+        places = places.locationSet;
+
+        var philadelphia = places['Philadelphia'];
+
+        inlatRange = (philadelphia.latitude > 39.9523 - 0.005 && philadelphia.latitude < 39.9523 + 0.005) ? true : false;
+        inlonRange = (philadelphia.longitude > -75.1638 - 0.005 && philadelphia.longitude < -75.1638 + 0.005) ? true : false;
+
+        t.equal(typeof philadelphia, 'object');
+        t.equal(inlatRange, true);
+        t.equal(inlonRange, true);
+
         t.done();
-    },
+      });
+    });
+  },
 
-    tearDown: function(done) {
-        done();
-    }
+  'Deleting Set': function(t) {
+    t.expect(2);
+
+    geo.deleteSet('people', function(err, res) {
+      people.nearby({
+        latitude: 39.9523,
+        longitude: -75.1638
+      }, 5000000, {
+        withCoordinates: true
+      }, function(err, people) {
+        t.equal(people.length, 0);
+      });
+    });
+
+    places.delete(function(err, res) {
+      places.nearby({
+        latitude: 39.9523,
+        longitude: -75.1638
+      }, 5000000, {
+        withCoordinates: true
+      }, function(err, places) {
+        t.equal(places.length, 0);
+        t.done();
+      });
+    });
+  },
+
+  'Quitting Client': function(t) {
+    client.quit();
+    t.done();
+  },
+
+  tearDown: function(done) {
+    done();
+  }
 };
 
 
 function queryRadius(radius, t, next) {
+  geo.nearby({
+    latitude: lat,
+    longitude: lon
+  }, radius, function(err, replies) {
+    if (err) throw err;
 
-    geo.nearby({
-        latitude: lat,
-        longitude: lon
-    }, radius, function(err, replies) {
+    var max = 0;
+    var maxname = '';
 
-        if (err) throw err;
+    for (var i = 0; i < replies.length; i++) {
+      var split = replies[i].split('_');
+      if (Number(split[1]) > max) {
+        max = Number(split[1]);
+        maxname = replies[i];
+      }
+    }
 
-        var max = 0;
-        var maxname = '';
+    t.equal((max > radius - (radius / 2) || max < radius + (radius / 2)), true);
 
-        for (var i = 0; i < replies.length; i++) {
-            var split = replies[i].split('_');
-            if (Number(split[1]) > max) {
-                max = Number(split[1]);
-                maxname = replies[i];
-            }
-        }
+    startRadius *= 2;
 
-        t.equal((max > radius - (radius / 2) || max < radius + (radius / 2)), true);
-
-        startRadius *= 2;
-
-        if (startRadius < 1000000) {
-            queryRadius(startRadius, t, next);
-        } else {
-            next();
-        }
-    });
+    if (startRadius < 1000000) {
+      queryRadius(startRadius, t, next);
+    } else {
+      next();
+    }
+  });
 }
 
 
 // helpers
 
 function getMinMaxs(latitude, longitude, radius) {
+  var latr = radius / 111111;
+  var lonr = radius / (111111 * Math.abs(Math.cos(latitude)));
 
-    var latr = radius / 111111;
-    var lonr = radius / (111111 * Math.abs(Math.cos(latitude)));
+  var latmin = latitude - latr;
+  var latmax = latitude + latr;
+  var lonmin = longitude - lonr;
+  var lonmax = longitude + lonr;
 
-    var latmin = latitude - latr;
-    var latmax = latitude + latr;
-    var lonmin = longitude - lonr;
-    var lonmax = longitude + lonr;
-
-    return {
-        latmin: latmin,
-        latmax: latmax,
-        lonmin: lonmin,
-        lonmax: lonmax
-    };
+  return {
+    latmin: latmin,
+    latmax: latmax,
+    lonmin: lonmin,
+    lonmax: lonmax
+  };
 }
 
 
 function isBetween(val, low, high) {
-    return (low <= val && high >= val);
+  return (low <= val && high >= val);
 }

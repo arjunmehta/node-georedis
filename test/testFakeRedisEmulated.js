@@ -3,8 +3,8 @@ var testComponents = require('./testComponents');
 var client = redis.createClient();
 
 var geo = require('../main.js').initialize(client, {
-    zset: 'geo:emulated',
-    nativeGeo: false
+  zset: 'geo:emulated',
+  nativeGeo: false
 });
 
 testComponents.setGeo(geo, client, 'geo:emulated', 'RedisClient');
@@ -45,4 +45,3 @@ exports['tearDown'] = testComponents['tearDown'];
 
 
 return exports;
-
