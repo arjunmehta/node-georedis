@@ -1,5 +1,6 @@
 var NativeInterface = require('./lib/interfaceNative');
 var EmulatedInterface = require('./lib/interfaceEmulated');
+var QueuedInterface = require('./lib/interfaceQueued');
 
 var randomId = require('./lib/util/helper').randomId;
 
@@ -11,19 +12,21 @@ var nativeCommands = ['info', 'geoadd', 'geohash', 'geopos', 'geodist', 'georadi
 function GeoSet(options) {
   options = options || {};
   this.zset = options.zset || 'geo:locations';
-  this.clientInterface = options.clientInterface;
+  this.parentGeoSet = options.parentGeoSet || null;
 }
+
+
+GeoSet.prototype.getClientInterface = function() {
+  return this.parentGeoSet ? this.parentGeoSet.clientInterface : this.clientInterface;
+};
 
 
 // initialization
 
-GeoSet.prototype.initialize = function(redisClient, options) {
+GeoSet.prototype.initialize = function(client, options) {
   options = options || {};
-
-  this.clientInterface = new EmulatedInterface(redisClient);
   this.zset = options.zset ? options.zset : 'geo:locations';
-
-  checkNativeInterface(this, redisClient, options.nativeGeo);
+  this.clientInterface = setInterface(this, client, options.nativeGeo);
 
   return this;
 };
@@ -34,27 +37,27 @@ GeoSet.prototype.initialize = function(redisClient, options) {
 GeoSet.prototype.addSet = function(setName) {
   return new GeoSet({
     zset: this.zset + ':' + (setName || 'subset_' + randomId()),
-    clientInterface: this.clientInterface
+    parentGeoSet: this.parentGeoSet || this
   });
 };
 
 GeoSet.prototype.deleteSet = function(setName, callBack) {
-  this.clientInterface.del(this.zset + ':' + setName, callBack);
+  this.getClientInterface().del(this.zset + ':' + setName, callBack);
 };
 
 GeoSet.prototype.delete = function(callBack) {
-  this.clientInterface.del(this.zset, callBack);
+  this.getClientInterface().del(this.zset, callBack);
 };
 
 
 // adding locations
 
 GeoSet.prototype.addLocation = function(locationName, point, callBack) {
-  this.clientInterface.geoadd(locationName, point, this.zset, callBack);
+  this.getClientInterface().geoadd(locationName, point, this.zset, callBack);
 };
 
 GeoSet.prototype.addLocations = function(locationSet, callBack) {
-  this.clientInterface.geoadd_multi(locationSet, this.zset, callBack);
+  this.getClientInterface().geoadd_multi(locationSet, this.zset, callBack);
 };
 
 
@@ -68,7 +71,7 @@ GeoSet.prototype.distance = function(locationNameA, locationNameB, options, call
     options = options || {};
   }
 
-  this.clientInterface.geodist(locationNameA, locationNameB, options.units, this.zset, callBack);
+  this.getClientInterface().geodist(locationNameA, locationNameB, options.units, this.zset, callBack);
 };
 
 
@@ -82,33 +85,33 @@ GeoSet.prototype.updateLocations = GeoSet.prototype.addLocations;
 // removing locations
 
 GeoSet.prototype.removeLocation = function(locationName, callBack) {
-  this.clientInterface.zrem([locationName], this.zset, callBack);
+  this.getClientInterface().zrem([locationName], this.zset, callBack);
 };
 
 GeoSet.prototype.removeLocations = function(locationNameArray, callBack) {
-  this.clientInterface.zrem(locationNameArray, this.zset, callBack);
+  this.getClientInterface().zrem(locationNameArray, this.zset, callBack);
 };
 
 
 // querying location positions
 
 GeoSet.prototype.location = function(locationName, callBack) {
-  this.clientInterface.geopos([locationName], this.zset, callBack);
+  this.getClientInterface().geopos([locationName], this.zset, callBack);
 };
 
 GeoSet.prototype.locations = function(locationNameArray, callBack) {
-  this.clientInterface.geopos_multi(locationNameArray, this.zset, callBack);
+  this.getClientInterface().geopos_multi(locationNameArray, this.zset, callBack);
 };
 
 
 // querying location geohashes
 
 GeoSet.prototype.getGeohash = function(locationName, callBack) {
-  this.clientInterface.geohash([locationName], this.zset, callBack);
+  this.getClientInterface().geohash([locationName], this.zset, callBack);
 };
 
 GeoSet.prototype.getGeohashes = function(locationNameArray, callBack) {
-  this.clientInterface.geohashes(locationNameArray, this.zset, callBack);
+  this.getClientInterface().geohashes(locationNameArray, this.zset, callBack);
 };
 
 
@@ -123,11 +126,10 @@ GeoSet.prototype.radius = function(location, radius, options, callBack) {
   }
 
   if (typeof location === 'string') {
-    this.clientInterface.georadiusbymember(location, radius, options, this.zset, callBack);
+    this.getClientInterface().georadiusbymember(location, radius, options, this.zset, callBack);
   } else {
-    this.clientInterface.georadius(location, radius, options, this.zset, callBack);
+    this.getClientInterface().georadius(location, radius, options, this.zset, callBack);
   }
-
 };
 
 GeoSet.prototype.nearby = function(location, distance, options, callBack) {
@@ -139,32 +141,41 @@ GeoSet.prototype.nearby = function(location, distance, options, callBack) {
   }
 
   if (typeof location === 'string') {
-    this.clientInterface.nearbymember(location, distance, options, this.zset, callBack);
+    this.getClientInterface().nearbymember(location, distance, options, this.zset, callBack);
   } else {
-    this.clientInterface.nearby(location, distance, options, this.zset, callBack);
+    this.getClientInterface().nearby(location, distance, options, this.zset, callBack);
   }
 };
 
 
-// helpers
+// interface config
 
-function checkNativeInterface(set, client, nativeGeo) {
-  if (client.send_command) {
-    if (nativeGeo === undefined) {
-      try {
-        client.send_command('command', nativeCommands, function(err, response) {
-          if (!err) {
-            if (Array.isArray(response) && Array.isArray(response[0]) && response[0][0] === 'geoadd') {
-              set.clientInterface = new NativeInterface(client);
-            }
-          }
-        });
-      } catch (err) {
-        // silent handling of error if there is one.
+function setInterface(geoSet, client, nativeGeo) {
+  var queuedInterface = new QueuedInterface(client);
+
+  if (nativeGeo === true) {
+    geoSet.clientInterface = new NativeInterface(client);
+    return;
+  } else if (nativeGeo === false) {
+    geoSet.clientInterface = new EmulatedInterface(client);
+    return;
+  }
+
+  geoSet.clientInterface = queuedInterface;
+  checkNativeInterface(queuedInterface, geoSet, client);
+}
+
+function checkNativeInterface(queuedInterface, geoSet, client) {
+  try {
+    client.send_command('command', nativeCommands, function(err, response) {
+      if (!err && Array.isArray(response) && response.length === nativeCommands.length - 1) {
+        geoSet.clientInterface = queuedInterface.drain(new NativeInterface(client));
+      } else {
+        geoSet.clientInterface = queuedInterface.drain(new EmulatedInterface(client));
       }
-    } else if (nativeGeo === true) {
-      set.clientInterface = new NativeInterface(client);
-    }
+    });
+  } catch (err) {
+    geoSet.clientInterface = queuedInterface.drain(new EmulatedInterface(client));
   }
 }
 
