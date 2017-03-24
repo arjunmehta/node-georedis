@@ -43,9 +43,10 @@ module.exports = {
   'Location Null': function(t) {
     client.del(geoSet);
 
-    t.expect(1);
+    t.expect(2);
 
     geo.location('Toronto', function(err, reply) {
+      t.equal(err, null);
       t.equal(reply, null);
       t.done();
     });
@@ -79,7 +80,7 @@ module.exports = {
     locationSet = {};
     locationSet['center_0'] = testPoint;
 
-    for (var i = 0; i < 10000; i++) {
+    for (var i = 0; i < 5000; i++) {
       distance = i * (i / 100);
       locationRange = getMinMaxs(lat, lon, distance);
 
@@ -112,14 +113,16 @@ module.exports = {
 
 
   'Get Location': function(t) {
+    var locations = Object.keys(locationSet);
+    var instance = locations[Math.round(locations.length / 2)];
+
     t.expect(3);
 
-    geo.location('sw_616696.09', function(err, point) {
-
+    geo.location(instance, function(err, point) {
       if (err) throw err;
       t.equal(err, null);
-      t.equal(Math.round(point.latitude * 100), Math.round(locationSet['sw_616696.09'].latitude * 100));
-      t.equal(Math.round(point.longitude * 100), Math.round(locationSet['sw_616696.09'].longitude * 100));
+      t.equal(Math.round(point.latitude * 100), Math.round(locationSet[instance].latitude * 100));
+      t.equal(Math.round(point.longitude * 100), Math.round(locationSet[instance].longitude * 100));
       t.done();
     });
   },
@@ -159,18 +162,23 @@ module.exports = {
   },
 
   'Get Distance': function(t) {
+    var locations = Object.keys(locationSet);
+    var instance = locations[Math.round(locations.length / 2)];
+    var expected = 78974;
+    var errorThreshold = 200;
+
     t.expect(2);
 
-    geo.distance('sw_616696.09', 'center_0', function(err, distance) {
+    geo.distance(instance, 'center_0', function(err, distance) {
       if (err) throw err;
-      t.ok(isBetween(distance, 790384 - 200, 790384 + 200));
+      t.ok(isBetween(distance, expected - errorThreshold, expected + errorThreshold));
     });
 
-    geo.distance('sw_616696.09', 'center_0', {
+    geo.distance(instance, 'center_0', {
       units: 'ft'
     }, function(err, distance) {
       if (err) throw err;
-      t.ok(isBetween(distance, (790384 * 3.28084) - 200, (790384 * 3.28084) + 200));
+      t.ok(isBetween(distance, (expected * 3.28084) - errorThreshold, (expected * 3.28084) + errorThreshold));
       t.done();
     });
   },
@@ -209,7 +217,6 @@ module.exports = {
     t.expect(5);
 
     geo.nearby(testPoint, 50000, function(err, replies) {
-
       if (err) throw err;
 
       setLength = replies.length;
@@ -227,7 +234,6 @@ module.exports = {
     t.expect(5);
 
     geo.nearby('center_0', 50000, function(err, replies) {
-
       if (err) throw err;
       t.equal(typeof replies, 'object');
       t.equal(Array.isArray(replies), true);
@@ -256,7 +262,6 @@ module.exports = {
     geo.nearby(testPoint, 50000, {
       count: 10
     }, function(err, replies) {
-
       if (err) throw err;
       t.equal(typeof replies, 'object');
       t.equal(Array.isArray(replies), true);
@@ -273,7 +278,6 @@ module.exports = {
     geo.nearby(testPoint, 50000, {
       order: true
     }, function(err, replies) {
-
       if (err) throw err;
       t.equal(typeof replies, 'object');
       t.equal(Array.isArray(replies), true);
@@ -292,7 +296,6 @@ module.exports = {
     t.expect(9);
 
     geo.nearby(testPoint, 50000, options, function(err, replies) {
-
       if (err) throw err;
 
       t.equal(typeof replies, 'object');
@@ -319,7 +322,6 @@ module.exports = {
     t.expect(9);
 
     geo.nearby(testPoint, 50000, options, function(err, replies) {
-
       if (err) throw err;
 
       t.equal(typeof replies, 'object');
@@ -345,7 +347,6 @@ module.exports = {
     t.expect(9);
 
     geo.nearby(testPoint, 50000, options, function(err, replies) {
-
       if (err) throw err;
 
       t.equal(typeof replies, 'object');
@@ -402,7 +403,6 @@ module.exports = {
       oneToDelete = replies[replies.length - 1];
 
       geo.removeLocation(oneToDelete, function(err, numberRemoved) {
-
         if (err) throw err;
         t.equal(numberRemoved, 1);
         t.done();
@@ -416,13 +416,11 @@ module.exports = {
     var arrayToDelete = [];
 
     geo.nearby(testPoint, 50000, function(err, replies) {
-
       if (err) throw err;
 
       arrayToDelete = replies;
 
       geo.removeLocations(arrayToDelete, function(err, numberRemoved) {
-
         if (err) throw err;
         t.equal(numberRemoved, setLength - 1);
         t.done();
@@ -433,7 +431,7 @@ module.exports = {
   'Large Radius': function(t) {
     client.del(geoSet);
 
-    t.expect(1);
+    t.expect(2);
 
     geo.addLocation('debugger', {
       latitude: 1,
@@ -449,6 +447,7 @@ module.exports = {
       latitude: 2,
       longitude: 2
     }, 100000000, function(err, replies) {
+      t.equal(err, null);
       t.equal(replies[2], null);
       t.done();
     });
@@ -466,7 +465,7 @@ module.exports = {
     locationSet = {};
     locationSet['center_0'] = testPoint;
 
-    for (var i = 0; i < 10000; i++) {
+    for (var i = 0; i < 5000; i++) {
       distance = i * (i / 100);
       locationRange = getMinMaxs(lat, lon, distance);
 
@@ -558,7 +557,6 @@ module.exports = {
       if (err) throw err;
 
       places.addLocations(placesLocations, function(err, reply) {
-
         if (err) throw err;
 
         people.nearby({
@@ -673,13 +671,11 @@ function queryRadius(radius, t, next) {
     if (err) throw err;
 
     var max = 0;
-    var maxname = '';
 
     for (var i = 0; i < replies.length; i++) {
       var split = replies[i].split('_');
       if (Number(split[1]) > max) {
         max = Number(split[1]);
-        maxname = replies[i];
       }
     }
 
