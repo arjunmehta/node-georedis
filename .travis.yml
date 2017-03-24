@@ -14,6 +14,8 @@ sudo: required
 before_install:
   - sudo apt-get remove redis-server -y
   - sudo apt-get clean -y
-  - sudo add-apt-repository ppa:chris-lea/redis-server -y
-  - sudo apt-get update -q
-  - sudo apt-get install redis-server -y
+  - wget http://download.redis.io/releases/redis-3.2.8.tar.gz
+  - tar xzf redis-3.2.8.tar.gz
+  - cd redis-3.2.8
+  - sudo make
+  - sudo src/redis-server
