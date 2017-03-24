@@ -26,7 +26,7 @@ GeoSet.prototype.getClientInterface = function() {
 GeoSet.prototype.initialize = function(client, options) {
   options = options || {};
   this.zset = options.zset ? options.zset : 'geo:locations';
-  this.clientInterface = setInterface(this, client, options.nativeGeo);
+  setInterface(this, client, options.nativeGeo);
 
   return this;
 };
