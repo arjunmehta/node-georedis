@@ -2,7 +2,9 @@ var redis = require('redis');
 var testComponents = require('./testComponents');
 var client = redis.createClient();
 
-var geo = require('../main.js').initialize(client);
+var geo = require('../main.js').initialize(client, {
+  nativeGeo: true
+});
 
 testComponents.setGeo(geo, client, 'geo:locations', 'RedisClient');
 

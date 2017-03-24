@@ -2,7 +2,9 @@ var IORedis = require('ioredis');
 var testComponents = require('./testComponents');
 var client = new IORedis();
 
-var geo = require('../main.js').initialize(client);
+var geo = require('../main.js').initialize(client, {
+  nativeGeo: true
+});
 
 
 testComponents.setGeo(geo, client, 'geo:locations', 'Redis');
