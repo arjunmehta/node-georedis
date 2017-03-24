@@ -60,6 +60,7 @@ module.exports = {
       latitude: 43.6667,
       longitude: -79.4167
     }, function(err, reply) {
+      t.equal(err, null);
       t.equal(reply, 1);
       t.done();
     });
@@ -192,7 +193,7 @@ module.exports = {
 
     geo.locations(locationQuery, function(err, points) {
       if (err) throw err;
-      
+
       t.equal(err, null);
       t.equal(Object.keys(points).length, 10);
       t.equal(typeof points['non-existent'], 'object');

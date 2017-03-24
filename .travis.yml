@@ -10,5 +10,7 @@ node_js:
 branches:
   except:
     - image
-services:
-  - redis-server
+addons:
+  apt:
+    packages:
+      - redis-server
