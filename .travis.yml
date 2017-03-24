@@ -16,5 +16,7 @@ before_install:
   - sudo apt-get clean -y
   - wget http://download.redis.io/releases/redis-3.2.8.tar.gz
   - tar xzf redis-3.2.8.tar.gz
-  - sudo make ./redis-3.2.8
-  - sudo redis-3.2.8/src/redis-server &
+  - cd redis-3.2.8
+  - sudo make
+  - sudo src/redis-server &
+  - cd ..
