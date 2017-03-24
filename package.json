@@ -55,6 +55,7 @@
     "testIORedis": "nodeunit test/testIORedis.js",
     "testIORedisNative": "nodeunit test/testIORedisNative.js",
     "testFakeRedisEmulated": "nodeunit test/testFakeRedisEmulated.js",
+    "testAutoDetect": "nodeunit test/testAutoDetect.js",
     "benchmark": "node ./test/benchmark.js"
   },
   "main": "./main",

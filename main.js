@@ -168,7 +168,7 @@ function setInterface(geoSet, client, nativeGeo) {
 function checkNativeInterface(queuedInterface, geoSet, client) {
   try {
     client.send_command('command', nativeCommands, function(err, response) {
-      if (!err && Array.isArray(response) && response.length === nativeCommands.length - 1) {
+      if (!err && hasNativeCommands(response)) {
         geoSet.clientInterface = queuedInterface.drain(new NativeInterface(client));
       } else {
         geoSet.clientInterface = queuedInterface.drain(new EmulatedInterface(client));
@@ -177,6 +177,19 @@ function checkNativeInterface(queuedInterface, geoSet, client) {
   } catch (err) {
     geoSet.clientInterface = queuedInterface.drain(new EmulatedInterface(client));
   }
+}
+
+function hasNativeCommands(response) {
+  if (Array.isArray(response) && response.length === nativeCommands.length - 1) {
+    for (var i = 0; i < response.length; i++) {
+      if (!response[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
 }
 
 
