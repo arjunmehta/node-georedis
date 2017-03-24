@@ -54,7 +54,7 @@ module.exports = {
   'Add Location': function(t) {
     client.del(geoSet);
 
-    t.expect(1);
+    t.expect(2);
 
     geo.addLocation('Toronto', {
       latitude: 43.6667,
