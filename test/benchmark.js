@@ -14,10 +14,6 @@ var geoEmulated = geo.addSet().initialize(client, {
   zset: 'geo:emulated'
 });
 
-var old = require('geo-proximity').initialize(client, {
-  zset: 'geo:old'
-});
-
 var lat = 43.646838;
 var lon = -79.403723;
 var testPoint = {
@@ -38,7 +34,6 @@ var locationName;
 
 client.del('geo:native');
 client.del('geo:emulated');
-client.del('geo:old');
 
 locationSet.center_0 = testPoint;
 
@@ -358,25 +353,6 @@ suite.add({
 // 500km
 
 suite.add({
-  name: 'OLD GEO-PROXIMITY: Nearby - 500km',
-  defer: true,
-  fn: function(deferred) {
-    old.nearby(lat, lon, 500000, function(err, replies) {
-      if (err) throw err;
-      deferred.resolve();
-    });
-  },
-  onStart: function() {
-    cycleCount = 0;
-    console.log('Starting:', this.name);
-  },
-  onCycle: function() {
-    process.stdout.write('\r Cycle:' + cycleCount++);
-  },
-  onComplete: function() {}
-});
-
-suite.add({
   name: 'NEW NATIVE: Nearby - 500km',
   defer: true,
   fn: function(deferred) {
@@ -420,25 +396,6 @@ suite.add({
 
 
 // 50 km
-
-suite.add({
-  name: 'OLD GEO-PROXIMITY: Nearby - 50km',
-  defer: true,
-  fn: function(deferred) {
-    old.nearby(lat, lon, 50000, function(err, replies) {
-      if (err) throw err;
-      deferred.resolve();
-    });
-  },
-  onStart: function() {
-    cycleCount = 0;
-    console.log('Starting:', this.name);
-  },
-  onCycle: function() {
-    process.stdout.write('\r Cycle:' + cycleCount++);
-  },
-  onComplete: function() {}
-});
 
 suite.add({
   name: 'NEW NATIVE: Nearby - 50km',
@@ -486,25 +443,6 @@ suite.add({
 // 5 km
 
 suite.add({
-  name: 'OLD GEO-PROXIMITY: Nearby - 5km',
-  defer: true,
-  fn: function(deferred) {
-    old.nearby(lat, lon, 5000, function(err, replies) {
-      if (err) throw err;
-      deferred.resolve();
-    });
-  },
-  onStart: function() {
-    cycleCount = 0;
-    console.log('Starting:', this.name);
-  },
-  onCycle: function() {
-    process.stdout.write('\r Cycle:' + cycleCount++);
-  },
-  onComplete: function() {}
-});
-
-suite.add({
   name: 'NEW NATIVE: Nearby - 5km',
   defer: true,
   fn: function(deferred) {
@@ -550,25 +488,6 @@ suite.add({
 // .5 km
 
 suite.add({
-  name: 'OLD GEO-PROXIMITY: Nearby - 500m',
-  defer: true,
-  fn: function(deferred) {
-    old.nearby(lat, lon, 500, function(err, replies) {
-      if (err) throw err;
-      deferred.resolve();
-    });
-  },
-  onStart: function() {
-    cycleCount = 0;
-    console.log('Starting:', this.name);
-  },
-  onCycle: function() {
-    process.stdout.write('\r Cycle:' + cycleCount++);
-  },
-  onComplete: function() {}
-});
-
-suite.add({
   name: 'NEW NATIVE: Nearby - 500m',
   defer: true,
   fn: function(deferred) {
@@ -612,27 +531,6 @@ suite.add({
 
 
 // 50 km w/ Coordinates
-
-suite.add({
-  name: 'OLD GEO-PROXIMITY: Nearby with Coordinates - 50km',
-  defer: true,
-  fn: function(deferred) {
-    old.nearby(lat, lon, 50000, {
-      values: true
-    }, function(err, replies) {
-      if (err) throw err;
-      deferred.resolve();
-    });
-  },
-  onStart: function() {
-    cycleCount = 0;
-    console.log('Starting:', this.name);
-  },
-  onCycle: function() {
-    process.stdout.write('\r Cycle:' + cycleCount++);
-  },
-  onComplete: function() {}
-});
 
 suite.add({
   name: 'NEW NATIVE: Nearby with Coordinates - 50km',
@@ -689,12 +587,8 @@ geo.addLocations(locationSet, function(err, reply) {
   geoEmulated.addLocations(locationSet, function(erra, replya) {
     if (erra) throw erra;
 
-    old.addLocations(locationsArray, function(errb, replyb) {
-      if (errb) throw errb;
-
-      suite.run({
-        'async': false
-      });
+    suite.run({
+      'async': false
     });
   });
 });
