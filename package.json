@@ -1,6 +1,6 @@
 {
   "name": "georedis",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "author": {
     "name": "Arjun Mehta",
     "email": "arjunmeht@gmail.com",
@@ -38,12 +38,11 @@
   },
   "devDependencies": {
     "benchmark": "1.0.0",
-    "eslint": "3.18.0",
+    "eslint": "^6.5.1",
     "eslint-config-standard": "7.0.1",
     "eslint-plugin-promise": "3.5.0",
     "eslint-plugin-standard": "2.1.1",
     "fakeredis": "2.0.0",
-    "geo-proximity": "2.3.1",
     "ioredis": "2.5.0",
     "nodeunit": "0.9.0",
     "redis": "2.7.1"
