@@ -47,6 +47,9 @@
     "nodeunit": "0.9.0",
     "redis": "2.7.1"
   },
+  "engines": {
+    "node": ">=8"
+  },
   "scripts": {
     "test": "nodeunit test/testEmulated.js && nodeunit test/testNative.js && nodeunit test/testIORedis.js && nodeunit test/testIORedisNative.js && nodeunit test/testAutoDetect.js",
     "testEmulated": "nodeunit test/testEmulated.js",
