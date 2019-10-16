@@ -35,42 +35,42 @@ Usage of this module should be extremely simple. Just make sure that your Redis 
 
 Include and initialize this module with a redis client instance.
 
-```javascript
-var redis = require('redis'),
-    client = redis.createClient()
+```es6
+const redis = require('redis')
+const client = redis.createClient()
 
-var geo = require('georedis').initialize(client)
+const geo = require('georedis').initialize(client)
 ```
 
 ### Add Locations
 
 Add locations individually:
 
-```javascript
-geo.addLocation('Toronto', {latitude: 43.6667, longitude: -79.4167}, function(err, reply){
-  if(err) console.error(err)
+```es6
+geo.addLocation('Toronto', { latitude: 43.6667, longitude: -79.4167 }, (err, reply) => {
+  if (err) console.error(err)
   else console.log('added location:', reply)
 })
 ```
 
 If you have a large set you'd like to add in bulk, there's a much quicker way:
 
-```javascript
-var locationSet = {
-  'Toronto': {latitude: 43.6667, longitude: -79.4167},
-  'Philadelphia': {latitude: 39.9523, longitude: -75.1638},
-  'Palo Alto': {latitude: 37.4688, longitude: -122.1411},
-  'San Francisco': {latitude: 37.7691, longitude: -122.4449},
-  'St. John\'s': {latitude: 47.5500, longitude: -52.6667},
-  'New York': {latitude: 40.7143, longitude: -74.0060},
-  'Twillingate': {latitude: 49.6500, longitude: -54.7500},
-  'Ottawa': {latitude: 45.4167, longitude: -75.7000},
-  'Calgary': {latitude: 51.0833, longitude: -114.0833},
-  'Mumbai': {latitude: 18.9750, longitude: 72.8258}
+```es6
+const locationSet = {
+  'Toronto': { latitude: 43.6667, longitude: -79.4167 },
+  'Philadelphia': { latitude: 39.9523, longitude: -75.1638 },
+  'Palo Alto': { latitude: 37.4688, longitude: -122.1411 },
+  'San Francisco': { latitude: 37.7691, longitude: -122.4449 },
+  'St. John\'s': { latitude: 47.5500, longitude: -52.6667 },
+  'New York': { latitude: 40.7143, longitude: -74.0060 },
+  'Twillingate': { latitude: 49.6500, longitude: -54.7500 },
+  'Ottawa': { latitude: 45.4167, longitude: -75.7000 },
+  'Calgary': { latitude: 51.0833, longitude: -114.0833 },
+  'Mumbai': { latitude: 18.9750, longitude: 72.8258 }
 }
 
-geo.addLocations(locationSet, function(err, reply){
-  if(err) console.error(err)
+geo.addLocations(locationSet, (err, reply) => {
+  if (err) console.error(err)
   else console.log('added locations:', reply)
 })
 ```
@@ -78,22 +78,26 @@ geo.addLocations(locationSet, function(err, reply){
 
 ### Recall the Coordinates of a Location
 
-```javascript
-geo.location('Toronto', function(err, location){
-  if(err) console.error(err)
+```es6
+geo.location('Toronto', (err, location) => {
+  if (err) console.error(err)
   else console.log('Location for Toronto is: ', location.latitude, location.longitude)
 })
 ```
 
 Or for multiple locations:
 
-```javascript
-geo.locations(['Toronto', 'Philadelphia', 'Palo Alto', 'San Francisco', 'Ottawa'], function(err, locations){
-  if(err) console.error(err)
+```es6
+const locationList = ['Toronto', 'Philadelphia', 'Palo Alto', 'San Francisco', 'Ottawa']
+
+geo.locations(locationList, (err, locations) => {
+  if (err) console.error(err)
   else {
-    for(var locationName in locations){
-      console.log(locationName + "'s location is:", locations[locationName].latitude, locations[locationName].longitude)
-    }
+    Object
+      .entries(locations)
+      .forEach(([locationName, position]) => {
+        console.log(`${locationName}'s location is: ${position.latitude}, ${position.longitude}`)
+      })
   }
 })
 ```
@@ -103,9 +107,9 @@ geo.locations(['Toronto', 'Philadelphia', 'Palo Alto', 'San Francisco', 'Ottawa'
 
 Now you can look for locations that exist approximately within a certain distance of any particular coordinate in the system. This method will return an `Array` of location names `[locationNameA, locationNameB, locationNameC]`.
 
-```javascript
+```es6
 // look for all points within ~5000m of Toronto.
-geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, locations){
+geo.nearby({ latitude: 43.646838, longitude: -79.403723 }, 5000, (err, locations) => {
   if(err) console.error(err)
   else console.log('nearby locations:', locations)
 })
@@ -114,8 +118,8 @@ geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, loc
 
 Or, if you're more particular about how you'd like your results returned, pass in some `options`. Note that by passing in options, the method will return an `Array` of `location` objects of the form `{key: locationName, latitude: 47.6838, longitude: -79.403, distance: 287.22 ... etc}` etc.
 
-```javascript
-var options = {
+```es6
+const options = {
   withCoordinates: true, // Will provide coordinates with locations, default false
   withHashes: true, // Will provide a 52bit Geohash Integer, default false
   withDistances: true, // Will provide distance from query, default false
@@ -126,7 +130,7 @@ var options = {
 }
 
 // look for all points within ~5000m of Toronto with the options.
-geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, options, function(err, locations){
+geo.nearby({ latitude: 43.646838, longitude: -79.403723 }, 5000, options, (err, locations) => {
   if(err) console.error(err)
   else console.log('nearby locations:', locations)
 })
@@ -135,8 +139,8 @@ geo.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, options, function
 
 If you know the name of a location that you'd like to do a nearby search within, instead of passing in a point, just pass in a `locationName` as the first argument:
 
-```javascript
-geo.nearby('Toronto', 5000, options, function(err, locations){
+```es6
+geo.nearby('Toronto', 5000, options, (err, locations) => {
   if(err) console.error(err)
   else console.log('nearby locations:', locations)
 })
@@ -146,14 +150,14 @@ geo.nearby('Toronto', 5000, options, function(err, locations){
 ### Remove Locations
 Of course you may need to remove some points from your set as users/temporary events/whatever no longer are part of the set.
 
-```javascript
-geo.removeLocation('New York', function(err, reply){
+```es6
+geo.removeLocation('New York', (err, reply) => {
   if(err) console.error(err)
   else console.log('removed location:', reply)
 })
 
 // OR Quicker for Bulk Removals
-geo.removeLocations(['New York', 'St. John\'s', 'San Francisco'], function(err, reply){
+geo.removeLocations(['New York', 'St. John\'s', 'San Francisco'], (err, reply) => {
   if(err) console.error(err)
   else console.log('removed locations', reply)
 })
@@ -166,11 +170,11 @@ geo.removeLocations(['New York', 'St. John\'s', 'San Francisco'], function(err, 
 
 You can initialize `georedis` with a specific redis client instance, but you can also specify a ZSET name to use when storing/querying locations instead of the default `geo:locations`. If you want to force using emulated mode even if your redis server supports native geo commands, just set `nativeGeo` to `false`.
 
-```javascript
-var redis = require('redis'),
-    client = redis.createClient()
+```es6
+const redis = require('redis')
+const client = redis.createClient()
 
-var geo = require('georedis').initialize(client, {
+const geo = require('georedis').initialize(client, {
   zset: 'mySpecialLocationsSet',
   nativeGeo: false
 })
@@ -180,34 +184,34 @@ var geo = require('georedis').initialize(client, {
 If you have different sets of coordinates, you can store and query them separately by adding a new set.
 
 #### Create Sets
-```javascript
-var people = geo.addSet('people')
-var places = geo.addSet('places')
+```es6
+const people = geo.addSet('people')
+const places = geo.addSet('places')
 ```
 
 #### Add Locations to Different Sets
-```javascript
-var peopleLocations = {
-  'John': {latitude: 43.6667, longitude: -79.4167},
-  'Shankar': {latitude: 39.9523, longitude: -75.1638},
-  'Cynthia': {latitude: 37.4688, longitude: -122.1411},
-  'Chen': {latitude: 37.7691, longitude: -122.4449}
+```es6
+const peopleLocations = {
+  'John': { latitude: 43.6667, longitude: -79.4167 },
+  'Shankar': { latitude: 39.9523, longitude: -75.1638 },
+  'Cynthia': { latitude: 37.4688, longitude: -122.1411 },
+  'Chen': { latitude: 37.7691, longitude: -122.4449 }
 }
 
-var placeLocations  = {
-  'Toronto': {latitude: 43.6667, longitude: -79.4167},
-  'Philadelphia': {latitude: 39.9523, longitude: -75.1638},
-  'Palo Alto': {latitude: 37.4688, longitude: -122.1411},
-  'San Francisco': {latitude: 37.7691, longitude: -122.4449},
-  'St. John\'s': {latitude: 47.5500, longitude: -52.6667}
+const placeLocations  = {
+  'Toronto': { latitude: 43.6667, longitude: -79.4167 },
+  'Philadelphia': { latitude: 39.9523, longitude: -75.1638 },
+  'Palo Alto': { latitude: 37.4688, longitude: -122.1411 },
+  'San Francisco': { latitude: 37.7691, longitude: -122.4449 },
+  'St. John\'s': { latitude: 47.5500, longitude: -52.6667 }
 }
 
-people.addLocations(peopleLocations, function(err, reply){
+people.addLocations(peopleLocations, (err, reply) => {
   if(err) console.error(err)
   else console.log('added people:', reply)
 })
 
-places.addLocations(placeLocations, function(err, reply){
+places.addLocations(placeLocations, (err, reply) => {
   if(err) console.error(err)
   else console.log('added places:', reply)
 })
@@ -215,15 +219,15 @@ places.addLocations(placeLocations, function(err, reply){
 
 #### Look for Nearby Locations In Different Sets
 
-```javascript
+```es6
 // will find all PEOPLE ~5000m from the passed in coordinate
-people.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, people){
+people.nearby({ latitude: 43.646838, longitude: -79.403723 }, 5000, (err, people) => {
   if(err) console.error(err)
   else console.log('people nearby:', people)
 })
 
 // will find all PLACES ~5000m from the passed in coordinate
-places.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, places){
+places.nearby({ latitude: 43.646838, longitude: -79.403723 }, 5000, (err, places) => {
   if(err) console.error(err)
   else console.log('places nearby:', places)
 })
@@ -233,8 +237,8 @@ places.nearby({latitude: 43.646838, longitude: -79.403723}, 5000, function(err, 
 #### The `locationSet` Property
 Because javascript doesn't guarantee sorted sets, it makes more sense for the `nearby` method to by default be an `Array`. But you can convert this array to an object by simply using the `locationSet` property on the returned `Array`.
 
-```javascript
-geo.nearby('Toronto', 5000, options, function(err, locations){
+```es6
+geo.nearby('Toronto', 5000, options, (err, locations) => {
   if(err) console.error(err)
   else console.log('nearby locations as a Set:', locations.locationSet)
 })
@@ -242,18 +246,18 @@ geo.nearby('Toronto', 5000, options, function(err, locations){
 
 This object will have the form:
 
-```javascript
+```es6
 {
   'locationNameA': {
     latitude: xx,
     longitude: xx,
     distance: xx
-  },
+   },
   'locationNameB': {
     latitude: xx,
     longitude: xx,
     distance: xx
-  },
+   },
   // etc...
 }
 ```
@@ -262,7 +266,7 @@ This object will have the form:
 
 If you no longer need one of your newly created sets, you can just delete it. Either of the following methods will remove the set from redis and destroy its contents. If you add locations to that set again it will recreate the set on redis and you can use as usual.
 
-```javascript
+```es6
 // will delete the people set and its contents
 people.delete()
 
@@ -281,8 +285,8 @@ Initialize the module with a redis client.
 - `nativeGeo` **Boolean**: Default `true` if Redis supports geo commands, `false` if not. Force to `false` if you don't want to make use of native geo commands for some reason. Forcing to `true` on non-supported versions of redis will likely cause errors.
 
 
-```javascript
-var geo = require('georedis').initialize(client, {
+```es6
+const geo = require('georedis').initialize(client, {
   zset: 'locations',
   nativeGeo: false
 })
@@ -300,11 +304,11 @@ Add a new coordinate to your set.
 ### geo.addLocations(locationSet, callBack)
 Adds a set of new coordinates to your set. Use this method for bulk additions, as it is much faster than individual adds. The `locationSet` must be in the form:
 
-```javascript
-var locationSet = {
-  'locationA': {latitude: locationA_latitude, longitude: locationA_lattude},
-  'locationB': {latitude: locationB_latitude, longitude: locationB_lattude},
-  'locationC': {latitude: locationC_latitude, longitude: locationC_lattude}
+```es6
+const locationSet = {
+  'locationA': { latitude: locationA_latitude, longitude: locationA_lattude },
+  'locationB': { latitude: locationB_latitude, longitude: locationB_lattude },
+  'locationC': { latitude: locationC_latitude, longitude: locationC_lattude }
 }
 ```
 
@@ -326,7 +330,7 @@ Remove the specified coordinate by name.
 ### geo.removeLocations(locationNameArray, callBack)
 Remove a set of coordinates by name. `locationNameArray` must be of the form `[nameA,nameB,nameC,...,nameN]`.
 
-### geo.distance(locationNameA, locationNameB, {options}, callBack)
+### geo.distance(locationNameA, locationNameB, {options }, callBack)
 Get the distance between two locations. Takes two `locationName`s, and returns the distance between.
 
 #### Options
@@ -335,7 +339,7 @@ Get the distance between two locations. Takes two `locationName`s, and returns t
 ### geo.delete(callBack)
 Removes all locations and deletes the zSet from Redis. You should use the callBack to check for errors or to wait for confirmation that the set is deleted, but this is probably not necessary.
 
-### geo.nearby(point|locationName, distance, {options}, callBack)
+### geo.nearby(point|locationName, distance, {options }, callBack)
 First argument can either be an **Object** with `latitude` and `longitude`, or a **String** of the `locationName`. Returns an **Array** of either `locationName`s (if no extra properties are needed) or `locations` (if optional properties are requested in options).
 
 #### Options
@@ -347,7 +351,7 @@ First argument can either be an **Object** with `latitude` and `longitude`, or a
 - `accurate` **Boolean**: Default `false`. If your Redis server doesn't have native geo commands, you can enable this option to ensure that results are within the queried `distance`.
 - `count` **Number**: Default `unlimited`. If you'd like to limit the results to a certain number, you can. Note that this is not guaranteed to necessarily reduce compulational load at all.
 
-### geo.radius(point|locationName, radius, {options}, callBack)
+### geo.radius(point|locationName, radius, {options }, callBack)
 The same as **geo.nearby** except that the `accurate` option is always `true`.
 
 
