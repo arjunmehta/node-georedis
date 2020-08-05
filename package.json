@@ -6,7 +6,6 @@
     "email": "arjunmeht@gmail.com",
     "url": "http://www.arjunmehta.net/"
   },
-  "main": "./main",
   "description": "Super fast geo queries.",
   "keywords": [
     "geohash",
@@ -58,6 +57,7 @@
     "testAutoDetect": "nodeunit test/testAutoDetect.js",
     "benchmark": "node ./test/benchmark.js"
   },
+  "main": "./main",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/arjunmehta/node-georedis/issues"
