@@ -30,7 +30,7 @@ export type GeoRedis = {
   nearby(
     locationName: string,
     radius: number,
-    options?: NearbyOptions,
+    options?: Partial<NearbyOptions>,
     callback?: GeoCallback<string[]>
   ): void
 }
