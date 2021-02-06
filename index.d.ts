@@ -16,6 +16,30 @@ export type NearbyOptions = {
   accurate: boolean // Useful if in emulated mode and accuracy is important, default false
 }
 
+export type NearbyKey = string
+
+export type NearbyObjectBase = {
+  key: string
+}
+export type WithDistance = { distance: number }
+export type WithCoordiantes = Point
+export type WithHash = { hash: number }
+export type NearbyD = NearbyObjectBase & WithDistance
+export type NearbyDC = NearbyD & WithCoordiantes
+export type NearbyDCH = NearbyDC & WithHash
+export type NearbyC = NearbyObjectBase & WithCoordiantes
+export type NearbyCH = NearbyC & WithHash
+export type NearbyH = NearbyObjectBase & WithHash
+export type NearbyObject =
+  | NearbyD
+  | NearbyDC
+  | NearbyDCH
+  | NearbyC
+  | NearbyCH
+  | NearbyH
+
+export type NearbyReturnTypes = NearbyKey | NearbyObject
+
 export type GeoRedis = {
   delete(callback?: (err: Error) => void): void
   removeLocations(
@@ -27,11 +51,11 @@ export type GeoRedis = {
     position: Point,
     callback?: GeoCallback<boolean>
   ): void
-  nearby(
+  nearby<TRet extends NearbyReturnTypes>(
     locationName: string,
     radius: number,
     options?: Partial<NearbyOptions>,
-    callback?: GeoCallback<string[]>
+    callback?: GeoCallback<TRet[]>
   ): void
 }
 
