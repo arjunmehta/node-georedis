@@ -28,6 +28,8 @@ Other bonuses:
 npm install --save georedis
 ```
 
+Note: A promise-based wrapper is available via `npm install --save georedis-promised`. The API is identical, but promises are used instead of callbacks.
+
 ## Basic Usage
 Usage of this module should be extremely simple. Just make sure that your Redis server is accessible to your Node environment. Because this module uses Redis as a store, almost all methods have integrated error handling for queries.
 
