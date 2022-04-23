@@ -33,6 +33,7 @@
     "url": "https://github.com/arjunmehta/node-georedis"
   },
   "dependencies": {
+    "@types/redis": "^2.8.28",
     "geolib": "2.0.24",
     "ngeohash": "0.6.3"
   },
