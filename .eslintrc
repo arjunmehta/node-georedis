@@ -4,11 +4,11 @@
     - "standard"
   env:
     es6: false
-    node: true`
-  rules:    
+    node: true
+  rules:
     semi:
       - 2
-      - "always"    
+      - "always"
     arrow-parens:
       - 2
       - "always"
